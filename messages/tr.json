@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Merhaba Dünya!",
+    "about": "Get lo!"
+  },
+  "LocaleSwitcher": {
+    "label": "Dil"
+  },
+  "AllProducts": {
+    "title": "Tüm ürünler",
+    "description": "Tüm ürünlerimizi burada bulabilirsiniz"
+  }
+}

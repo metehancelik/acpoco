@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Hello world!",
+    "about": "Go to the about page"
+  },
+  "LocaleSwitcher": {
+    "label": "Change language"
+  },
+  "AllProducts": {
+    "title": "All products",
+    "description": "Here you can find all our products"
+  }
+}
