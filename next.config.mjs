@@ -10,6 +10,9 @@ const nextConfig = {
         hostname: "sage-demo.vercel.app",
       },
       {
+        hostname: "cdn.shopify.com",
+      },
+      {
         hostname: "i.etsystatic.com",
       },
       {

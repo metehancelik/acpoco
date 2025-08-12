@@ -12,11 +12,39 @@ export interface AmazonCustomizationOption {
   priceDelta: number;
 }
 
+interface PriceDeltaObject {
+  value?: number;
+}
+
+interface AmazonV3Area {
+  label?: string;
+  name?: string;
+  optionValue?: string;
+  text?: string;
+  priceDelta?: number | PriceDeltaObject;
+}
+
+interface AmazonV3Surface {
+  areas?: AmazonV3Area[];
+}
+
+interface AmazonV3Customization {
+  customizationInfo?: {
+    surfaces?: AmazonV3Surface[];
+  };
+}
+
+type AmazonCustomizationDataMap = Record<string, unknown> & {
+  ["version3.0"]?: AmazonV3Customization;
+};
+
+interface AmazonCustomizationDataResponse {
+  customizationData?: AmazonCustomizationDataMap;
+}
+
 export async function processAllAmazonCustomizations() {
   try {
     await dbConnect();
-
-    console.log("Starting to process all Amazon customizations...");
 
     // Tüm Amazon siparişlerini bul (CustomizedURL içeren siparişler)
     const amazonOrders = await Order.find({
@@ -27,16 +55,10 @@ export async function processAllAmazonCustomizations() {
       },
     });
 
-    console.log(
-      `Found ${amazonOrders.length} Amazon orders with CustomizedURL`,
-    );
-
     let processedCount = 0;
     let errorCount = 0;
 
     for (const order of amazonOrders) {
-      console.log(`Processing order: ${order.orderId}`);
-
       for (let itemIndex = 0; itemIndex < order.items.length; itemIndex++) {
         const item = order.items[itemIndex];
 
@@ -50,16 +72,12 @@ export async function processAllAmazonCustomizations() {
         }
 
         try {
-          console.log(`  Processing item ${itemIndex + 1} (${item.sku})`);
-
           // Zip dosyasını indir ve JSON'u çıkar
-          const customizationData =
-            await fetchAmazonCustomizationData(customizationUrl);
+          const customizationData = (await fetchAmazonCustomizationData(
+            customizationUrl,
+          )) as AmazonCustomizationDataResponse | null;
 
           if (!customizationData) {
-            console.log(
-              `    Failed to fetch customization data for item ${item.sku}`,
-            );
             errorCount++;
             continue;
           }
@@ -67,21 +85,21 @@ export async function processAllAmazonCustomizations() {
           // Version 3.0'dan özelleştirme seçeneklerini çıkar
           const options: AmazonCustomizationOption[] = [];
 
-          if (
-            customizationData.customizationData["version3.0"]?.customizationInfo
-              ?.surfaces
-          ) {
-            const surfaces =
-              customizationData.customizationData["version3.0"]
-                .customizationInfo.surfaces;
+          const v3 = customizationData?.customizationData?.["version3.0"];
+          if (v3?.customizationInfo?.surfaces) {
+            const surfaces = v3.customizationInfo.surfaces;
 
-            surfaces.forEach((surface: any) => {
+            surfaces.forEach((surface) => {
               if (surface.areas) {
-                surface.areas.forEach((area: any) => {
+                surface.areas.forEach((area) => {
+                  const priceDeltaValue =
+                    typeof area.priceDelta === "number"
+                      ? area.priceDelta
+                      : (area.priceDelta?.value ?? 0);
                   const option: AmazonCustomizationOption = {
                     label: area.label || area.name || "",
                     option: area.optionValue || area.text || "",
-                    priceDelta: area.priceDelta?.value || 0,
+                    priceDelta: priceDeltaValue,
                   };
                   options.push(option);
                 });
@@ -104,9 +122,6 @@ export async function processAllAmazonCustomizations() {
             },
           );
 
-          console.log(
-            `    Successfully processed item ${item.sku} with ${options.length} options`,
-          );
           processedCount++;
 
           // Rate limiting - her istek arasında kısa bir bekleme
@@ -117,11 +132,6 @@ export async function processAllAmazonCustomizations() {
         }
       }
     }
-
-    console.log(`\n=== PROCESSING COMPLETE ===`);
-    console.log(`Total orders processed: ${amazonOrders.length}`);
-    console.log(`Items successfully processed: ${processedCount}`);
-    console.log(`Items with errors: ${errorCount}`);
 
     return {
       totalOrders: amazonOrders.length,

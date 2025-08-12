@@ -1,0 +1,269 @@
+"use client";
+import {
+  DisclosureButton,
+  Disclosure,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+  DisclosurePanel,
+} from "@headlessui/react";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import { useState, useEffect } from "react";
+
+import AddToCartButton from "@/components/product-details/addToCartButton";
+import AddToFavoritesButton from "@/components/product-details/addToFavoritesButton";
+import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
+import { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
+
+const details = [
+  {
+    name: "Özellikler",
+    items: [
+      "Zincir ebatı: Kolye zincir boyu 40+5 uyarlanabilir. ( İstege göre ebat ve modeli değişebilir) Bileklik ebatları bileğie göre asansörlü ya da uzatmalı modeldir. Küpelerde zincirli modellerde zincir ebatı modele göre değişkendir. ",
+      "Renk: Gümüş, Roze ve Gold",
+      "Kaplama: Cila üzeri Rodyum, Roze-gold ve 14 ayar altın  kaplama ile kaplanmıştır. ",
+      "Ağırlık: Modeldeki değişikliklere göre ve zincir ebatına göre değişkenlik gösterebilir.",
+      "Taş: Taş isimleri ürün başlığında belirtilmiştir.  Belitirmediğildi durumlarda zirkon kullanılmıştır. ",
+    ],
+  },
+];
+
+interface ShopifyProductClientProps {
+  product: ShopifyProduct;
+  initialVariant?: ShopifyVariant;
+  hasSession: boolean;
+}
+
+const ShopifyProductClient = ({ 
+  product, 
+  initialVariant,
+  hasSession 
+}: ShopifyProductClientProps) => {
+  const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant | null>(
+    initialVariant || product.variants.edges[0]?.node || null
+  );
+console.log("product bvuadaasd",product)
+  // Get images to display (variant image or product images)
+  const imagesToShow = selectedVariant?.image 
+    ? [selectedVariant.image, ...product.images.edges.map(edge => edge.node)]
+    : product.images.edges.map(edge => edge.node);
+
+  // Remove duplicates
+  const uniqueImages = imagesToShow.filter((image, index, self) => 
+    index === self.findIndex(img => img.id === image.id)
+  );
+
+  return (
+    <div className="bg-white w-full mt-8 lg:mt-12">
+      <div className="mx-auto px-4 py-8 md:px-0 sm:py-12 lg:max-w-6xl w-full">
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+          {/* Image gallery */}
+          <TabGroup className="flex flex-col-reverse">
+            {/* Image selector */}
+            <div className="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
+              <TabList className="grid grid-cols-4 gap-6">
+                {uniqueImages.map((image) => (
+                  <Tab
+                    key={image.id}
+                    className="group relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500/50 focus:ring-offset-4"
+                  >
+                    <span className="sr-only">{image.altText || product.title}</span>
+                    <span className="absolute inset-0 overflow-hidden rounded-md">
+                      <Image
+                        width={400}
+                        height={400}
+                        alt={image.altText || product.title}
+                        src={image.url}
+                        className="size-full object-cover"
+                      />
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 rounded-md ring-2 ring-transparent ring-offset-2 group-data-[selected]:ring-indigo-500"
+                    />
+                  </Tab>
+                ))}
+              </TabList>
+            </div>
+
+            <TabPanels>
+              {uniqueImages.map((image) => (
+                <TabPanel key={image.id}>
+                  <Image
+                    width={800}
+                    height={800}
+                    alt={image.altText || product.title}
+                    src={image.url}
+                    className="aspect-square w-full object-cover rounded-lg"
+                  />
+                </TabPanel>
+              ))}
+            </TabPanels>
+          </TabGroup>
+
+          {/* Product info */}
+          <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              {product.title}
+            </h1>
+            
+            {selectedVariant && (
+              <>
+                <h2 className="mt-2 text-lg text-gray-600">
+                  SKU: {selectedVariant.sku || 'N/A'}
+                </h2>
+                <p className="text-2xl font-bold text-black mt-2">
+                  ${selectedVariant.price}
+                  {selectedVariant.compareAtPrice && (
+                    <span className="ml-2 text-lg text-gray-500 line-through">
+                      ${selectedVariant.compareAtPrice}
+                    </span>
+                  )}
+                </p>
+                <div className="mt-2 flex items-center space-x-4">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0
+                      ? `${selectedVariant.inventoryQuantity} in stock`
+                      : 'Out of stock'
+                    }
+                  </span>
+                </div>
+              </>
+            )}
+
+            <div className="mt-6">
+              <h3 className="sr-only">Description</h3>
+              <div
+                dangerouslySetInnerHTML={{ __html: product.description }}
+                className="space-y-6 text-base text-gray-700"
+              />
+            </div>
+
+            {/* Variant Selection */}
+            <ShopifyAttributeSelect
+              product={product}
+              selectedVariant={selectedVariant}
+              onVariantChange={setSelectedVariant}
+            />
+
+            {/* Action Buttons */}
+            <div className="mt-10 flex items-center space-x-4">
+              {selectedVariant && selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0 ? (
+                <AddToCartButton productId={selectedVariant.id} />
+              ) : (
+                <button
+                  disabled
+                  className="flex items-center justify-center rounded-md border border-transparent bg-gray-300 px-8 py-3 text-base font-medium text-white cursor-not-allowed"
+                >
+                  Out of Stock
+                </button>
+              )}
+              {hasSession && (
+                <AddToFavoritesButton productId={product.id} />
+              )}
+            </div>
+
+            {/* Product Details */}
+            <section aria-labelledby="details-heading" className="mt-12">
+              <h2 id="details-heading" className="sr-only">
+                Additional details
+              </h2>
+
+              <div className="divide-y divide-gray-200 border-t">
+                {details.map((detail: { name: string; items: string[] }) => (
+                  <Disclosure key={detail.name} as="div">
+                    <h3>
+                      <DisclosureButton className="group relative flex w-full items-center justify-between py-6 text-left">
+                        <span className="text-sm font-medium text-gray-900 group-data-[open]:text-indigo-600">
+                          {detail.name}
+                        </span>
+                        <span className="ml-6 flex items-center">
+                          <PlusIcon
+                            aria-hidden="true"
+                            className="block size-6 text-gray-400 group-hover:text-gray-500 group-data-[open]:hidden"
+                          />
+                          <MinusIcon
+                            aria-hidden="true"
+                            className="hidden size-6 text-indigo-400 group-hover:text-indigo-500 group-data-[open]:block"
+                          />
+                        </span>
+                      </DisclosureButton>
+                    </h3>
+                    <DisclosurePanel className="pb-6">
+                      <ul
+                        role="list"
+                        className="list-disc space-y-1 pl-5 text-sm/6 text-gray-700 marker:text-gray-300"
+                      >
+                        {detail.items.map((item) => (
+                          <li key={item} className="pl-2">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </DisclosurePanel>
+                  </Disclosure>
+                ))}
+
+                {/* Additional product info */}
+                <Disclosure as="div">
+                  <h3>
+                    <DisclosureButton className="group relative flex w-full items-center justify-between py-6 text-left">
+                      <span className="text-sm font-medium text-gray-900 group-data-[open]:text-indigo-600">
+                        Product Information
+                      </span>
+                      <span className="ml-6 flex items-center">
+                        <PlusIcon
+                          aria-hidden="true"
+                          className="block size-6 text-gray-400 group-hover:text-gray-500 group-data-[open]:hidden"
+                        />
+                        <MinusIcon
+                          aria-hidden="true"
+                          className="hidden size-6 text-indigo-400 group-hover:text-indigo-500 group-data-[open]:block"
+                        />
+                      </span>
+                    </DisclosureButton>
+                  </h3>
+                  <DisclosurePanel className="pb-6">
+                    <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Vendor</dt>
+                        <dd className="text-sm text-gray-900">{product.vendor}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm font-medium text-gray-500">Product Type</dt>
+                        <dd className="text-sm text-gray-900">{product.productType}</dd>
+                      </div>
+                      {product.tags.length > 0 && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-sm font-medium text-gray-500">Tags</dt>
+                          <dd className="text-sm text-gray-900">
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {product.tags.map((tag) => (
+                                <span key={tag} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </dd>
+                        </div>
+                      )}
+                    </dl>
+                  </DisclosurePanel>
+                </Disclosure>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ShopifyProductClient;

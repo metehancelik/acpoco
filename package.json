@@ -28,6 +28,7 @@
     "csv-parse": "^5.6.0",
     "date-fns": "^4.1.0",
     "debounce": "^2.2.0",
+    "graphql-request": "^7.1.0",
     "html2canvas": "^1.4.1",
     "iconsax-react": "^0.0.8",
     "iyzipay": "^2.0.64",

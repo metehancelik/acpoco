@@ -4,8 +4,6 @@ import { processAllAmazonCustomizations } from "@/lib/shipstation/process-all-am
 
 export async function POST() {
   try {
-    console.log("Starting Amazon customization processing...");
-
     const result = await processAllAmazonCustomizations();
 
     return NextResponse.json({
