@@ -17,6 +17,7 @@ import { useCartStore } from "@/store/useCartStore";
 
 import Banner from "./Banner";
 import ProfileDropdown from "./ProfileDropdown";
+import Image from "next/image";
 
 // const navigation = [
 //   // { name: "Demo", href: "/demo", icon: PresentationChartBarIcon },
@@ -67,9 +68,9 @@ const PublicNavbar = () => {
             </TransitionChild>
             {/* Sidebar component, swap this element with another sidebar if you like */}
             <div className="flex grow flex-col gap-y-3 overflow-y-auto bg-white px-6 pb-2 shadow-md">
-              <div className="flex h-16 shrink-0 items-center">
+              <div className="flex h-8 shrink-0 items-center">
                 <Link href={"/"} className="text-2xl font-bold ml-2">
-                  ANGORA GUMUS
+                  ACPOCO
                 </Link>
               </div>
               <nav className="flex flex-1 flex-col">
@@ -134,12 +135,17 @@ const PublicNavbar = () => {
       </Dialog>
 
       {/* Static sidebar for desktop */}
-      <div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-32 bg-white shadow-md">
-        <Banner />
+      <div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-16 bg-white shadow-md">
+        {/* <Banner /> */}
         <div className="flex grow gap-y-5 overflow-y-auto cursor-default max-w-6xl mx-auto w-full justify-between">
           <div className="flex shrink-0 items-center gap-x-2">
             <Link href="/" className="text-2xl font-bold">
-              ANGORA GÜMÜŞ
+              <Image
+                src="https://cdn.shopify.com/s/files/1/0613/8478/5997/files/acpoco_logo.png?v=1751975004"
+                alt="ACPOCO"
+                width={100}
+                height={80}
+              />
             </Link>
           </div>
 
