@@ -6,18 +6,14 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/16/solid";
-import { ShoppingCartIcon, UserIcon } from "@heroicons/react/24/outline";
+import { UserIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
 
-import { useCart } from "@/hooks/useCart";
-import { useCartSync } from "@/hooks/useCartSync";
 import { Link } from "@/i18n/routing";
-import { useCartStore } from "@/store/useCartStore";
 
-import Banner from "./Banner";
 import ProfileDropdown from "./ProfileDropdown";
-import Image from "next/image";
 
 // const navigation = [
 //   // { name: "Demo", href: "/demo", icon: PresentationChartBarIcon },
@@ -28,11 +24,6 @@ import Image from "next/image";
 const PublicNavbar = () => {
   const session = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { cartItemsCount } = useCart();
-  const itemsCount = useCartStore((state) => state.itemsCount());
-  const { mounted } = useCartSync();
-
-  const totalCartItems = session.data ? cartItemsCount : itemsCount;
 
   return (
     <div>
@@ -85,30 +76,30 @@ const PublicNavbar = () => {
                           Profil
                         </Link>
                       </li>
-                      <li>
+                      {/* <li>
                         <Link
                           href="/cart"
                           className="block px-4 py-2 text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                         >
                           Sepetim
                         </Link>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
                         <Link
                           href="/favorites"
                           className="block px-4 py-2 text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                         >
                           Favorilerim
                         </Link>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
                         <Link
                           href="/sample-orders"
                           className="block px-4 py-2 text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
                         >
                           Numune Siparişlerim
                         </Link>
-                      </li>
+                      </li> */}
                       <li>
                         <Link
                           href="/sales"
@@ -160,16 +151,6 @@ const PublicNavbar = () => {
               </Link>
             )}
             {session?.data && <ProfileDropdown />}
-            <Link
-              href="/cart"
-              className="text-[#777] hover:text-[#d1aa5c] flex items-center space-x-2 py-2 px-4 rounded-md bg-white shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              <ShoppingCartIcon className="" width={20} height={20} />
-              <p>Sepetim</p>
-              <p className="text-xs font-bold text-center text-white rounded-full bg-sageOrange h-5 w-5 flex items-center justify-center">
-                {mounted ? totalCartItems : 0}
-              </p>
-            </Link>
           </div>
         </div>
       </div>

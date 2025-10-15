@@ -14,7 +14,8 @@ import { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
 interface ShopifyAttributeSelectProps {
   product: ShopifyProduct;
   selectedVariant: ShopifyVariant | null;
-  onVariantChange: (variant: ShopifyVariant | null) => void;
+  // eslint-disable-next-line no-unused-vars
+  onVariantChange: (_variant: ShopifyVariant | null) => void;
 }
 
 const ShopifyAttributeSelect = ({
@@ -24,7 +25,9 @@ const ShopifyAttributeSelect = ({
 }: ShopifyAttributeSelectProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<
+    Record<string, string>
+  >({});
 
   // Initialize selected options from selected variant or URL params
   useEffect(() => {
@@ -53,16 +56,19 @@ const ShopifyAttributeSelect = ({
       // No options selected, use first available variant
       const firstVariant = product.variants.edges[0]?.node || null;
       onVariantChange(firstVariant);
+
       return;
     }
 
     // Find matching variant
-    const matchingVariant = product.variants.edges.find((edge) => {
-      const variant = edge.node;
-      return variant.selectedOptions.every((option) => 
-        selectedOptions[option.name] === option.value
-      );
-    })?.node || null;
+    const matchingVariant =
+      product.variants.edges.find((edge) => {
+        const variant = edge.node;
+
+        return variant.selectedOptions.every(
+          (option) => selectedOptions[option.name] === option.value,
+        );
+      })?.node || null;
 
     onVariantChange(matchingVariant);
   }, [selectedOptions, product.variants, onVariantChange]);
@@ -79,21 +85,26 @@ const ShopifyAttributeSelect = ({
 
   // Get available values for each option based on current selections and stock
   const getAvailableValues = (currentOptionName: string) => {
-    const currentOption = product.options?.find(opt => opt.name === currentOptionName);
+    const currentOption = product.options?.find(
+      (opt) => opt.name === currentOptionName,
+    );
     if (!currentOption) return [];
 
     // Get all values for this option that have available variants
-    return currentOption.values.filter(value => {
+    return currentOption.values.filter((value) => {
       // Create temporary selection with this value
       const tempSelection = { ...selectedOptions, [currentOptionName]: value };
-      
+
       // Check if any variant matches this selection and is available
-      return product.variants.edges.some(edge => {
+      return product.variants.edges.some((edge) => {
         const variant = edge.node;
-        const matches = variant.selectedOptions.every(option => 
-          tempSelection[option.name] === option.value
+        const matches = variant.selectedOptions.every(
+          (option) => tempSelection[option.name] === option.value,
         );
-        return matches && variant.availableForSale && variant.inventoryQuantity > 0;
+
+        return (
+          matches && variant.availableForSale && variant.inventoryQuantity > 0
+        );
       });
     });
   };
@@ -108,7 +119,7 @@ const ShopifyAttributeSelect = ({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {product.options.map((option) => {
           const availableValues = getAvailableValues(option.name);
-          
+
           return (
             <div key={option.id} className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
@@ -116,7 +127,9 @@ const ShopifyAttributeSelect = ({
               </label>
               <Select
                 value={selectedOptions[option.name] || ""}
-                onValueChange={(value) => handleOptionChange(option.name, value)}
+                onValueChange={(value) =>
+                  handleOptionChange(option.name, value)
+                }
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={`Select ${option.name}`} />
@@ -124,9 +137,10 @@ const ShopifyAttributeSelect = ({
                 <SelectContent>
                   {option.values.map((value) => {
                     const isAvailable = availableValues.includes(value);
+
                     return (
-                      <SelectItem 
-                        key={value} 
+                      <SelectItem
+                        key={value}
                         value={value}
                         disabled={!isAvailable}
                         className={!isAvailable ? "text-gray-400" : ""}
@@ -141,7 +155,7 @@ const ShopifyAttributeSelect = ({
           );
         })}
       </div>
-      
+
       {selectedVariant && (
         <div className="mt-4 space-y-2 rounded-lg bg-gray-50 p-4">
           <div className="flex items-center justify-between">
@@ -156,19 +170,23 @@ const ShopifyAttributeSelect = ({
           )}
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Price:</span>
-            <span className="font-medium">${selectedVariant.price}</span>
+            <span className="font-medium">€{selectedVariant.price}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Stock:</span>
-            <span className={`font-medium ${selectedVariant.inventoryQuantity > 0 ? "text-green-600" : "text-red-600"}`}>
-              {selectedVariant.inventoryQuantity > 0 
-                ? `${selectedVariant.inventoryQuantity} available` 
+            <span
+              className={`font-medium ${selectedVariant.inventoryQuantity > 0 ? "text-green-600" : "text-red-600"}`}
+            >
+              {selectedVariant.inventoryQuantity > 0
+                ? `${selectedVariant.inventoryQuantity} available`
                 : "Out of stock"}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Available for sale:</span>
-            <span className={`font-medium ${selectedVariant.availableForSale ? "text-green-600" : "text-red-600"}`}>
+            <span
+              className={`font-medium ${selectedVariant.availableForSale ? "text-green-600" : "text-red-600"}`}
+            >
               {selectedVariant.availableForSale ? "Yes" : "No"}
             </span>
           </div>

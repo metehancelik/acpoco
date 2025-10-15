@@ -11,49 +11,33 @@ import {
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import AddToCartButton from "@/components/product-details/addToCartButton";
-import AddToFavoritesButton from "@/components/product-details/addToFavoritesButton";
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
 import { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
-
-const details = [
-  {
-    name: "Özellikler",
-    items: [
-      "Zincir ebatı: Kolye zincir boyu 40+5 uyarlanabilir. ( İstege göre ebat ve modeli değişebilir) Bileklik ebatları bileğie göre asansörlü ya da uzatmalı modeldir. Küpelerde zincirli modellerde zincir ebatı modele göre değişkendir. ",
-      "Renk: Gümüş, Roze ve Gold",
-      "Kaplama: Cila üzeri Rodyum, Roze-gold ve 14 ayar altın  kaplama ile kaplanmıştır. ",
-      "Ağırlık: Modeldeki değişikliklere göre ve zincir ebatına göre değişkenlik gösterebilir.",
-      "Taş: Taş isimleri ürün başlığında belirtilmiştir.  Belitirmediğildi durumlarda zirkon kullanılmıştır. ",
-    ],
-  },
-];
 
 interface ShopifyProductClientProps {
   product: ShopifyProduct;
   initialVariant?: ShopifyVariant;
-  hasSession: boolean;
 }
 
-const ShopifyProductClient = ({ 
-  product, 
+const ShopifyProductClient = ({
+  product,
   initialVariant,
-  hasSession 
 }: ShopifyProductClientProps) => {
   const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant | null>(
-    initialVariant || product.variants.edges[0]?.node || null
+    initialVariant || product.variants.edges[0]?.node || null,
   );
-console.log("product bvuadaasd",product)
+
   // Get images to display (variant image or product images)
-  const imagesToShow = selectedVariant?.image 
-    ? [selectedVariant.image, ...product.images.edges.map(edge => edge.node)]
-    : product.images.edges.map(edge => edge.node);
+  const imagesToShow = selectedVariant?.image
+    ? [selectedVariant.image, ...product.images.edges.map((edge) => edge.node)]
+    : product.images.edges.map((edge) => edge.node);
 
   // Remove duplicates
-  const uniqueImages = imagesToShow.filter((image, index, self) => 
-    index === self.findIndex(img => img.id === image.id)
+  const uniqueImages = imagesToShow.filter(
+    (image, index, self) =>
+      index === self.findIndex((img) => img.id === image.id),
   );
 
   return (
@@ -70,7 +54,9 @@ console.log("product bvuadaasd",product)
                     key={image.id}
                     className="group relative flex h-24 cursor-pointer items-center justify-center rounded-md bg-white text-sm font-medium uppercase text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring focus:ring-indigo-500/50 focus:ring-offset-4"
                   >
-                    <span className="sr-only">{image.altText || product.title}</span>
+                    <span className="sr-only">
+                      {image.altText || product.title}
+                    </span>
                     <span className="absolute inset-0 overflow-hidden rounded-md">
                       <Image
                         width={400}
@@ -109,30 +95,33 @@ console.log("product bvuadaasd",product)
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               {product.title}
             </h1>
-            
+
             {selectedVariant && (
               <>
                 <h2 className="mt-2 text-lg text-gray-600">
-                  SKU: {selectedVariant.sku || 'N/A'}
+                  SKU: {selectedVariant.sku || "N/A"}
                 </h2>
                 <p className="text-2xl font-bold text-black mt-2">
-                  ${selectedVariant.price}
+                  €{selectedVariant.price}
                   {selectedVariant.compareAtPrice && (
                     <span className="ml-2 text-lg text-gray-500 line-through">
-                      ${selectedVariant.compareAtPrice}
+                      €{selectedVariant.compareAtPrice}
                     </span>
                   )}
                 </p>
                 <div className="mt-2 flex items-center space-x-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      selectedVariant.availableForSale &&
+                      selectedVariant.inventoryQuantity > 0
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {selectedVariant.availableForSale &&
+                    selectedVariant.inventoryQuantity > 0
                       ? `${selectedVariant.inventoryQuantity} in stock`
-                      : 'Out of stock'
-                    }
+                      : "Out of stock"}
                   </span>
                 </div>
               </>
@@ -154,7 +143,7 @@ console.log("product bvuadaasd",product)
             />
 
             {/* Action Buttons */}
-            <div className="mt-10 flex items-center space-x-4">
+            {/* <div className="mt-10 flex items-center space-x-4">
               {selectedVariant && selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0 ? (
                 <AddToCartButton productId={selectedVariant.id} />
               ) : (
@@ -168,7 +157,7 @@ console.log("product bvuadaasd",product)
               {hasSession && (
                 <AddToFavoritesButton productId={product.id} />
               )}
-            </div>
+            </div> */}
 
             {/* Product Details */}
             <section aria-labelledby="details-heading" className="mt-12">
@@ -177,40 +166,6 @@ console.log("product bvuadaasd",product)
               </h2>
 
               <div className="divide-y divide-gray-200 border-t">
-                {details.map((detail: { name: string; items: string[] }) => (
-                  <Disclosure key={detail.name} as="div">
-                    <h3>
-                      <DisclosureButton className="group relative flex w-full items-center justify-between py-6 text-left">
-                        <span className="text-sm font-medium text-gray-900 group-data-[open]:text-indigo-600">
-                          {detail.name}
-                        </span>
-                        <span className="ml-6 flex items-center">
-                          <PlusIcon
-                            aria-hidden="true"
-                            className="block size-6 text-gray-400 group-hover:text-gray-500 group-data-[open]:hidden"
-                          />
-                          <MinusIcon
-                            aria-hidden="true"
-                            className="hidden size-6 text-indigo-400 group-hover:text-indigo-500 group-data-[open]:block"
-                          />
-                        </span>
-                      </DisclosureButton>
-                    </h3>
-                    <DisclosurePanel className="pb-6">
-                      <ul
-                        role="list"
-                        className="list-disc space-y-1 pl-5 text-sm/6 text-gray-700 marker:text-gray-300"
-                      >
-                        {detail.items.map((item) => (
-                          <li key={item} className="pl-2">
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </DisclosurePanel>
-                  </Disclosure>
-                ))}
-
                 {/* Additional product info */}
                 <Disclosure as="div">
                   <h3>
@@ -233,20 +188,33 @@ console.log("product bvuadaasd",product)
                   <DisclosurePanel className="pb-6">
                     <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Vendor</dt>
-                        <dd className="text-sm text-gray-900">{product.vendor}</dd>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Vendor
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          {product.vendor}
+                        </dd>
                       </div>
                       <div>
-                        <dt className="text-sm font-medium text-gray-500">Product Type</dt>
-                        <dd className="text-sm text-gray-900">{product.productType}</dd>
+                        <dt className="text-sm font-medium text-gray-500">
+                          Product Type
+                        </dt>
+                        <dd className="text-sm text-gray-900">
+                          {product.productType}
+                        </dd>
                       </div>
                       {product.tags.length > 0 && (
                         <div className="sm:col-span-2">
-                          <dt className="text-sm font-medium text-gray-500">Tags</dt>
+                          <dt className="text-sm font-medium text-gray-500">
+                            Tags
+                          </dt>
                           <dd className="text-sm text-gray-900">
                             <div className="flex flex-wrap gap-1 mt-1">
                               {product.tags.map((tag) => (
-                                <span key={tag} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                                <span
+                                  key={tag}
+                                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800"
+                                >
                                   {tag}
                                 </span>
                               ))}

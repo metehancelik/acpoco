@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(`api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, surname, email, password }),
@@ -42,7 +42,7 @@ export default function RegisterPage() {
         setError(data.message || "Registration failed");
       }
     } catch (error) {
-      console.error("An error occurred during registration:", error);
+      console.warn(error);
       setError("An error occurred. Please try again.");
     }
   };

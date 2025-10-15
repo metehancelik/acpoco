@@ -163,19 +163,6 @@ export async function fetchProducts(
   } = {},
 ): Promise<ProductsResponse> {
   const { first, last, after, before, query } = options;
-  // eslint-disable-next-line no-console
-  console.log(
-    "fetchProducts - first:",
-    first,
-    "last:",
-    last,
-    "after:",
-    after,
-    "before:",
-    before,
-    "query:",
-    query,
-  );
 
   try {
     const variables: Record<string, string | number | undefined> = {
@@ -407,20 +394,12 @@ export function transformShopifyProduct(
       unit: "cm",
     },
     images: product.images.edges.map((edge) => edge.node.url),
-    attributes: [
-      {
-        name: "vendor",
-        values: [product.vendor],
-      },
-      {
-        name: "product_type",
-        values: [product.productType],
-      },
-      {
-        name: "tags",
-        values: product.tags,
-      },
-    ],
+    attributes: product.options
+      ? product.options.map((option) => ({
+          name: option.name,
+          values: option.values,
+        }))
+      : [],
     category: firstCollection
       ? {
           _id: firstCollection.id.replace("gid://shopify/Collection/", ""),

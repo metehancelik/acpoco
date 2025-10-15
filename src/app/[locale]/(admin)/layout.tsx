@@ -20,8 +20,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "angoragumuspartner.com",
-  description: "Angora Gümüş Partner",
+  title: "acpocob2b.com",
+  description: "Acpoco B2B",
 };
 
 export default function RootLayout({

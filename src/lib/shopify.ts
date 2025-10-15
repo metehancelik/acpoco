@@ -71,6 +71,11 @@ export const GET_PRODUCTS_QUERY = `
               }
             }
           }
+          options {
+            id
+            name
+            values
+          }
         }
         cursor
       }
@@ -335,6 +340,20 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
                   availableForSale
                 }
               }
+            }
+            collections(first: 10) {
+              edges {
+                node {
+                  id
+                  title
+                  handle
+                }
+              }
+            }
+            options {
+              id
+              name
+              values
             }
           }
         }

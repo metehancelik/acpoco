@@ -29,7 +29,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
   const currentPage = Number(searchParams.page || 1);
 
   const itemsPerPage = 20;
-  
+
   const getProducts = async (): Promise<{
     products: TransformedProduct[];
     hasNextPage: boolean;
@@ -44,8 +44,8 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
     }
     if (category) {
       searchQuery = searchQuery
-        ? `${searchQuery} AND product_type:${category}`
-        : `product_type:${category}`;
+        ? `${searchQuery} AND collection:${category}`
+        : `collection:${category}`;
     }
 
     // Fetch products using cursor-based pagination
@@ -58,7 +58,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
     } = {
       query: searchQuery || undefined,
     };
-    
+
     if (before) {
       // Backward pagination
       fetchOptions.last = itemsPerPage;
@@ -70,7 +70,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
         fetchOptions.after = cursor;
       }
     }
-    
+
     const response = await fetchProducts(fetchOptions);
 
     // Transform products for compatibility with existing components
@@ -79,7 +79,8 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
     );
 
     // Get pagination info
-    const { hasNextPage, hasPreviousPage, endCursor, startCursor } = response.products.pageInfo;
+    const { hasNextPage, hasPreviousPage, endCursor, startCursor } =
+      response.products.pageInfo;
 
     return {
       products,
@@ -108,7 +109,8 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
     getCategories(),
   ]);
 
-  const { products, hasNextPage, hasPreviousPage, nextCursor, previousCursor } = productsData;
+  const { products, hasNextPage, hasPreviousPage, nextCursor, previousCursor } =
+    productsData;
   const categories = categoriesData;
 
   return (
