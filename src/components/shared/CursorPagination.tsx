@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface CursorPaginationProps {
   hasNextPage: boolean;
@@ -23,11 +23,10 @@ const CursorPagination = ({
   currentPage = 1,
 }: CursorPaginationProps) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const buildUrl = (cursor?: string, page?: number, before?: string) => {
     const params = new URLSearchParams();
-    
+
     // Preserve existing search parameters
     if (currentQuery) {
       params.set("query", currentQuery);
@@ -51,7 +50,7 @@ const CursorPagination = ({
     } else if (cursor) {
       params.set("cursor", cursor);
     }
-    
+
     return `?${params.toString()}`;
   };
 
@@ -63,7 +62,9 @@ const CursorPagination = ({
 
   const goToPrevious = () => {
     if (hasPreviousPage) {
-      router.push(buildUrl(undefined, Math.max(1, currentPage - 1), previousCursor));
+      router.push(
+        buildUrl(undefined, Math.max(1, currentPage - 1), previousCursor),
+      );
     }
   };
 
@@ -109,10 +110,13 @@ const CursorPagination = ({
           <p className="text-sm text-gray-700">
             Showing products from your catalog
             {currentQuery && (
-              <span className="font-medium"> matching "{currentQuery}"</span>
+              <span className="font-medium"> matching {currentQuery}</span>
             )}
             {currentCategory && (
-              <span className="font-medium"> in category "{currentCategory}"</span>
+              <span className="font-medium">
+                {" "}
+                in category {currentCategory}
+              </span>
             )}
           </p>
         </div>
@@ -146,7 +150,7 @@ const CursorPagination = ({
 
             {/* Current page indicator */}
             <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:z-20 focus:outline-offset-0">
-               {currentPage}
+              {currentPage}
             </span>
 
             {/* Next button */}
@@ -169,7 +173,7 @@ const CursorPagination = ({
                 ...
               </span>
             )}
-            
+
             {!hasNextPage && (
               <span className="relative inline-flex items-center rounded-r-md px-4 py-2 text-sm font-semibold text-gray-400 ring-1 ring-inset ring-gray-300">
                 End
