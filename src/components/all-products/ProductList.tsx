@@ -6,8 +6,6 @@ import Categories from "./Categories";
 import ProductCard from "./ProductCard";
 import ProductFilter from "./ProductFilter";
 
-
-
 type Props = {
   products: IProduct[];
   categories: ICategory[];

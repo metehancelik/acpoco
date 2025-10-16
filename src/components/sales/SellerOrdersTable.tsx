@@ -583,7 +583,6 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
                                     <p className="text-xs font-bold">
                                       Adet:{item.quantity}
                                     </p>
-                                    
                                     {/* Amazon Özelleştirme Verileri */}
                                     <AmazonCustomizationDisplay
                                       options={
@@ -591,7 +590,8 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
                                       }
                                       isVisible={
                                         !!item.amazonCustomizationOptions &&
-                                        item.amazonCustomizationOptions.length > 0
+                                        item.amazonCustomizationOptions.length >
+                                          0
                                       }
                                     />
                                   </div>
