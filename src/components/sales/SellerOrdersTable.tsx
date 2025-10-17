@@ -1,5 +1,3 @@
-// import Image from "next/image";
-// import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Download, Printer, Trash2, Upload } from "lucide-react";
@@ -10,7 +8,6 @@ import React from "react";
 import { Tooltip } from "react-tooltip";
 
 import { Badge } from "@/components/ui/badge";
-// import { Card } from "@/components/ui/card";
 import { OrderWithPopulatedItems } from "@/lib/shipstation/types";
 import { getWarehouseLocation } from "@/lib/utils";
 import { IProduct } from "@/models/Product";
@@ -330,7 +327,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
       <div className="mt-4 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:ml-0 lg:mr-2 overflow-y-auto scroll">
           <div className="inline-block min-w-full py-2 align-middle max-h-[75vh]">
-            <div className="flex items-center justify-end w-1/5 mb-4 gap-2">
+            <div className="flex items-center justify-start  mb-4 gap-2">
               {session.data?.user?.role === "ADMIN" && (
                 <Select
                   disabled={!isAllSelected && selectedOrderIds.length === 0}
@@ -339,7 +336,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
                     setConfirmStatusChangeOpen(true);
                   }}
                 >
-                  <SelectTrigger className="bg-sageBlue text-white">
+                  <SelectTrigger className="bg-sageBlue text-white w-[200px]">
                     <SelectValue placeholder="Durum Değiştir" />
                   </SelectTrigger>
                   <SelectContent>

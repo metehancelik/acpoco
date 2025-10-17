@@ -34,7 +34,8 @@ const UsersTable = () => {
   }, [searchParams]);
 
   return (
-    <div className="rounded-md bg-gray-50 p-5 text-sm w-full max-w-[1280px]  mx-auto">
+    <div className="rounded-md bg-gray-50 p-5 text-sm w-full">
+      <h2 className="text-2xl font-bold mb-4">Kullanıcılar</h2>
       <div className="flow-root ">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 h-[40vh] overflow-y-auto relative">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
