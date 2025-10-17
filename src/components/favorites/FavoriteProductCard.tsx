@@ -10,9 +10,9 @@ import { IProduct } from "@/models/Product";
 
 // import { Pathnames } from "@/i18n/routing";
 
-interface Props {
+type Props = {
   product: IProduct;
-}
+};
 const FavoriteProductCard: React.FC<Props> = ({ product }) => {
   const queryClient = useQueryClient();
   const removeFromFavorites = async () => {
@@ -50,7 +50,7 @@ const FavoriteProductCard: React.FC<Props> = ({ product }) => {
         <div className="flex flex-1 items-end justify-between">
           {/* <p className="text-sm italic text-gray-500">{product.options}</p> */}
           <p className="text-base font-medium text-gray-900">
-            Fiyat: {product.price} € 
+            Fiyat: {product.price} €
           </p>
         </div>
         <div className="flex items-center gap-x-2">

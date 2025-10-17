@@ -1,8 +1,9 @@
-import { getServerSession } from "next-auth";
-
 import ShopifyProductClient from "@/components/product-details/ShopifyProductClient";
-import { authOptions } from "@/lib/auth";
-import { fetchProductById, fetchProductByHandle, ShopifyVariant } from "@/utils/shopify";
+import {
+  fetchProductById,
+  fetchProductByHandle,
+  ShopifyVariant,
+} from "@/utils/shopify";
 
 const ProductPage = async ({
   params: { id },
@@ -11,48 +12,50 @@ const ProductPage = async ({
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }) => {
-
-  
-  const session = await getServerSession(authOptions);
-  
   let product;
-  
+
   try {
-
-    
     // Try to fetch as Shopify product ID first
-    if (id.startsWith('gid://shopify/Product/') || /^\d+$/.test(id)) {
-
-      const shopifyId = id.startsWith('gid://shopify/Product/') ? id : `gid://shopify/Product/${id}`;
+    if (id.startsWith("gid://shopify/Product/") || /^\d+$/.test(id)) {
+      const shopifyId = id.startsWith("gid://shopify/Product/")
+        ? id
+        : `gid://shopify/Product/${id}`;
 
       const response = await fetchProductById(shopifyId);
       product = response.product;
     } else {
-
       const response = await fetchProductByHandle(id);
       product = response.product;
     }
-    
-
   } catch (error) {
-    console.error('Error fetching product:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    throw new Error(`Product not found: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Error fetching product:", error);
+    console.error(
+      "Error stack:",
+      error instanceof Error ? error.stack : "No stack trace",
+    );
+    throw new Error(
+      `Product not found: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+    );
   }
 
   if (!product) {
-    console.error('Product is null after fetch attempt');
+    console.error("Product is null after fetch attempt");
     throw new Error("Product not found - no product data returned");
   }
 
   // Find initial variant based on search params
   let initialVariant: ShopifyVariant | undefined;
-  
-  if (Object.keys(searchParams).length > 0 && product.variants?.edges.length > 0) {
+
+  if (
+    Object.keys(searchParams).length > 0 &&
+    product.variants?.edges.length > 0
+  ) {
     // Convert search params to expected format
     const searchOptions: Record<string, string> = {};
     Object.entries(searchParams).forEach(([key, value]) => {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         searchOptions[key] = value;
       } else if (Array.isArray(value) && value.length > 0) {
         searchOptions[key] = value[0];
@@ -62,8 +65,9 @@ const ProductPage = async ({
     // Find matching variant
     initialVariant = product.variants.edges.find((edge) => {
       const variant = edge.node;
-      return variant.selectedOptions.every((option) => 
-        searchOptions[option.name] === option.value
+
+      return variant.selectedOptions.every(
+        (option) => searchOptions[option.name] === option.value,
       );
     })?.node;
   }
@@ -74,11 +78,7 @@ const ProductPage = async ({
   }
 
   return (
-    <ShopifyProductClient
-      product={product}
-      initialVariant={initialVariant}
-      hasSession={!!session}
-    />
+    <ShopifyProductClient product={product} initialVariant={initialVariant} />
   );
 };
 

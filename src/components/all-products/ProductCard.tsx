@@ -18,10 +18,18 @@ type Props = {
 const ProductCard: React.FC<Props> = ({ product }) => {
   const variants = product.shopifyData?.variants || [];
   const availableWithSku = variants.find(
-    (v) => v.availableForSale && v.inventoryQuantity > 0 && v.sku && v.sku.trim() !== "",
+    (v) =>
+      v.availableForSale &&
+      v.inventoryQuantity > 0 &&
+      v.sku &&
+      v.sku.trim() !== "",
   );
   const anyWithSku = variants.find((v) => v.sku && v.sku.trim() !== "");
-  const displaySku = (availableWithSku || anyWithSku || variants[0])?.sku || product.parentSku || "N/A";
+  const displaySku =
+    (availableWithSku || anyWithSku || variants[0])?.sku ||
+    product.parentSku ||
+    "N/A";
+
   return (
     <div
       key={product._id}
