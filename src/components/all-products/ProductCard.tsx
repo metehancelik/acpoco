@@ -4,11 +4,24 @@ import Link from "next/link";
 import React from "react";
 
 import { IProduct } from "@/models/Product";
+import { ShopifyVariant } from "@/utils/shopify";
 
-interface Props {
-  product: IProduct;
-}
+type ProductWithShopify = IProduct & {
+  shopifyData?: {
+    variants: ShopifyVariant[];
+  };
+};
+
+type Props = {
+  product: ProductWithShopify;
+};
 const ProductCard: React.FC<Props> = ({ product }) => {
+  const variants = product.shopifyData?.variants || [];
+  const availableWithSku = variants.find(
+    (v) => v.availableForSale && v.inventoryQuantity > 0 && v.sku && v.sku.trim() !== "",
+  );
+  const anyWithSku = variants.find((v) => v.sku && v.sku.trim() !== "");
+  const displaySku = (availableWithSku || anyWithSku || variants[0])?.sku || product.parentSku || "N/A";
   return (
     <div
       key={product._id}
@@ -24,7 +37,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       <div className="flex flex-1 flex-col space-y-2 p-4">
         <Link href={`/product/${product._id}`}>{product.title}</Link>
 
-        <p className="text-sm text-gray-500">SKU: {product.parentSku}</p>
+        <p className="text-sm text-gray-500">SKU: {displaySku}</p>
         <div className="flex flex-1 items-end justify-between">
           {/* <p className="text-sm italic text-gray-500">{product.options}</p> */}
           <p className="text-base font-medium text-gray-900">

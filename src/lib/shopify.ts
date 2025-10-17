@@ -55,6 +55,7 @@ export const GET_PRODUCTS_QUERY = `
                 compareAtPrice
                 inventoryQuantity
                 availableForSale
+                sku
                 selectedOptions {
                   name
                   value
@@ -338,6 +339,7 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
                   price
                   compareAtPrice
                   availableForSale
+                  sku
                 }
               }
             }
