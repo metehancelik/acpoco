@@ -6,9 +6,10 @@ import ShopConnect from "@/components/dashboard/ShopConnect";
 import UsersTable from "@/components/dashboard/UsersTable";
 // import SyncOrders from "@/components/SyncOrders";
 // import { SyncButton } from "@/components/SyncStores";
-import WarehouseCreateForm from "@/components/warehouse/WarehouseCreateForm";
-import WarehouseTable from "@/components/warehouse/WarehouseTable";
+// import WarehouseCreateForm from "@/components/warehouse/WarehouseCreateForm";
+// import WarehouseTable from "@/components/warehouse/WarehouseTable";
 import { authOptions } from "@/lib/auth";
+import GetProducts from "@/components/dashboard/GetProducts";
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -22,16 +23,8 @@ export default async function AdminDashboard() {
       <p>Mağaza Bağlama</p>
       <ShopConnect />
       <br />
-      <p>Ara Depo Oluştur</p>
-      <WarehouseCreateForm />
+      <GetProducts />
       <br />
-      <WarehouseTable />
-
-      {/* <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Sync</h2>
-        <SyncButton />
-        <SyncOrders />
-      </div> */}
       <UsersTable />
       <AllWalletLogs />
     </div>

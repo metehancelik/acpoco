@@ -42,7 +42,8 @@ const AllWalletLogs = () => {
   }, [searchParams]);
 
   return (
-    <div className="flex flex-col w-full max-w-[1280px] mx-auto mt-12 h-[40vh] relative overflow-y-auto">
+    <div className="flex flex-col w-full mt-12 h-[40vh] relative overflow-y-auto">
+      <h2 className="text-2xl font-bold mb-4">Cüzdan Hareketleri</h2>
       <div className="w-full flex text-center rounded-t-md border-b border-b-primary bg-gray-50 py-2 mb-2 text-textPrimary font-bold text-sm sticky top-0">
         <p className="w-full">İsim-Soyisim</p>
         <p className="w-full">Tutar</p>

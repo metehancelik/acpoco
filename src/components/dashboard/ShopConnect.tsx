@@ -76,7 +76,7 @@ const ShopConnect = () => {
       </Select>
 
       <Button type="submit" disabled={isLoading}>
-        Connect
+        Onayla
       </Button>
     </form>
   );

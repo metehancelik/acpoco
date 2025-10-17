@@ -32,6 +32,7 @@ export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const session = useSession();
   const location = usePathname();
+  console.log(location)
   const navigation = [
     // { name: "Dashboard", href: "/dashboard", icon: PresentationChartBarIcon },
     {
@@ -91,7 +92,7 @@ export default function Sidebar() {
                 </div>
               </TransitionChild>
               {/* Sidebar component, swap this element with another sidebar if you like */}
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-2 ring-1 pt-4">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 ring-1 pt-4">
                 {/* <div className="flex h-16 shrink-0 items-center">
                   
                 </div> */}
@@ -167,14 +168,14 @@ export default function Sidebar() {
         </Dialog>
 
         {/* Static sidebar for desktop */}
-        <div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-20 bg-primary">
+        <div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-20 bg-white shadow-md">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex grow gap-y-5 cursor-default w-full max-w-6xl mx-auto">
             <div className="flex items-center gap-x-2 p-2">
               <Link href="/">
                 <Image
-                  alt="S.A.G.E"
-                  src="https://i.ibb.co/MSXBw3M/logo.png"
+                  alt="ACPOCO"
+                  src="https://cdn.shopify.com/s/files/1/0613/8478/5997/files/acpoco_logo.png?v=1751975004"
                   width={80}
                   height={80}
                 />
@@ -195,7 +196,7 @@ export default function Sidebar() {
                           className={classNames(
                             "/dashboard" === getLocationAfterLocale(location!)
                               ? "bg-secondary text-primary"
-                              : "text-gray-100 hover:bg-secondary hover:text-primary",
+                              : "text-gray-600 hover:bg-secondary hover:text-primary",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                           )}
                         >
@@ -210,7 +211,7 @@ export default function Sidebar() {
                           className={classNames(
                             "/my-products" === getLocationAfterLocale(location!)
                               ? "bg-secondary text-primary"
-                              : "text-gray-100 hover:bg-secondary hover:text-primary",
+                              : "text-gray-600 hover:bg-secondary hover:text-primary",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                           )}
                         >
@@ -226,7 +227,7 @@ export default function Sidebar() {
                           className={classNames(
                             item.href === getLocationAfterLocale(location!)
                               ? "bg-secondary text-primary"
-                              : "text-gray-100 hover:bg-secondary hover:text-primary",
+                              : "text-gray-600 hover:bg-secondary hover:text-primary",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                           )}
                         >
@@ -245,7 +246,7 @@ export default function Sidebar() {
                           className={classNames(
                             "/wallet" === getLocationAfterLocale(location!)
                               ? "bg-secondary text-primary"
-                              : "text-gray-100 hover:bg-secondary hover:text-primary",
+                              : "text-gray-600 hover:bg-secondary hover:text-primary",
                             "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
                           )}
                         >
