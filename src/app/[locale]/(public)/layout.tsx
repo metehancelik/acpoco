@@ -24,8 +24,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "angoragumuspartner.com",
-  description: "Angora Gümüş Partner",
+  title: process.env.NEXT_PUBLIC_APP_NAME,
+  description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
 };
 
 // const queryClient = new QueryClient();

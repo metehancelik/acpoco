@@ -74,7 +74,11 @@ export async function POST(
     for (const item of order.items) {
       if (item.orderItemId === body.orderItemId) {
         item.matchId = productVariant._id;
-        item.matchedPrice = productVariant.price + user.productPriceRate;
+        const basePrice = productVariant.price + user.productPriceRate;
+        const discountPercent = user?.discountPercent || 0;
+        const discounted =
+          basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100);
+        item.matchedPrice = Math.max(0, Number(discounted.toFixed(2)));
       }
     }
     if (order.items.every((item: { matchId: string }) => item.matchId)) {

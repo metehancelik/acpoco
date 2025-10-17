@@ -34,6 +34,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           balance: user.balance,
           cart: user.cart,
+          discountPercent: user.discountPercent || 0,
         };
       },
     }),
@@ -46,6 +47,7 @@ export const authOptions: NextAuthOptions = {
         token.surname = user.surname;
         token.balance = user.balance;
         token.cart = user.cart;
+        token.discountPercent = user.discountPercent || 0;
       }
 
       return token;
@@ -57,6 +59,7 @@ export const authOptions: NextAuthOptions = {
         session.user.balance = token.balance as number;
         session.user.surname = token.surname as string;
         session.user.cart = token.cart as string[];
+        session.user.discountPercent = token.discountPercent || 0;
       }
 
       return session;

@@ -14,6 +14,7 @@ interface IUser {
   role: string;
   balance: number;
   stores: { storeName: string }[];
+  discountPercent?: number;
 }
 
 const UsersTable = () => {
@@ -76,6 +77,12 @@ const UsersTable = () => {
                     scope="col"
                     className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
                   >
+                    İndirim (%)
+                  </th>
+                  <th
+                    scope="col"
+                    className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
+                  >
                     Detay
                   </th>
                 </tr>
@@ -99,6 +106,36 @@ const UsersTable = () => {
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
                       {user.balance}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
+                      <div className="flex items-center gap-2 justify-center">
+                        <input
+                          type="number"
+                          defaultValue={user.discountPercent || 0}
+                          min={0}
+                          max={100}
+                          className="w-20 border rounded px-2 py-1 text-center"
+                          onBlur={async (e) => {
+                            const value = Number(e.target.value || 0);
+                            const normalized = Math.max(
+                              0,
+                              Math.min(100, value),
+                            );
+                            if (normalized !== (user.discountPercent || 0)) {
+                              await axios.put(
+                                `/api/users/${user._id}/discount`,
+                                {
+                                  discountPercent: normalized,
+                                },
+                              );
+                              getUsers();
+                            }
+                          }}
+                        />
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          %{user.discountPercent || 0}
+                        </span>
+                      </div>
                     </td>
 
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-0">

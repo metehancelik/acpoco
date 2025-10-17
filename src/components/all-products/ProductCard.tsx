@@ -1,6 +1,9 @@
+"use client";
+
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import React from "react";
 
 import { IProduct } from "@/models/Product";
@@ -30,6 +33,17 @@ const ProductCard: React.FC<Props> = ({ product }) => {
     product.parentSku ||
     "N/A";
 
+  const { data: session } = useSession();
+  const discountPercent = session?.user?.discountPercent || 0;
+  const showDiscount = discountPercent > 0;
+  const basePrice = product.price;
+  const discounted = Number(
+    (
+      basePrice *
+      (1 - Math.min(100, Math.max(0, discountPercent)) / 100)
+    ).toFixed(2),
+  );
+
   return (
     <div
       key={product._id}
@@ -47,10 +61,25 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 
         <p className="text-sm text-gray-500">SKU: {displaySku}</p>
         <div className="flex flex-1 items-end justify-between">
-          {/* <p className="text-sm italic text-gray-500">{product.options}</p> */}
-          <p className="text-base font-medium text-gray-900">
-            Fiyat: {product.price} €
-          </p>
+          <div className="flex items-center gap-2">
+            {showDiscount ? (
+              <>
+                <span className="text-base font-semibold text-gray-900">
+                  €{discounted}
+                </span>
+                <span className="text-sm text-gray-500 line-through">
+                  €{basePrice}
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  %{discountPercent} indirim
+                </span>
+              </>
+            ) : (
+              <span className="text-base font-medium text-gray-900">
+                Fiyat: €{basePrice}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-x-2">
           <Link

@@ -6,9 +6,21 @@ declare module "next-auth" {
     email: string;
     name?: string;
     billingAddress?: BillingAddress;
+    discountPercent?: number;
   }
 
   interface Session {
     user: User;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    role?: string;
+    id?: string;
+    surname?: string;
+    balance?: number;
+    cart?: string[];
+    discountPercent?: number;
   }
 }

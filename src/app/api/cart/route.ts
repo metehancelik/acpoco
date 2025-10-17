@@ -88,13 +88,24 @@ export async function GET() {
     _id: { $in: productVariantIds },
   }).populate("productId", "images title");
 
-  const cart = tempCart.map((item) => ({
-    ...item.toObject(),
-    count: user.cart.find(
+  const discountPercent = user?.discountPercent || 0;
+  const cart = tempCart.map((item) => {
+    const count = user.cart.find(
       (cartItem: { _id: string }) =>
         cartItem._id.toString() === item._id.toString(),
-    )?.count,
-  }));
+    )?.count;
+    const basePrice = item.price;
+    const discounted =
+      basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100);
+
+    return {
+      ...item.toObject(),
+      price: Math.max(0, Number(discounted.toFixed(2))),
+      originalPrice: basePrice,
+      discountPercent,
+      count,
+    };
+  });
 
   return NextResponse.json({ cart }, { status: 200 });
 }

@@ -11,6 +11,7 @@ import {
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
@@ -28,6 +29,17 @@ const ShopifyProductClient = ({
   const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant | null>(
     initialVariant || product.variants.edges[0]?.node || null,
   );
+  const { data: session } = useSession();
+  const discountPercent = session?.user?.discountPercent || 0;
+  const showDiscount = discountPercent > 0;
+  const discountedVariantPrice = selectedVariant
+    ? Number(
+        (
+          Number(selectedVariant.price) *
+          (1 - Math.min(100, Math.max(0, discountPercent)) / 100)
+        ).toFixed(2),
+      )
+    : null;
 
   // Get images to display (variant image or product images)
   const imagesToShow = selectedVariant?.image
@@ -101,12 +113,19 @@ const ShopifyProductClient = ({
                 <h2 className="mt-2 text-lg text-gray-600">
                   SKU: {selectedVariant.sku || "N/A"}
                 </h2>
-                <p className="text-2xl font-bold text-black mt-2">
-                  €{selectedVariant.price}
-                  {selectedVariant.compareAtPrice && (
-                    <span className="ml-2 text-lg text-gray-500 line-through">
-                      €{selectedVariant.compareAtPrice}
-                    </span>
+                <p className="text-2xl font-bold text-black mt-2 flex items-center gap-3">
+                  {showDiscount ? (
+                    <>
+                      <span>€{discountedVariantPrice}</span>
+                      <span className="text-lg text-gray-500 line-through">
+                        €{selectedVariant.price}
+                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        %{discountPercent} indirim
+                      </span>
+                    </>
+                  ) : (
+                    <span>€{selectedVariant.price}</span>
                   )}
                 </p>
                 <div className="mt-2 flex items-center space-x-4">
