@@ -32,7 +32,6 @@ export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const session = useSession();
   const location = usePathname();
-  console.log(location)
   const navigation = [
     // { name: "Dashboard", href: "/dashboard", icon: PresentationChartBarIcon },
     {

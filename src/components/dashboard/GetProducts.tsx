@@ -1,16 +1,15 @@
-"use client"
-import React from 'react'
-import { Button } from '../ui/button'
-import axios from 'axios'
+"use client";
+import axios from "axios";
+import React from "react";
+
+import { Button } from "../ui/button";
 
 const GetProducts = () => {
-    const handleGetProducts = async () => {
-        const response = await axios.get('/api/admin/shopify-products')
-        console.log(response.data)
-    }
-  return (
-    <Button onClick={handleGetProducts}>Ürünleri Getir</Button>
-  )
-}
+  const handleGetProducts = async () => {
+    await axios.get("/api/admin/shopify-products");
+  };
 
-export default GetProducts
+  return <Button onClick={handleGetProducts}>Ürünleri Getir</Button>;
+};
+
+export default GetProducts;

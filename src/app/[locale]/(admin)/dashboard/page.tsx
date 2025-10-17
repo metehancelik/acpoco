@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 
 import AllWalletLogs from "@/components/dashboard/AllWalletLogs";
+import GetProducts from "@/components/dashboard/GetProducts";
 import ShopConnect from "@/components/dashboard/ShopConnect";
 import UsersTable from "@/components/dashboard/UsersTable";
 // import SyncOrders from "@/components/SyncOrders";
@@ -9,7 +10,6 @@ import UsersTable from "@/components/dashboard/UsersTable";
 // import WarehouseCreateForm from "@/components/warehouse/WarehouseCreateForm";
 // import WarehouseTable from "@/components/warehouse/WarehouseTable";
 import { authOptions } from "@/lib/auth";
-import GetProducts from "@/components/dashboard/GetProducts";
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);

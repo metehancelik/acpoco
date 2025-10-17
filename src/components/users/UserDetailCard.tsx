@@ -125,7 +125,37 @@ const UserDetailCard: React.FC<Props> = ({ user }) => {
           Düzenle
         </Button>
       </form>
-      
+
+      <form
+        className="flex space-x-3 justify-between items-center"
+        onSubmit={handleSubmitShippingPriceRate}
+      >
+        <h2 className="text-sm font-semibold w-full">Kargo Çarpanı:</h2>
+        <Input
+          value={shippingPriceRate}
+          onChange={(e) => setShippingPriceRate(Number(e.target.value))}
+          className="w-full"
+        />
+        <Button type="submit" className="w-full">
+          Düzenle
+        </Button>
+      </form>
+
+      <form
+        className="flex space-x-3 justify-between items-center"
+        onSubmit={handleSubmitWarehousePriceRate}
+      >
+        <h2 className="text-sm font-semibold w-full">Depo Çarpanı:</h2>
+        <Input
+          value={warehousePriceRate}
+          onChange={(e) => setWarehousePriceRate(Number(e.target.value))}
+          className="w-full"
+        />
+        <Button type="submit" className="w-full">
+          Düzenle
+        </Button>
+      </form>
+
       <div className="flex space-x-3 items-center">
         <h2 className="text-sm font-semibold">Bakiye:</h2>
         <p>{wallet?.balance || 0}</p>
