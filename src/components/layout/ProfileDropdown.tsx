@@ -28,22 +28,22 @@ const ProfileDropdown = () => {
               Profil
             </Link>
           </MenuItem>
-          <MenuItem>
+          {/* <MenuItem>
             <Link
               href="/favorites"
               className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
             >
               Favorilerim
             </Link>
-          </MenuItem>
-          <MenuItem>
+          </MenuItem> */}
+          {/* <MenuItem>
             <Link
               href="/sample-orders"
               className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
             >
               Numune Siparişlerim
             </Link>
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem>
             <Link
               href="/sales"

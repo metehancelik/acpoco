@@ -43,6 +43,10 @@ interface ShopifyCollection {
   id: string;
   title: string;
   handle: string;
+  image?: {
+    url: string;
+    altText?: string;
+  };
 }
 
 interface ShopifyProduct {
@@ -107,17 +111,6 @@ export async function GET() {
     // Database bağlantısı
     await dbConnect();
 
-    // Default kategori oluştur veya getir
-    let defaultCategory = await CategoryModel.findOne({
-      name: "Uncategorized",
-    });
-    if (!defaultCategory) {
-      defaultCategory = await CategoryModel.create({
-        name: "Uncategorized",
-        image: "",
-      });
-    }
-
     let allProducts: ShopifyProduct[] = [];
     let hasNextPage = true;
     let afterCursor: string | null = null;
@@ -130,8 +123,10 @@ export async function GET() {
       const variables: {
         first: number;
         after?: string;
+        query?: string;
       } = {
         first: batchSize,
+        query: "status:active", // Sadece active ürünleri çek
       };
 
       if (afterCursor) {
@@ -160,7 +155,6 @@ export async function GET() {
 
     // Kategorileri oluştur veya getir
     const categoryMap = new Map<string, Category>();
-    categoryMap.set("Uncategorized", defaultCategory as Category);
 
     for (const product of allProducts) {
       if (product.collections?.edges?.length > 0) {
@@ -172,8 +166,15 @@ export async function GET() {
           if (!category) {
             category = await CategoryModel.create({
               name: firstCollection.title,
-              image: "",
+              image: firstCollection.image?.url || "",
             });
+          } else if (firstCollection.image?.url) {
+            // Eğer category varsa ama image güncellenirse
+            category = await CategoryModel.findByIdAndUpdate(
+              category._id,
+              { image: firstCollection.image.url },
+              { new: true },
+            );
           }
           categoryMap.set(firstCollection.title, category as Category);
         }
@@ -188,12 +189,17 @@ export async function GET() {
     // Her ürünü işle
     for (const shopifyProduct of allProducts) {
       try {
+        // Collection olmayan (Uncategorized) ürünleri atla
+        if (!shopifyProduct.collections?.edges?.length) {
+          continue; // Collection olmayan ürünleri atla
+        }
+
         // Kategori belirle
-        let productCategory = defaultCategory;
-        if (shopifyProduct.collections?.edges?.length > 0) {
-          const firstCollection = shopifyProduct.collections.edges[0].node;
-          productCategory =
-            categoryMap.get(firstCollection.title) || defaultCategory;
+        const firstCollection = shopifyProduct.collections.edges[0].node;
+        const productCategory = categoryMap.get(firstCollection.title);
+
+        if (!productCategory) {
+          continue; // Kategori bulunamazsa ürünü atla
         }
 
         // Resimleri çıkar

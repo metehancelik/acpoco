@@ -69,6 +69,10 @@ export const GET_PRODUCTS_QUERY = `
                 id
                 title
                 handle
+                image {
+                  url
+                  altText
+                }
               }
             }
           }

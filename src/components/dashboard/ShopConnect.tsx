@@ -46,6 +46,8 @@ const ShopConnect = () => {
     e.preventDefault();
     await httpClient.post("stores/connect-store", { shopId, userId });
   };
+  console.log({shops});
+  console.log({users});
 
   return (
     <form className="flex gap-2 lg:gap-4 items-center" onSubmit={handleSubmit}>
