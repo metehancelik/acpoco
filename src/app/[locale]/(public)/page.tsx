@@ -2,17 +2,8 @@ import { setRequestLocale } from "next-intl/server";
 import React from "react";
 
 import ProductList from "@/components/all-products/ProductList";
-import CursorPagination from "@/components/shared/CursorPagination";
+import Pagination from "@/components/shared/Pagination";
 import { IProduct, ICategory } from "@/models/Product";
-import {
-  fetchProducts,
-  fetchCollections,
-  transformShopifyProduct,
-  transformShopifyCollection,
-  buildProductSearchQuery,
-  TransformedProduct,
-  TransformedCategory,
-} from "@/utils/shopify";
 
 type Props = {
   params: { locale: string };
@@ -22,86 +13,78 @@ type Props = {
 const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
   setRequestLocale(locale);
 
-  const query = (searchParams.query as string) || "";
-  const cursor = (searchParams.cursor as string) || "";
-  const before = (searchParams.before as string) || "";
+  const page = Number(searchParams.page || 1);
   const category = (searchParams.category as string) || "";
-  const currentPage = Number(searchParams.page || 1);
 
-  const itemsPerPage = 20;
+  // API base URL
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   const getProducts = async (): Promise<{
-    products: TransformedProduct[];
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-    nextCursor?: string;
-    previousCursor?: string;
+    products: IProduct[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
   }> => {
-    // Build search query for Shopify GraphQL
-    let searchQuery = "";
-    if (query) {
-      searchQuery = buildProductSearchQuery({ title: query });
-    }
-    if (category) {
-      searchQuery = searchQuery
-        ? `${searchQuery} AND collection:${category}`
-        : `collection:${category}`;
-    }
-
-    // Fetch products using cursor-based pagination
-    const fetchOptions: {
-      first?: number;
-      last?: number;
-      after?: string;
-      before?: string;
-      query?: string;
-    } = {
-      query: searchQuery || undefined,
-    };
-
-    if (before) {
-      // Backward pagination
-      fetchOptions.last = itemsPerPage;
-      fetchOptions.before = before;
-    } else {
-      // Forward pagination (default)
-      fetchOptions.first = itemsPerPage;
-      if (cursor) {
-        fetchOptions.after = cursor;
+    try {
+      const params = new URLSearchParams();
+      params.set("page", page.toString());
+      if (category) {
+        params.set("category", category);
       }
+
+      const response = await fetch(`${baseUrl}/catalog?${params}`, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to fetch products");
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return {
+        products: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: 24,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
     }
-
-    const response = await fetchProducts(fetchOptions);
-
-    // Transform products for compatibility with existing components
-    const products = response.products.edges.map((edge) =>
-      transformShopifyProduct(edge.node),
-    );
-
-    // Get pagination info
-    const { hasNextPage, hasPreviousPage, endCursor, startCursor } =
-      response.products.pageInfo;
-
-    return {
-      products,
-      hasNextPage,
-      hasPreviousPage,
-      nextCursor: hasNextPage ? endCursor : undefined,
-      previousCursor: hasPreviousPage ? startCursor : undefined,
-    };
   };
 
-  const getCategories = async (): Promise<TransformedCategory[]> => {
-    const response = await fetchCollections({
-      first: 50, // Fetch more collections to show as categories
-    });
+  const getCategories = async (): Promise<ICategory[]> => {
+    try {
+      const response = await fetch(`${baseUrl}/categories`, {
+        cache: "no-store",
+      });
 
-    // Transform collections to be used as categories
-    const categories = response.collections.edges.map((edge) =>
-      transformShopifyCollection(edge.node),
-    );
+      if (!response.ok) {
+        throw new Error("Failed to fetch categories");
+      }
 
-    return categories;
+      const categories = await response.json();
+      return categories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
   };
 
   const [productsData, categoriesData] = await Promise.all([
@@ -109,26 +92,14 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
     getCategories(),
   ]);
 
-  const { products, hasNextPage, hasPreviousPage, nextCursor, previousCursor } =
-    productsData;
+  const { products, pagination } = productsData;
   const categories = categoriesData;
 
   return (
     <div>
-      <ProductList
-        products={products as unknown as IProduct[]}
-        categories={categories as unknown as ICategory[]}
-      />
-      <div className="max-w-6xl w-full mx-auto">
-        <CursorPagination
-          hasNextPage={hasNextPage}
-          hasPreviousPage={hasPreviousPage}
-          nextCursor={nextCursor}
-          previousCursor={previousCursor}
-          currentQuery={query}
-          currentCategory={category}
-          currentPage={currentPage}
-        />
+      <ProductList products={products} categories={categories} />
+      <div className="max-w-6xl w-full mx-auto px-4">
+        <Pagination totalPages={pagination.totalPages} />
       </div>
     </div>
   );
