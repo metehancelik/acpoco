@@ -1,15 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
+import React from "react";
 
 import { IUserRoot } from "@/app/[locale]/(admin)/users/[id]/page";
-import AlertNotification from "@/utils/alertNotification";
 import httpClient from "@/utils/httpClient";
 
 import { BalanceChangeModal } from "./BalanceChangeModal";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 interface Props {
   user: IUserRoot | null;
@@ -111,8 +108,6 @@ const UserDetailCard: React.FC<Props> = ({ user }) => {
         <h2 className="text-sm font-semibold">Rol:</h2>
         <p>{user?.role}</p>
       </div>
-     
-
 
       <div className="flex space-x-3 items-center">
         <h2 className="text-sm font-semibold">Bakiye:</h2>

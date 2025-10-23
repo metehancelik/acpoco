@@ -34,7 +34,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
     "N/A";
 
   const { data: session } = useSession();
-  console.log({session})
   const discountPercent = session?.user?.discountPercent || 0;
   const showDiscount = discountPercent > 0;
   const basePrice = product.price;

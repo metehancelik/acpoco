@@ -17,8 +17,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
   const category = (searchParams.category as string) || "";
 
   // API base URL
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   const getProducts = async (): Promise<{
     products: IProduct[];
@@ -55,6 +54,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
       return result.data;
     } catch (error) {
       console.error("Error fetching products:", error);
+
       return {
         products: [],
         pagination: {
@@ -80,9 +80,11 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
       }
 
       const categories = await response.json();
+
       return categories;
     } catch (error) {
       console.error("Error fetching categories:", error);
+
       return [];
     }
   };

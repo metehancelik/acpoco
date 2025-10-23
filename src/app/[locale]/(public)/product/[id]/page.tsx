@@ -1,5 +1,5 @@
 import ShopifyProductClient from "@/components/product-details/ShopifyProductClient";
-import { ShopifyVariant } from "@/utils/shopify";
+import { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
 
 const ProductPage = async ({
   params: { id },
@@ -9,10 +9,9 @@ const ProductPage = async ({
   searchParams: { [key: string]: string | string[] | undefined };
 }) => {
   // API base URL
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-  let product;
+  let product: ShopifyProduct | null;
 
   try {
     // Fetch product from database
@@ -67,11 +66,11 @@ const ProductPage = async ({
     });
 
     // Find matching variant
-    initialVariant = product.variants.edges.find((edge: any) => {
+    initialVariant = product.variants.edges.find((edge) => {
       const variant = edge.node;
 
       return variant.selectedOptions.every(
-        (option: any) => searchOptions[option.name] === option.value,
+        (option) => searchOptions[option.name] === option.value,
       );
     })?.node;
   }
