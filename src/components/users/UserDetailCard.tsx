@@ -22,15 +22,15 @@ interface IWallet {
 
 const UserDetailCard: React.FC<Props> = ({ user }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [productPriceRate, setProductPriceRate] = React.useState(
-    user?.productPriceRate || 2,
-  );
-  const [shippingPriceRate, setShippingPriceRate] = React.useState(
-    user?.shippingPriceRate || 2,
-  );
-  const [warehousePriceRate, setWarehousePriceRate] = React.useState(
-    user?.warehousePriceRate || 2,
-  );
+  // const [productPriceRate, setProductPriceRate] = React.useState(
+  //   user?.productPriceRate || 2,
+  // );
+  // const [shippingPriceRate, setShippingPriceRate] = React.useState(
+  //   user?.shippingPriceRate || 2,
+  // );
+  // const [warehousePriceRate, setWarehousePriceRate] = React.useState(
+  //   user?.warehousePriceRate || 2,
+  // );
 
   const { data: wallet } = useQuery<IWallet>({
     queryKey: ["userWallet", user?._id],
@@ -48,48 +48,48 @@ const UserDetailCard: React.FC<Props> = ({ user }) => {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleSubmitProductPriceRate = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    try {
-      await httpClient.put(`users/${user?._id}/product-rate`, {
-        productPriceRate,
-      });
-      AlertNotification("Ürün fiyat çarpanı başarıyla güncellendi", "success");
-    } catch (error) {
-      console.error(error);
-      AlertNotification("Bir hata oluştu", "error");
-    }
-  };
-  const handleSubmitShippingPriceRate = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    try {
-      await httpClient.put(`users/${user?._id}/shipping-rate`, {
-        shippingPriceRate,
-      });
-      AlertNotification("Kargo fiyat çarpanı başarıyla güncellendi", "success");
-    } catch (error: unknown) {
-      console.error(error);
-      AlertNotification("Bir hata oluştu", "error");
-    }
-  };
-  const handleSubmitWarehousePriceRate = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    try {
-      await httpClient.put(`users/${user?._id}/warehouse-rate`, {
-        warehousePriceRate,
-      });
-      AlertNotification("Depo fiyat çarpanı başarıyla güncellendi", "success");
-    } catch (error: unknown) {
-      console.error(error);
-      AlertNotification("Bir hata oluştu", "error");
-    }
-  };
+  // const handleSubmitProductPriceRate = async (e: React.SyntheticEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await httpClient.put(`users/${user?._id}/product-rate`, {
+  //       productPriceRate,
+  //     });
+  //     AlertNotification("Ürün fiyat çarpanı başarıyla güncellendi", "success");
+  //   } catch (error) {
+  //     console.error(error);
+  //     AlertNotification("Bir hata oluştu", "error");
+  //   }
+  // };
+  // const handleSubmitShippingPriceRate = async (e: React.SyntheticEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await httpClient.put(`users/${user?._id}/shipping-rate`, {
+  //       shippingPriceRate,
+  //     });
+  //     AlertNotification("Kargo fiyat çarpanı başarıyla güncellendi", "success");
+  //   } catch (error: unknown) {
+  //     console.error(error);
+  //     AlertNotification("Bir hata oluştu", "error");
+  //   }
+  // };
+  // const handleSubmitWarehousePriceRate = async (e: React.SyntheticEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await httpClient.put(`users/${user?._id}/warehouse-rate`, {
+  //       warehousePriceRate,
+  //     });
+  //     AlertNotification("Depo fiyat çarpanı başarıyla güncellendi", "success");
+  //   } catch (error: unknown) {
+  //     console.error(error);
+  //     AlertNotification("Bir hata oluştu", "error");
+  //   }
+  // };
 
-  useEffect(() => {
-    setProductPriceRate(user?.productPriceRate || 2);
-    setShippingPriceRate(user?.shippingPriceRate || 2);
-    setWarehousePriceRate(user?.warehousePriceRate || 2);
-  }, [user]);
+  // useEffect(() => {
+  //   setProductPriceRate(user?.productPriceRate || 2);
+  //   setShippingPriceRate(user?.shippingPriceRate || 2);
+  //   setWarehousePriceRate(user?.warehousePriceRate || 2);
+  // }, [user]);
 
   return (
     <div className="w-1/2 flex flex-col space-y-6 bg-gray-50 p-4 rounded-md shadow-md text-textPrimary">
@@ -111,50 +111,8 @@ const UserDetailCard: React.FC<Props> = ({ user }) => {
         <h2 className="text-sm font-semibold">Rol:</h2>
         <p>{user?.role}</p>
       </div>
-      <form
-        className="flex space-x-3 justify-between items-center"
-        onSubmit={handleSubmitProductPriceRate}
-      >
-        <h2 className="text-sm font-semibold w-full">İndirim Oranı:</h2>
-        <Input
-          value={productPriceRate}
-          onChange={(e) => setProductPriceRate(Number(e.target.value))}
-          className="w-full"
-        />
-        <Button type="submit" className="w-full">
-          Düzenle
-        </Button>
-      </form>
+     
 
-      <form
-        className="flex space-x-3 justify-between items-center"
-        onSubmit={handleSubmitShippingPriceRate}
-      >
-        <h2 className="text-sm font-semibold w-full">Kargo Çarpanı:</h2>
-        <Input
-          value={shippingPriceRate}
-          onChange={(e) => setShippingPriceRate(Number(e.target.value))}
-          className="w-full"
-        />
-        <Button type="submit" className="w-full">
-          Düzenle
-        </Button>
-      </form>
-
-      <form
-        className="flex space-x-3 justify-between items-center"
-        onSubmit={handleSubmitWarehousePriceRate}
-      >
-        <h2 className="text-sm font-semibold w-full">Depo Çarpanı:</h2>
-        <Input
-          value={warehousePriceRate}
-          onChange={(e) => setWarehousePriceRate(Number(e.target.value))}
-          className="w-full"
-        />
-        <Button type="submit" className="w-full">
-          Düzenle
-        </Button>
-      </form>
 
       <div className="flex space-x-3 items-center">
         <h2 className="text-sm font-semibold">Bakiye:</h2>

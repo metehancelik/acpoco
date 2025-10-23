@@ -1,9 +1,5 @@
 import ShopifyProductClient from "@/components/product-details/ShopifyProductClient";
-import {
-  fetchProductById,
-  fetchProductByHandle,
-  ShopifyVariant,
-} from "@/utils/shopify";
+import { ShopifyVariant } from "@/utils/shopify";
 
 const ProductPage = async ({
   params: { id },
@@ -12,21 +8,29 @@ const ProductPage = async ({
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }) => {
+  // API base URL
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
   let product;
 
   try {
-    // Try to fetch as Shopify product ID first
-    if (id.startsWith("gid://shopify/Product/") || /^\d+$/.test(id)) {
-      const shopifyId = id.startsWith("gid://shopify/Product/")
-        ? id
-        : `gid://shopify/Product/${id}`;
+    // Fetch product from database
+    const response = await fetch(`${baseUrl}/catalog/${id}`, {
+      cache: "no-store",
+    });
 
-      const response = await fetchProductById(shopifyId);
-      product = response.product;
-    } else {
-      const response = await fetchProductByHandle(id);
-      product = response.product;
+    if (!response.ok) {
+      throw new Error("Failed to fetch product");
     }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || "Product not found");
+    }
+
+    product = result.data;
   } catch (error) {
     console.error("Error fetching product:", error);
     console.error(
@@ -63,11 +67,11 @@ const ProductPage = async ({
     });
 
     // Find matching variant
-    initialVariant = product.variants.edges.find((edge) => {
+    initialVariant = product.variants.edges.find((edge: any) => {
       const variant = edge.node;
 
       return variant.selectedOptions.every(
-        (option) => searchOptions[option.name] === option.value,
+        (option: any) => searchOptions[option.name] === option.value,
       );
     })?.node;
   }

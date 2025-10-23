@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import dbConnect from "@/lib/db";
 import { CategoryModel } from "@/models/Category";
 
 const categories = [
@@ -25,10 +26,48 @@ const categories = [
   },
 ];
 
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Tüm kategorileri getirir
+ *     description: Database'deki tüm kategorileri getirir
+ *     tags:
+ *       - Categories
+ *     responses:
+ *       200:
+ *         description: Kategoriler başarıyla getirildi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   image:
+ *                     type: string
+ *       500:
+ *         description: Sunucu hatası
+ */
 export async function GET() {
-  const categories = await CategoryModel.find({});
+  try {
+    await dbConnect();
+    const categories = await CategoryModel.find({}).sort({ name: 1 });
 
-  return NextResponse.json(categories);
+    return NextResponse.json(categories);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error fetching categories:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch categories" },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST() {
