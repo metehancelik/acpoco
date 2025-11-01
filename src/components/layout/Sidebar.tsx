@@ -47,7 +47,7 @@ export default function Sidebar() {
 	];
 	const { data: wallet } = useQuery({
 		queryKey: ["wallet"],
-		queryFn: () => httpClient.get("/wallet/user-wallet"),
+		queryFn: () => httpClient.get(`/wallet/user-wallet`),
 	});
 
 	const getLocationAfterLocale = (locale: string) => {
@@ -92,7 +92,7 @@ export default function Sidebar() {
 						{/* Sidebar component, swap this element with another sidebar if you like */}
 						<div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2 ring-1 pt-4">
 							{/* <div className="flex h-16 shrink-0 items-center">
-                  
+
                 </div> */}
 							<nav className="flex flex-1 flex-col">
 								<ul className="flex flex-1 flex-col gap-y-7">
@@ -260,18 +260,18 @@ export default function Sidebar() {
 						className="block text-sm font-semibold text-white "
 					>
 						{session?.data?.user.role !== "ADMIN" && (
-							<p className="rounded-md bg-sage-blue px-3 py-2 text-center shadow-xs hover:bg-indigo-500 ">
+							<p className="rounded-md bg-sageBlue px-3 py-2 text-center shadow-sm hover:bg-indigo-500 ">
 								Bakiye: ${wallet?.data?.balance}
 							</p>
 						)}
 					</button>
 					<div className="flex items-center gap-x-2 ml-2">
-						<Link
+						<a
 							href="/api/auth/signout"
-							className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+							className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-none"
 						>
 							Çıkış Yap
-						</Link>
+						</a>
 					</div>
 					<BalanceModal
 						isModalOpen={isModalOpen}

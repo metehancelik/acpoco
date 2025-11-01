@@ -24,25 +24,28 @@ const ProductFilter = () => {
 	};
 
 	return (
-		<div className="flex items-center space-x-2 w-full lg:w-1/2 mx-auto mb-12">
-			<form className="flex w-full gap-2" onSubmit={handleSubmit}>
+		<div className="flex items-center space-x-2 w-full lg:w-1/2 mx-auto mb-12 flex-col sm:flex-row gap-2">
+			<form
+				className="flex w-full gap-2 flex-col sm:flex-row"
+				onSubmit={handleSubmit}
+			>
 				<input
 					type="text"
 					placeholder="Aradığınız ürünü yazınız..."
-					className="flex-1 px-4 py-2 border border-slate-700 rounded-full focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-xs lg:placeholder:text-base"
+					className="flex-1 px-4 py-2 border border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-xs lg:placeholder:text-base"
 					onChange={handleChange}
 					value={query}
 				/>
 				<button
 					type="submit"
-					className="px-6 py-2 bg-slate-700 text-white rounded-full hover:bg-slate-500 focus:outline-hidden text-sm lg:text-base"
+					className="px-6 py-2 bg-slate-700 text-white rounded-full hover:bg-slate-500 focus:outline-none text-sm lg:text-base"
 				>
 					Ürün Bul
 				</button>
 			</form>
 			<button
 				onClick={handleAllProducts}
-				className="w-48 px-6 py-2 bg-white text-slate-700 rounded-full border border-slate-700 hover:bg-slate-700 hover:text-white focus:outline-hidden text-sm lg:text-base"
+				className="w-full sm:w-48 px-6 py-2 bg-white text-slate-700 rounded-full border border-slate-700 hover:bg-slate-700 hover:text-white focus:outline-none text-sm lg:text-base"
 			>
 				Tümünü Gör
 			</button>
