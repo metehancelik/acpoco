@@ -23,8 +23,11 @@ const ProductFilter = () => {
   };
 
   return (
-    <div className="flex items-center space-x-2 w-full lg:w-1/2 mx-auto mb-12">
-      <form className="flex w-full gap-2" onSubmit={handleSubmit}>
+    <div className="flex items-center space-x-2 w-full lg:w-1/2 mx-auto mb-12 flex-col sm:flex-row gap-2">
+      <form
+        className="flex w-full gap-2 flex-col sm:flex-row"
+        onSubmit={handleSubmit}
+      >
         <input
           type="text"
           placeholder="Aradığınız ürünü yazınız..."
@@ -41,7 +44,7 @@ const ProductFilter = () => {
       </form>
       <button
         onClick={handleAllProducts}
-        className="w-48 px-6 py-2 bg-white text-slate-700 rounded-full border border-slate-700 hover:bg-slate-700 hover:text-white focus:outline-none text-sm lg:text-base"
+        className="w-full sm:w-48 px-6 py-2 bg-white text-slate-700 rounded-full border border-slate-700 hover:bg-slate-700 hover:text-white focus:outline-none text-sm lg:text-base"
       >
         Tümünü Gör
       </button>

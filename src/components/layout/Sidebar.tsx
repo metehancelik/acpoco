@@ -47,7 +47,7 @@ export default function Sidebar() {
   ];
   const { data: wallet } = useQuery({
     queryKey: ["wallet"],
-    queryFn: () => httpClient.get("/wallet/user-wallet"),
+    queryFn: () => httpClient.get(`/wallet/user-wallet`),
   });
 
   const getLocationAfterLocale = (locale: string) => {
@@ -272,12 +272,12 @@ export default function Sidebar() {
               )}
             </button>
             <div className="flex items-center gap-x-2 ml-2">
-              <Link
+              <a
                 href="/api/auth/signout"
                 className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-[focus]:bg-gray-100 data-[focus]:text-gray-900 data-[focus]:outline-none"
               >
                 Çıkış Yap
-              </Link>
+              </a>
             </div>
             <BalanceModal
               isModalOpen={isModalOpen}
