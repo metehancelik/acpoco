@@ -252,26 +252,37 @@ export default function Sidebar() {
 							</li>
 						</ul>
 					</nav>
-					<button
-						type="button"
-						onClick={() => {
-							setIsModalOpen(true);
-						}}
-						className="block text-sm font-semibold text-white "
-					>
-						{session?.data?.user.role !== "ADMIN" && (
-							<p className="rounded-md bg-sageBlue px-3 py-2 text-center shadow-sm hover:bg-indigo-500 ">
-								Bakiye: ${wallet?.data?.balance}
-							</p>
-						)}
-					</button>
-					<div className="flex items-center gap-x-2 ml-2">
-						<a
-							href="/api/auth/signout"
-							className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-none"
+					{session?.data?.user && (
+						<button
+							type="button"
+							onClick={() => {
+								setIsModalOpen(true);
+							}}
+							className="block text-sm font-semibold text-white "
 						>
-							Çıkış Yap
-						</a>
+							{session?.data?.user.role !== "ADMIN" && (
+								<p className="rounded-md bg-primary px-3 py-2 text-center shadow-sm hover:bg-indigo-500 ">
+									Bakiye: ${wallet?.data?.balance}
+								</p>
+							)}
+						</button>
+					)}
+					<div className="flex items-center gap-x-2 ml-2">
+						{session?.data?.user ? (
+							<a
+								href="/api/auth/signout"
+								className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-none"
+							>
+								Çıkış Yap
+							</a>
+						) : (
+							<Link
+								href="/login"
+								className="block bg-danger rounded-md px-4 py-2 text-left text-sm text-white data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-none"
+							>
+								Giriş Yap
+							</Link>
+						)}
 					</div>
 					<BalanceModal
 						isModalOpen={isModalOpen}
