@@ -3,7 +3,7 @@
 import axios from "axios";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Pagination from "../shared/Pagination";
 
@@ -21,7 +21,7 @@ interface IUser {
 const UsersTable = () => {
 	const [users, setUsers] = useState<IUser[] | null>([]);
 	const searchParams = useSearchParams();
-	const getUsers = async () => {
+	const getUsers = useCallback(async () => {
 		try {
 			const res = await axios.get(
 				`/api/users?page=${searchParams?.get("page") || 1}`,
@@ -30,7 +30,7 @@ const UsersTable = () => {
 		} catch (error) {
 			console.error("Error fetching users:", error);
 		}
-	};
+	}, [searchParams]);
 	useEffect(() => {
 		getUsers();
 	}, [getUsers]);

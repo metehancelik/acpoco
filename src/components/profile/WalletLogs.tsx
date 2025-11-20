@@ -20,19 +20,19 @@ interface IWalletLog {
 const WalletLogs = () => {
 	const [walletLogs, setWalletLogss] = useState<IWalletLog[] | null>([]);
 	const [totalPages, setTotalPages] = useState<number>(0);
-	const getWalletLogs = async () => {
-		try {
-			const res = await axios.get("/api/wallet/logs");
-			setWalletLogss(res.data.logs);
-			setTotalPages(res.data.totalPages);
-		} catch (error: unknown) {
-			AlertNotification("Bir hata oluştu!", "error");
-			console.error(error);
-		}
-	};
 	useEffect(() => {
+		const getWalletLogs = async () => {
+			try {
+				const res = await axios.get("/api/wallet/logs");
+				setWalletLogss(res.data.logs);
+				setTotalPages(res.data.totalPages);
+			} catch (error: unknown) {
+				AlertNotification("Bir hata oluştu!", "error");
+				console.error(error);
+			}
+		};
 		getWalletLogs();
-	}, [getWalletLogs]);
+	}, []);
 
 	return (
 		<div className="bg-gray-50 p-4">
