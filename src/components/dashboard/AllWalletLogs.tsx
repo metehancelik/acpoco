@@ -26,21 +26,21 @@ const AllWalletLogs = () => {
 	const [totalPages, setTotalPages] = useState(0);
 	const searchParams = useSearchParams();
 
-	const getWalletLogs = async () => {
-		try {
-			const res = await axios.get(
-				`/api/wallet/logs?page=${searchParams?.get("page") || 1}`,
-			);
-			setWalletLogs(res.data.logs);
-			setTotalPages(res.data.totalPages);
-		} catch (error: unknown) {
-			AlertNotification("Bir hata oluştu!", "error");
-			console.error(error);
-		}
-	};
 	useEffect(() => {
+		const getWalletLogs = async () => {
+			try {
+				const res = await axios.get(
+					`/api/wallet/logs?page=${searchParams?.get("page") || 1}`,
+				);
+				setWalletLogs(res.data.logs);
+				setTotalPages(res.data.totalPages);
+			} catch (error: unknown) {
+				AlertNotification("Bir hata oluştu!", "error");
+				console.error(error);
+			}
+		};
 		getWalletLogs();
-	}, [getWalletLogs]);
+	}, [searchParams]);
 
 	return (
 		<div className="flex flex-col w-full mt-12 h-[40vh] relative overflow-y-auto">

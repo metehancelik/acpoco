@@ -126,17 +126,17 @@ const FilterForm = () => {
 		window.history.replaceState(null, "", `?${queryString}`); // Update the URL with the query string
 	};
 
-	const getStores = async () => {
-		try {
-			const res = await axios.get(`/api/stores/mystores`);
-			setStores(res.data.stores);
-		} catch (error: unknown) {
-			console.error(error);
-		}
-	};
 	useEffect(() => {
+		const getStores = async () => {
+			try {
+				const res = await axios.get(`/api/stores/mystores`);
+				setStores(res.data.stores);
+			} catch (error: unknown) {
+				console.error(error);
+			}
+		};
 		getStores();
-	}, [getStores]);
+	}, []);
 
 	return (
 		<div className="col-span-12 w-full">

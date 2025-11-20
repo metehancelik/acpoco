@@ -48,15 +48,7 @@ const Profile = () => {
 			setSurname(value);
 		}
 	};
-	const getMyStores = async () => {
-		try {
-			const res = await fetch("/api/stores/mystores");
-			const data = await res.json();
-			setStores(data.stores);
-		} catch (error) {
-			console.error("Error fetching stores:", error);
-		}
-	};
+
 	const submitHandler = async (e: React.SyntheticEvent) => {
 		e.preventDefault();
 		try {
@@ -70,10 +62,19 @@ const Profile = () => {
 		}
 	};
 	useEffect(() => {
+		const getMyStores = async () => {
+			try {
+				const res = await fetch("/api/stores/mystores");
+				const data = await res.json();
+				setStores(data.stores);
+			} catch (error) {
+				console.error("Error fetching stores:", error);
+			}
+		};
 		setName(session.data?.user?.name || "");
 		setSurname(session.data?.user?.surname || "");
 		getMyStores();
-	}, [session, getMyStores]);
+	}, [session]);
 
 	return (
 		<div className="max-w-7xl mx-auto flex flex-col space-y-4 md:space-y-6">

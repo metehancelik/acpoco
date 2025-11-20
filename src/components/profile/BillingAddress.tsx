@@ -79,19 +79,18 @@ const BillingAddress = () => {
 		}
 	};
 
-	const getBillingAddress = async () => {
-		try {
-			const res = await axios.get("/api/users/billing-address");
-
-			setBillingAddress(res.data);
-		} catch (error: unknown) {
-			AlertNotification(error as string, "error");
-		}
-	};
-
 	useEffect(() => {
+		const getBillingAddress = async () => {
+			try {
+				const res = await axios.get("/api/users/billing-address");
+
+				setBillingAddress(res.data);
+			} catch (error: unknown) {
+				AlertNotification(error as string, "error");
+			}
+		};
 		getBillingAddress();
-	}, [getBillingAddress]);
+	}, []);
 
 	useEffect(() => {
 		if (billingAddress) {
