@@ -179,9 +179,9 @@ export default function Sidebar() {
               </p> */}
 					</div>
 					<nav className="flex items-center mx-auto">
-						<ul className="flex flex-1 gap-y-7">
+						<ul role="list" className="flex flex-1 gap-y-7">
 							<li>
-								<ul className="flex -mx-2 space-x-4">
+								<ul role="list" className="flex -mx-2 space-x-4">
 									{session?.data?.user?.role === "ADMIN" && (
 										<li>
 											<Link

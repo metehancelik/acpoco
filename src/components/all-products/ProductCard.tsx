@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import type React from "react";
 
 import type { IProduct } from "@/models/Product";
-import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 import type { ShopifyVariant } from "@/utils/shopify";
 
 type ProductWithShopify = IProduct & {
@@ -52,7 +51,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 		>
 			<Image
 				alt={product.images[0]}
-				src={normalizeImageSrc(product.images[0])}
+				src={product.images[0]}
 				width={400}
 				height={400}
 				className="aspect-square w-full bg-gray-200 object-cover group-hover:opacity-75 sm:aspect-square"
