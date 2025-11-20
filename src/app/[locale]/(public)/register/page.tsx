@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
+import httpClient from "@/utils/httpClient";
+
 export default function RegisterPage() {
 	const router = useRouter();
 	const session = useSession();
@@ -18,13 +20,14 @@ export default function RegisterPage() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
-			const response = await fetch(`api/auth/register`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name, surname, email, password }),
+			const response = await httpClient.post(`/auth/register`, {
+				name,
+				surname,
+				email,
+				password,
 			});
 
-			if (response.ok) {
+			if (response.status === 200) {
 				const result = await signIn("credentials", {
 					redirect: false,
 					email,
@@ -37,7 +40,7 @@ export default function RegisterPage() {
 					router.push("/");
 				}
 			} else {
-				const data = await response.json();
+				const data = response.data;
 				setError(data.message || "Registration failed");
 			}
 		} catch (error) {
