@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { useCart } from "@/hooks/useCart";
 import { useCartStore } from "@/store/useCartStore";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 export type CartItemType = {
 	_id: string;
@@ -70,7 +71,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 		<div className="flex rounded-lg w-full border border-slate-400 shadow-md p-2 mb-2 items-center gap-2">
 			<div className="w-full flex justify-center">
 				<Image
-					src={item.productId.images[0]}
+					src={normalizeImageSrc(item.productId.images[0])}
 					alt={item.productId.title}
 					className="w-16 h-16 object-cover object-center rounded-md"
 					width={100}

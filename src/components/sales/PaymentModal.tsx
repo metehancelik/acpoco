@@ -12,6 +12,7 @@ import {
 import type { OrderWithPopulatedItems } from "@/lib/shipstation/types";
 import AlertNotification from "@/utils/alertNotification";
 import httpClient from "@/utils/httpClient";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 import { Button } from "../ui/button";
 
@@ -91,7 +92,7 @@ const PaymentModal: React.FC<Props> = ({ order, onClose, open }) => {
 						>
 							<div className="w-full flex justify-center">
 								<Image
-									src={item?.imageUrl || ""}
+									src={normalizeImageSrc(item?.imageUrl || "")}
 									alt={item.name}
 									width={100}
 									height={100}
