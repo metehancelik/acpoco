@@ -32,19 +32,26 @@ export default function Sidebar() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const session = useSession();
 	const location = usePathname();
-	const navigation = [
-		// { name: "Dashboard", href: "/dashboard", icon: PresentationChartBarIcon },
-		{
-			name: "Siparişlerim",
+	const navigation = [{ name: "Ürünler", href: "/", icon: GiftIcon }];
+	if (session?.data?.user) {
+		const item = {
+			name:
+				session?.data?.user.role === "ADMIN" ? "Siparişler" : "Siparişlerim",
 			href:
 				session?.data?.user.role === "ADMIN"
 					? "/sales?status=waitingProduction"
 					: "/sales",
 			icon: TruckIcon,
-		},
-		{ name: "Ürünler", href: "/", icon: GiftIcon },
-		{ name: "Profil", href: "/profile", icon: UserCircleIcon },
-	];
+		};
+		navigation.unshift(item);
+	}
+	if (session?.data?.user.role === "SELLER") {
+		navigation.push({
+			name: "Profil",
+			href: "profile",
+			icon: UserCircleIcon,
+		});
+	}
 	const { data: wallet } = useQuery({
 		queryKey: ["wallet"],
 		queryFn: () => httpClient.get(`/wallet/user-wallet`),
@@ -194,21 +201,6 @@ export default function Sidebar() {
 												)}
 											>
 												Dashboard
-											</Link>
-										</li>
-									)}
-									{session?.data?.user?.role === "ADMIN" && (
-										<li>
-											<Link
-												href={"/my-products"}
-												className={classNames(
-													"/my-products" === getLocationAfterLocale(location!)
-														? "bg-secondary text-primary"
-														: "text-gray-600 hover:bg-secondary hover:text-primary",
-													"group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6",
-												)}
-											>
-												Ürünlerim
 											</Link>
 										</li>
 									)}
