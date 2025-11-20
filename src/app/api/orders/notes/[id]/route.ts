@@ -5,42 +5,42 @@ import { authOptions } from "@/lib/auth";
 import Order from "@/models/Order";
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
+	request: Request,
+	{ params }: { params: { id: string } },
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  try {
-    const { internalNotes } = await request.json();
-    const { id } = params;
+	try {
+		const { internalNotes } = await request.json();
+		const { id } = params;
 
-    if (!id) {
-      return NextResponse.json(
-        { error: "Order ID is required" },
-        { status: 400 },
-      );
-    }
+		if (!id) {
+			return NextResponse.json(
+				{ error: "Order ID is required" },
+				{ status: 400 },
+			);
+		}
 
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { internalNotes },
-      { new: true },
-    );
+		const order = await Order.findByIdAndUpdate(
+			id,
+			{ internalNotes },
+			{ new: true },
+		);
 
-    if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
-    }
+		if (!order) {
+			return NextResponse.json({ error: "Order not found" }, { status: 404 });
+		}
 
-    return NextResponse.json(order);
-  } catch (error) {
-    console.error("Error updating order notes:", error);
+		return NextResponse.json(order);
+	} catch (error) {
+		console.error("Error updating order notes:", error);
 
-    return NextResponse.json(
-      { error: "Failed to update order notes" },
-      { status: 500 },
-    );
-  }
+		return NextResponse.json(
+			{ error: "Failed to update order notes" },
+			{ status: 500 },
+		);
+	}
 }

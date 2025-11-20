@@ -5,18 +5,18 @@ const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_ADMIN_ACCESS_TOKEN = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN;
 
 if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_ADMIN_ACCESS_TOKEN) {
-  throw new Error("Missing required Shopify environment variables");
+	throw new Error("Missing required Shopify environment variables");
 }
 
 // Create GraphQL client for Shopify Admin API
 export const shopifyClient = new GraphQLClient(
-  `https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-10/graphql.json`,
-  {
-    headers: {
-      "X-Shopify-Access-Token": SHOPIFY_ADMIN_ACCESS_TOKEN,
-      "Content-Type": "application/json",
-    },
-  },
+	`https://${SHOPIFY_STORE_DOMAIN}/admin/api/2024-10/graphql.json`,
+	{
+		headers: {
+			"X-Shopify-Access-Token": SHOPIFY_ADMIN_ACCESS_TOKEN,
+			"Content-Type": "application/json",
+		},
+	},
 );
 
 // GraphQL query for fetching products

@@ -1,9 +1,9 @@
-@import 'swagger-ui-react/swagger-ui.css';
+@import "swagger-ui-react/swagger-ui.css";
 
 .swagger-wrapper {
-    padding: 20px;
+	padding: 20px;
 }
 
 .swagger-ui .topbar {
-    display: none;
+	display: none;
 }

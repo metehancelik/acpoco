@@ -5,68 +5,68 @@ import { authOptions } from "@/lib/auth";
 import { User } from "@/models/index";
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+	const session = await getServerSession(authOptions);
 
-  if (!session || session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1");
-  const users = await User.find()
-    .skip((page - 1) * 20)
-    .limit(20)
-    .populate("stores");
+	if (!session || session.user?.role !== "ADMIN") {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+	const { searchParams } = new URL(request.url);
+	const page = parseInt(searchParams.get("page") || "1", 10);
+	const users = await User.find()
+		.skip((page - 1) * 20)
+		.limit(20)
+		.populate("stores");
 
-  return NextResponse.json(users);
+	return NextResponse.json(users);
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+	const session = await getServerSession(authOptions);
 
-  if (!session || session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	if (!session || session.user?.role !== "ADMIN") {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  try {
-    const body = await request.json();
-    await User.create(body);
+	try {
+		const body = await request.json();
+		await User.create(body);
 
-    return NextResponse.json(
-      { message: "User created successfully" },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error("Error creating user:", error);
+		return NextResponse.json(
+			{ message: "User created successfully" },
+			{ status: 201 },
+		);
+	} catch (error) {
+		console.error("Error creating user:", error);
 
-    return NextResponse.json(
-      { error: "Failed to create user" },
-      { status: 500 },
-    );
-  }
+		return NextResponse.json(
+			{ error: "Failed to create user" },
+			{ status: 500 },
+		);
+	}
 }
 
 export async function PUT(request: Request) {
-  const session = await getServerSession(authOptions);
+	const session = await getServerSession(authOptions);
 
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  const id = session.user?.id;
-  try {
-    const body = await request.json();
-    const { name, surname } = body;
-    await User.findByIdAndUpdate(id, { name, surname });
+	if (!session) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+	const id = session.user?.id;
+	try {
+		const body = await request.json();
+		const { name, surname } = body;
+		await User.findByIdAndUpdate(id, { name, surname });
 
-    return NextResponse.json(
-      { message: "User updated successfully" },
-      { status: 200 },
-    );
-  } catch (error) {
-    console.error("Error updating user:", error);
+		return NextResponse.json(
+			{ message: "User updated successfully" },
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error("Error updating user:", error);
 
-    return NextResponse.json(
-      { error: "Failed to update user" },
-      { status: 500 },
-    );
-  }
+		return NextResponse.json(
+			{ error: "Failed to update user" },
+			{ status: 500 },
+		);
+	}
 }

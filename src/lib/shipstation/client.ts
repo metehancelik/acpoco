@@ -2,292 +2,291 @@ import axios from "axios";
 
 import dbConnect from "@/lib/db";
 import Order from "@/models/Order";
-import Product, { IProduct } from "@/models/Product";
-import Store from "@/models/Store";
-import { IStore } from "@/models/Store";
+import Product, { type IProduct } from "@/models/Product";
+import Store, { type IStore } from "@/models/Store";
 import User from "@/models/User";
 import Warehouse from "@/models/Warehouse";
 
 import {
-  fetchAmazonCustomizationData,
-  extractCustomizationUrlFromOptions,
-  isAmazonCustomizationUrl,
+	extractCustomizationUrlFromOptions,
+	fetchAmazonCustomizationData,
+	isAmazonCustomizationUrl,
 } from "./amazon-customization";
-import { ShipStationOrder } from "./types";
+import type { ShipStationOrder } from "./types";
 
 export async function fetchShipStationOrders(userId?: string): Promise<{
-  orders: ShipStationOrder[];
-  products: Pick<IProduct, "parentSku" | "_id">[];
+	orders: ShipStationOrder[];
+	products: Pick<IProduct, "parentSku" | "_id">[];
 }> {
-  try {
-    await dbConnect();
+	try {
+		await dbConnect();
 
-    const apiKey = process.env.SHIPSTATION_API_KEY;
-    const apiSecret = process.env.SHIPSTATION_API_SECRET;
+		const apiKey = process.env.SHIPSTATION_API_KEY;
+		const apiSecret = process.env.SHIPSTATION_API_SECRET;
 
-    if (!apiKey || !apiSecret) {
-      throw new Error("ShipStation API key or secret is not configured");
-    }
+		if (!apiKey || !apiSecret) {
+			throw new Error("ShipStation API key or secret is not configured");
+		}
 
-    const stores = await Store.find({ userId });
-    const storeIds = stores.map((store) => store.storeId);
+		const stores = await Store.find({ userId });
+		const storeIds = stores.map((store) => store.storeId);
 
-    const products = await Product.find({}, { _id: 1, sku: 1 });
+		const products = await Product.find({}, { _id: 1, sku: 1 });
 
-    const orders = [];
+		const orders = [];
 
-    for (const storeId of storeIds) {
-      const response = await axios(
-        `https://ssapi.shipstation.com/orders?storeId=${storeId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
-            "Content-Type": "application/json",
-          },
-        },
-      );
-      const data = response.data;
-      const pages: number = data.pages;
-      orders.push(...data.orders);
-      for (let i = 2; i <= pages; i++) {
-        const response = await axios(
-          `https://ssapi.shipstation.com/orders?storeId=${storeId}&page=${i}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
-              "Content-Type": "application/json",
-            },
-          },
-        );
-        const data = response.data;
-        orders.push(...data.orders);
-      }
-    }
+		for (const storeId of storeIds) {
+			const response = await axios(
+				`https://ssapi.shipstation.com/orders?storeId=${storeId}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+						"Content-Type": "application/json",
+					},
+				},
+			);
+			const data = response.data;
+			const pages: number = data.pages;
+			orders.push(...data.orders);
+			for (let i = 2; i <= pages; i++) {
+				const response = await axios(
+					`https://ssapi.shipstation.com/orders?storeId=${storeId}&page=${i}`,
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+							"Content-Type": "application/json",
+						},
+					},
+				);
+				const data = response.data;
+				orders.push(...data.orders);
+			}
+		}
 
-    return { orders, products };
-  } catch (error) {
-    console.error("Error fetching ShipStation orders:", error);
-    throw error;
-  }
+		return { orders, products };
+	} catch (error) {
+		console.error("Error fetching ShipStation orders:", error);
+		throw error;
+	}
 }
 
 export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
-  try {
-    await dbConnect();
-    const warehouse = await Warehouse.findOne({
-      country: shipStationOrder.shipTo.country,
-    });
+	try {
+		await dbConnect();
+		const warehouse = await Warehouse.findOne({
+			country: shipStationOrder.shipTo.country,
+		});
 
-    const user = await User.findOne({
-      stores: { $in: [shipStationOrder.advancedOptions.storeId.storeId] },
-    });
-    let warehousePrice = 0;
+		const user = await User.findOne({
+			stores: { $in: [shipStationOrder.advancedOptions.storeId.storeId] },
+		});
+		let warehousePrice = 0;
 
-    if (warehouse) {
-      warehousePrice = warehouse.price + user.warehousePriceRate;
-    }
+		if (warehouse) {
+			warehousePrice = warehouse.price + user.warehousePriceRate;
+		}
 
-    const orderData: ShipStationOrder = {
-      orderId: shipStationOrder.orderId,
-      orderNumber: shipStationOrder.orderNumber,
-      orderKey: shipStationOrder.orderKey,
-      orderDate: shipStationOrder.orderDate,
-      createDate: shipStationOrder.createDate,
-      modifyDate: shipStationOrder.modifyDate,
-      customerEmail: shipStationOrder.customerEmail,
-      requestedShippingService: shipStationOrder.requestedShippingService,
-      weight: shipStationOrder.weight,
-      orderTotal: shipStationOrder.orderTotal,
-      shippingAmount: shipStationOrder.shippingAmount,
-      taxAmount: shipStationOrder.taxAmount,
-      discountTotal: shipStationOrder.items.reduce(
-        (total, item) => total + (item.adjustment ? item.unitPrice : 0),
-        0,
-      ),
-      amountPaid: shipStationOrder.amountPaid,
-      customerId: shipStationOrder.customerId,
-      shipDate: shipStationOrder.createDate,
-      holdUntilDate: shipStationOrder.modifyDate,
-      shipTo: shipStationOrder.shipTo,
-      billTo: shipStationOrder.billTo,
-      items: await Promise.all(
-        shipStationOrder.items
-          .filter((item) => item.adjustment === false)
-          .map(async (item) => {
-            // Amazon özelleştirme verilerini kontrol et
-            const customizationUrl = extractCustomizationUrlFromOptions(
-              item.options,
-            );
-            let amazonCustomizationData = null;
+		const orderData: ShipStationOrder = {
+			orderId: shipStationOrder.orderId,
+			orderNumber: shipStationOrder.orderNumber,
+			orderKey: shipStationOrder.orderKey,
+			orderDate: shipStationOrder.orderDate,
+			createDate: shipStationOrder.createDate,
+			modifyDate: shipStationOrder.modifyDate,
+			customerEmail: shipStationOrder.customerEmail,
+			requestedShippingService: shipStationOrder.requestedShippingService,
+			weight: shipStationOrder.weight,
+			orderTotal: shipStationOrder.orderTotal,
+			shippingAmount: shipStationOrder.shippingAmount,
+			taxAmount: shipStationOrder.taxAmount,
+			discountTotal: shipStationOrder.items.reduce(
+				(total, item) => total + (item.adjustment ? item.unitPrice : 0),
+				0,
+			),
+			amountPaid: shipStationOrder.amountPaid,
+			customerId: shipStationOrder.customerId,
+			shipDate: shipStationOrder.createDate,
+			holdUntilDate: shipStationOrder.modifyDate,
+			shipTo: shipStationOrder.shipTo,
+			billTo: shipStationOrder.billTo,
+			items: await Promise.all(
+				shipStationOrder.items
+					.filter((item) => item.adjustment === false)
+					.map(async (item) => {
+						// Amazon özelleştirme verilerini kontrol et
+						const customizationUrl = extractCustomizationUrlFromOptions(
+							item.options,
+						);
+						let amazonCustomizationData = null;
 
-            if (
-              customizationUrl &&
-              isAmazonCustomizationUrl(customizationUrl)
-            ) {
-              try {
-                amazonCustomizationData =
-                  await fetchAmazonCustomizationData(customizationUrl);
-              } catch (error) {
-                console.error(
-                  `Error fetching Amazon customization data for item ${item.sku}:`,
-                  error,
-                );
-              }
-            }
+						if (
+							customizationUrl &&
+							isAmazonCustomizationUrl(customizationUrl)
+						) {
+							try {
+								amazonCustomizationData =
+									await fetchAmazonCustomizationData(customizationUrl);
+							} catch (error) {
+								console.error(
+									`Error fetching Amazon customization data for item ${item.sku}:`,
+									error,
+								);
+							}
+						}
 
-            return {
-              orderItemId: item.orderItemId,
-              lineItemKey: item.lineItemKey,
-              sku: item.sku,
-              name: item.name,
-              imageUrl: item.imageUrl,
-              designUrl: null,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              taxAmount: item.taxAmount,
-              weight: item.weight,
-              shippingAmount: item.shippingAmount,
-              options: item.options,
-              amazonCustomizationData:
-                amazonCustomizationData?.customizationData || null,
-              productId: item.productId,
-              adjustment: item.adjustment,
-              warehouseLocation: item.warehouseLocation,
-              upc: item.upc,
-              createDate: item.createDate,
-              modifyDate: item.modifyDate,
-              matchId: null,
-              matchedPrice: null,
-            };
-          }),
-      ),
-      paymentDate: shipStationOrder.paymentDate,
-      shipByDate: shipStationOrder.shipByDate,
-      orderStatus: shipStationOrder.orderStatus,
-      customerUsername: shipStationOrder.customerUsername,
-      customerNotes: shipStationOrder.customerNotes,
-      internalNotes: shipStationOrder.internalNotes,
-      gift: shipStationOrder.gift,
-      giftMessage: shipStationOrder.giftMessage,
-      paymentMethod: shipStationOrder.paymentMethod,
-      carrierCode: shipStationOrder.carrierCode,
-      serviceCode: shipStationOrder.serviceCode,
-      packageCode: shipStationOrder.packageCode,
-      confirmation: shipStationOrder.confirmation,
-      dimensions: shipStationOrder.dimensions,
-      insuranceOptions: {
-        provider: shipStationOrder.insuranceOptions.provider,
-        insureShipment: shipStationOrder.insuranceOptions.insureShipment,
-        insuredValue: shipStationOrder.insuranceOptions.insuredValue,
-      },
-      internationalOptions: {
-        contents: shipStationOrder.internationalOptions.contents,
-        customsItems: shipStationOrder.internationalOptions.customsItems,
-        nonDelivery: shipStationOrder.internationalOptions.nonDelivery,
-      },
-      advancedOptions: {
-        warehouseId: shipStationOrder.advancedOptions.warehouseId,
-        nonMachinable: shipStationOrder.advancedOptions.nonMachinable,
-        saturdayDelivery: shipStationOrder.advancedOptions.saturdayDelivery,
-        containsAlcohol: shipStationOrder.advancedOptions.containsAlcohol,
-        mergedOrSplit: shipStationOrder.advancedOptions.mergedOrSplit,
-        mergedIds: shipStationOrder.advancedOptions.mergedIds,
-        parentId: shipStationOrder.advancedOptions.parentId,
-        storeId: shipStationOrder.advancedOptions.storeId,
-        customField1: shipStationOrder.advancedOptions.customField1,
-        customField2: shipStationOrder.advancedOptions.customField2,
-        customField3: shipStationOrder.advancedOptions.customField3,
-        source: shipStationOrder.advancedOptions.source,
-        billToParty: shipStationOrder.advancedOptions.billToParty,
-        billToAccount: shipStationOrder.advancedOptions.billToAccount,
-        billToPostalCode: shipStationOrder.advancedOptions.billToPostalCode,
-        billToCountryCode: shipStationOrder.advancedOptions.billToCountryCode,
-        billToMyOtherAccount:
-          shipStationOrder.advancedOptions.billToMyOtherAccount,
-      },
-      tagIds: shipStationOrder.tagIds,
-      externallyFulfilled: shipStationOrder.externallyFulfilled,
-      externallyFulfilledBy: shipStationOrder.externallyFulfilledBy,
-      externallyFulfilledById: shipStationOrder.externallyFulfilledById,
-      externallyFulfilledByName: shipStationOrder.externallyFulfilledByName,
-      labelMessages: shipStationOrder.labelMessages,
-      isPayed: false,
-      warehouse: shipStationOrder.shipTo.country, //order çekilirken warehouse değeri set ediliyor
-      warehousePrice: warehousePrice,
-      warehouseTrackingNumber: shipStationOrder.warehouseTrackingNumber || "",
-      warehouseShippingService: shipStationOrder.warehouseShippingService || "",
-      storeId: shipStationOrder.advancedOptions.storeId.storeId,
-      status: "waitingMatch",
-    };
+						return {
+							orderItemId: item.orderItemId,
+							lineItemKey: item.lineItemKey,
+							sku: item.sku,
+							name: item.name,
+							imageUrl: item.imageUrl,
+							designUrl: null,
+							quantity: item.quantity,
+							unitPrice: item.unitPrice,
+							taxAmount: item.taxAmount,
+							weight: item.weight,
+							shippingAmount: item.shippingAmount,
+							options: item.options,
+							amazonCustomizationData:
+								amazonCustomizationData?.customizationData || null,
+							productId: item.productId,
+							adjustment: item.adjustment,
+							warehouseLocation: item.warehouseLocation,
+							upc: item.upc,
+							createDate: item.createDate,
+							modifyDate: item.modifyDate,
+							matchId: null,
+							matchedPrice: null,
+						};
+					}),
+			),
+			paymentDate: shipStationOrder.paymentDate,
+			shipByDate: shipStationOrder.shipByDate,
+			orderStatus: shipStationOrder.orderStatus,
+			customerUsername: shipStationOrder.customerUsername,
+			customerNotes: shipStationOrder.customerNotes,
+			internalNotes: shipStationOrder.internalNotes,
+			gift: shipStationOrder.gift,
+			giftMessage: shipStationOrder.giftMessage,
+			paymentMethod: shipStationOrder.paymentMethod,
+			carrierCode: shipStationOrder.carrierCode,
+			serviceCode: shipStationOrder.serviceCode,
+			packageCode: shipStationOrder.packageCode,
+			confirmation: shipStationOrder.confirmation,
+			dimensions: shipStationOrder.dimensions,
+			insuranceOptions: {
+				provider: shipStationOrder.insuranceOptions.provider,
+				insureShipment: shipStationOrder.insuranceOptions.insureShipment,
+				insuredValue: shipStationOrder.insuranceOptions.insuredValue,
+			},
+			internationalOptions: {
+				contents: shipStationOrder.internationalOptions.contents,
+				customsItems: shipStationOrder.internationalOptions.customsItems,
+				nonDelivery: shipStationOrder.internationalOptions.nonDelivery,
+			},
+			advancedOptions: {
+				warehouseId: shipStationOrder.advancedOptions.warehouseId,
+				nonMachinable: shipStationOrder.advancedOptions.nonMachinable,
+				saturdayDelivery: shipStationOrder.advancedOptions.saturdayDelivery,
+				containsAlcohol: shipStationOrder.advancedOptions.containsAlcohol,
+				mergedOrSplit: shipStationOrder.advancedOptions.mergedOrSplit,
+				mergedIds: shipStationOrder.advancedOptions.mergedIds,
+				parentId: shipStationOrder.advancedOptions.parentId,
+				storeId: shipStationOrder.advancedOptions.storeId,
+				customField1: shipStationOrder.advancedOptions.customField1,
+				customField2: shipStationOrder.advancedOptions.customField2,
+				customField3: shipStationOrder.advancedOptions.customField3,
+				source: shipStationOrder.advancedOptions.source,
+				billToParty: shipStationOrder.advancedOptions.billToParty,
+				billToAccount: shipStationOrder.advancedOptions.billToAccount,
+				billToPostalCode: shipStationOrder.advancedOptions.billToPostalCode,
+				billToCountryCode: shipStationOrder.advancedOptions.billToCountryCode,
+				billToMyOtherAccount:
+					shipStationOrder.advancedOptions.billToMyOtherAccount,
+			},
+			tagIds: shipStationOrder.tagIds,
+			externallyFulfilled: shipStationOrder.externallyFulfilled,
+			externallyFulfilledBy: shipStationOrder.externallyFulfilledBy,
+			externallyFulfilledById: shipStationOrder.externallyFulfilledById,
+			externallyFulfilledByName: shipStationOrder.externallyFulfilledByName,
+			labelMessages: shipStationOrder.labelMessages,
+			isPayed: false,
+			warehouse: shipStationOrder.shipTo.country, //order çekilirken warehouse değeri set ediliyor
+			warehousePrice: warehousePrice,
+			warehouseTrackingNumber: shipStationOrder.warehouseTrackingNumber || "",
+			warehouseShippingService: shipStationOrder.warehouseShippingService || "",
+			storeId: shipStationOrder.advancedOptions.storeId.storeId,
+			status: "waitingMatch",
+		};
 
-    return await Order.findOneAndUpdate(
-      { orderId: shipStationOrder.orderId },
-      orderData,
-      { upsert: true, new: true },
-    );
-  } catch (error) {
-    console.error("Error syncing order to database:", error);
-    throw error;
-  }
+		return await Order.findOneAndUpdate(
+			{ orderId: shipStationOrder.orderId },
+			orderData,
+			{ upsert: true, new: true },
+		);
+	} catch (error) {
+		console.error("Error syncing order to database:", error);
+		throw error;
+	}
 }
 
 export async function getStores(): Promise<IStore[]> {
-  try {
-    const apiKey = process.env.SHIPSTATION_API_KEY;
-    const apiSecret = process.env.SHIPSTATION_API_SECRET;
+	try {
+		const apiKey = process.env.SHIPSTATION_API_KEY;
+		const apiSecret = process.env.SHIPSTATION_API_SECRET;
 
-    if (!apiKey || !apiSecret) {
-      throw new Error("ShipStation API key or secret is not configured");
-    }
+		if (!apiKey || !apiSecret) {
+			throw new Error("ShipStation API key or secret is not configured");
+		}
 
-    const response = await axios("https://ssapi.shipstation.com/stores", {
-      headers: {
-        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
-        "Content-Type": "application/json",
-      },
-    });
+		const response = await axios("https://ssapi.shipstation.com/stores", {
+			headers: {
+				Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+				"Content-Type": "application/json",
+			},
+		});
 
-    const data: IStore[] = response.data;
+		const data: IStore[] = response.data;
 
-    return data.filter(
-      (store) =>
-        store.storeName !== "Api Shipments" &&
-        store.storeName !== "Manual Orders",
-    );
-  } catch (error) {
-    console.error("Error fetching ShipStation stores:", error);
-    throw error;
-  }
+		return data.filter(
+			(store) =>
+				store.storeName !== "Api Shipments" &&
+				store.storeName !== "Manual Orders",
+		);
+	} catch (error) {
+		console.error("Error fetching ShipStation stores:", error);
+		throw error;
+	}
 }
 
 export async function fetchNewOrders(url: string): Promise<void> {
-  await dbConnect();
+	await dbConnect();
 
-  const apiKey = process.env.SHIPSTATION_API_KEY;
-  const apiSecret = process.env.SHIPSTATION_API_SECRET;
+	const apiKey = process.env.SHIPSTATION_API_KEY;
+	const apiSecret = process.env.SHIPSTATION_API_SECRET;
 
-  if (!apiKey || !apiSecret) {
-    throw new Error("ShipStation API key or secret is not configured");
-  }
+	if (!apiKey || !apiSecret) {
+		throw new Error("ShipStation API key or secret is not configured");
+	}
 
-  // const products = await Product.find({}, { _id: 1, sku: 1 });
+	// const products = await Product.find({}, { _id: 1, sku: 1 });
 
-  try {
-    const response = await axios(url, {
-      headers: {
-        Authorization: "Basic " + btoa(`${apiKey}:${apiSecret}`),
-        "Content-Type": "application/json",
-      },
-    });
-    for (const order of response.data.orders) {
-      await syncOrderToDatabase(order);
-    }
-  } catch (error) {
-    console.error("Error fetching new orders:", error);
-    throw error;
-  }
+	try {
+		const response = await axios(url, {
+			headers: {
+				Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+				"Content-Type": "application/json",
+			},
+		});
+		for (const order of response.data.orders) {
+			await syncOrderToDatabase(order);
+		}
+	} catch (error) {
+		console.error("Error fetching new orders:", error);
+		throw error;
+	}
 }
 
 //TODO cron job to refresh store https://ssapi.shipstation.com/stores/refreshstore?storeId=storeId

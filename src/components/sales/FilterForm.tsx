@@ -5,9 +5,8 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale/tr";
 import { useSession } from "next-auth/react";
 import React, { useEffect } from "react";
-import DatePicker, { registerLocale } from "react-datepicker";
-import { setDefaultLocale } from "react-datepicker";
-import { useForm, Controller } from "react-hook-form";
+import DatePicker, { registerLocale, setDefaultLocale } from "react-datepicker";
+import { Controller, useForm } from "react-hook-form";
 
 //KİŞİNİN BİRDEN FAZLA MAĞAZASI OLABİLİR (MAĞAZA SEÇİMİ)
 //MÜŞTERİ İSMİ İLE ARAMA YAPILABİLİR
@@ -15,296 +14,296 @@ import { useForm, Controller } from "react-hook-form";
 //SİPARİŞİN DURUMU İLE ARAMA YAPILABİLİR (ÖDEME BEKLİYOR, ÜRETİM BEKLİYOR, ÜRETİLDİ,KARGOYA VERİLDİ)
 //RESET FİLTER BUTONU OLABİLİR
 export const COUNTRIES = [
-  { code: "AU", name: "Australia - AU" },
-  { code: "AT", name: "Austria - AT" },
-  { code: "BE", name: "Belgium - BE" },
-  { code: "BG", name: "Bulgaria - BG" },
-  { code: "CA", name: "Canada - CA" },
-  { code: "HR", name: "Croatia - HR" },
-  { code: "CY", name: "Cyprus - CY" },
-  { code: "CZ", name: "Czech Republic - CZ" },
-  { code: "DK", name: "Denmark - DK" },
-  { code: "EE", name: "Estonia - EE" },
-  { code: "FI", name: "Finland - FI" },
-  { code: "FR", name: "France - FR" },
-  { code: "DE", name: "Germany - DE" },
-  { code: "GR", name: "Greece - GR" },
-  { code: "HK", name: "Hong Kong - HK" },
-  { code: "HU", name: "Hungary - HU" },
-  { code: "IN", name: "India - IN" },
-  { code: "ID", name: "Indonesia - ID" },
-  { code: "IE", name: "Ireland - IE" },
-  { code: "IL", name: "Israel - IL" },
-  { code: "IT", name: "Italy - IT" },
-  { code: "LV", name: "Latvia - LV" },
-  { code: "LT", name: "Lithuania - LT" },
-  { code: "LU", name: "Luxembourg - LU" },
-  { code: "MY", name: "Malaysia - MY" },
-  { code: "MT", name: "Malta - MT" },
-  { code: "MX", name: "Mexico - MX" },
-  { code: "MA", name: "Morocco - MA" },
-  { code: "NL", name: "Netherlands - NL" },
-  { code: "NZ", name: "New Zealand - NZ" },
-  { code: "NO", name: "Norway - NO" },
-  { code: "PH", name: "Philippines - PH" },
-  { code: "PL", name: "Poland - PL" },
-  { code: "PT", name: "Portugal - PT" },
-  { code: "RO", name: "Romania - RO" },
-  { code: "SG", name: "Singapore - SG" },
-  { code: "SK", name: "Slovakia - SK" },
-  { code: "SI", name: "Slovenia - SI" },
-  { code: "ZA", name: "South Africa - ZA" },
-  { code: "ES", name: "Spain - ES" },
-  { code: "SE", name: "Sweden - SE" },
-  { code: "CH", name: "Switzerland - CH" },
-  { code: "TR", name: "Türkiye - TR" },
-  { code: "GB", name: "United Kingdom - GB" },
-  { code: "US", name: "United States - US" },
-  { code: "VN", name: "Vietnam - VN" },
+	{ code: "AU", name: "Australia - AU" },
+	{ code: "AT", name: "Austria - AT" },
+	{ code: "BE", name: "Belgium - BE" },
+	{ code: "BG", name: "Bulgaria - BG" },
+	{ code: "CA", name: "Canada - CA" },
+	{ code: "HR", name: "Croatia - HR" },
+	{ code: "CY", name: "Cyprus - CY" },
+	{ code: "CZ", name: "Czech Republic - CZ" },
+	{ code: "DK", name: "Denmark - DK" },
+	{ code: "EE", name: "Estonia - EE" },
+	{ code: "FI", name: "Finland - FI" },
+	{ code: "FR", name: "France - FR" },
+	{ code: "DE", name: "Germany - DE" },
+	{ code: "GR", name: "Greece - GR" },
+	{ code: "HK", name: "Hong Kong - HK" },
+	{ code: "HU", name: "Hungary - HU" },
+	{ code: "IN", name: "India - IN" },
+	{ code: "ID", name: "Indonesia - ID" },
+	{ code: "IE", name: "Ireland - IE" },
+	{ code: "IL", name: "Israel - IL" },
+	{ code: "IT", name: "Italy - IT" },
+	{ code: "LV", name: "Latvia - LV" },
+	{ code: "LT", name: "Lithuania - LT" },
+	{ code: "LU", name: "Luxembourg - LU" },
+	{ code: "MY", name: "Malaysia - MY" },
+	{ code: "MT", name: "Malta - MT" },
+	{ code: "MX", name: "Mexico - MX" },
+	{ code: "MA", name: "Morocco - MA" },
+	{ code: "NL", name: "Netherlands - NL" },
+	{ code: "NZ", name: "New Zealand - NZ" },
+	{ code: "NO", name: "Norway - NO" },
+	{ code: "PH", name: "Philippines - PH" },
+	{ code: "PL", name: "Poland - PL" },
+	{ code: "PT", name: "Portugal - PT" },
+	{ code: "RO", name: "Romania - RO" },
+	{ code: "SG", name: "Singapore - SG" },
+	{ code: "SK", name: "Slovakia - SK" },
+	{ code: "SI", name: "Slovenia - SI" },
+	{ code: "ZA", name: "South Africa - ZA" },
+	{ code: "ES", name: "Spain - ES" },
+	{ code: "SE", name: "Sweden - SE" },
+	{ code: "CH", name: "Switzerland - CH" },
+	{ code: "TR", name: "Türkiye - TR" },
+	{ code: "GB", name: "United Kingdom - GB" },
+	{ code: "US", name: "United States - US" },
+	{ code: "VN", name: "Vietnam - VN" },
 ];
 const WAREHOUSES = [
-  { code: "DE", name: "Almanya - DE" },
-  { code: "GB", name: "İngiltere - GB" },
-  { code: "US", name: "Amerika - US" },
-  { code: "CA", name: "Kanada - CA" },
+	{ code: "DE", name: "Almanya - DE" },
+	{ code: "GB", name: "İngiltere - GB" },
+	{ code: "US", name: "Amerika - US" },
+	{ code: "CA", name: "Kanada - CA" },
 ];
 type Inputs = {
-  storeId: string;
-  orderDateStart: Date | null;
-  orderDateEnd: Date | null;
-  status: string;
-  orderId: string;
-  warehouse: string;
-  country: string;
+	storeId: string;
+	orderDateStart: Date | null;
+	orderDateEnd: Date | null;
+	status: string;
+	orderId: string;
+	warehouse: string;
+	country: string;
 };
 
 const FilterForm = () => {
-  const session = useSession();
-  const [stores, setStores] = React.useState([]);
-  const {
-    register,
-    handleSubmit,
-    control,
-    // formState: { errors },
-  } = useForm({
-    defaultValues: {
-      storeId: "",
-      status: "",
-      country: "",
-      warehouse: "",
-      orderId: "",
-      orderDateStart: null as Date | null,
-      orderDateEnd: null as Date | null,
-    },
-  });
-  const searchParams = new URLSearchParams();
-  setDefaultLocale("tr");
-  registerLocale("tr", tr);
+	const session = useSession();
+	const [stores, setStores] = React.useState([]);
+	const {
+		register,
+		handleSubmit,
+		control,
+		// formState: { errors },
+	} = useForm({
+		defaultValues: {
+			storeId: "",
+			status: "",
+			country: "",
+			warehouse: "",
+			orderId: "",
+			orderDateStart: null as Date | null,
+			orderDateEnd: null as Date | null,
+		},
+	});
+	const searchParams = new URLSearchParams();
+	setDefaultLocale("tr");
+	registerLocale("tr", tr);
 
-  const onSubmit = (data: Inputs) => {
-    const formattedStartDate = data.orderDateStart
-      ? format(data.orderDateStart, "yyyy-MM-dd")
-      : null;
-    data.orderDateStart = formattedStartDate as unknown as Date | null;
-    const formattedEndDate = data.orderDateEnd
-      ? format(data.orderDateEnd, "yyyy-MM-dd")
-      : null;
-    data.orderDateEnd = formattedEndDate as unknown as Date | null;
+	const onSubmit = (data: Inputs) => {
+		const formattedStartDate = data.orderDateStart
+			? format(data.orderDateStart, "yyyy-MM-dd")
+			: null;
+		data.orderDateStart = formattedStartDate as unknown as Date | null;
+		const formattedEndDate = data.orderDateEnd
+			? format(data.orderDateEnd, "yyyy-MM-dd")
+			: null;
+		data.orderDateEnd = formattedEndDate as unknown as Date | null;
 
-    if (data.storeId) searchParams.append("storeId", data.storeId);
-    // if (data.customerUsername)
-    //   searchParams.append("customerUsername", data.customerUsername);
-    if (data.orderDateStart)
-      searchParams.append("orderDateStart", formattedStartDate!);
-    if (data.orderDateEnd)
-      searchParams.append("orderDateEnd", formattedEndDate!);
-    if (data.status) searchParams.append("status", data.status);
-    if (data.orderId) searchParams.append("orderId", data.orderId);
-    if (data.warehouse) searchParams.append("warehouse", data.warehouse);
-    if (data.country) searchParams.append("country", data.country);
+		if (data.storeId) searchParams.append("storeId", data.storeId);
+		// if (data.customerUsername)
+		//   searchParams.append("customerUsername", data.customerUsername);
+		if (data.orderDateStart)
+			searchParams.append("orderDateStart", formattedStartDate!);
+		if (data.orderDateEnd)
+			searchParams.append("orderDateEnd", formattedEndDate!);
+		if (data.status) searchParams.append("status", data.status);
+		if (data.orderId) searchParams.append("orderId", data.orderId);
+		if (data.warehouse) searchParams.append("warehouse", data.warehouse);
+		if (data.country) searchParams.append("country", data.country);
 
-    const queryString = searchParams.toString();
-    window.history.replaceState(null, "", `?${queryString}`); // Update the URL with the query string
-  };
+		const queryString = searchParams.toString();
+		window.history.replaceState(null, "", `?${queryString}`); // Update the URL with the query string
+	};
 
-  const getStores = async () => {
-    try {
-      const res = await axios.get(`/api/stores/mystores`);
-      setStores(res.data.stores);
-    } catch (error: unknown) {
-      console.error(error);
-    }
-  };
-  useEffect(() => {
-    getStores();
-  }, []);
+	const getStores = async () => {
+		try {
+			const res = await axios.get(`/api/stores/mystores`);
+			setStores(res.data.stores);
+		} catch (error: unknown) {
+			console.error(error);
+		}
+	};
+	useEffect(() => {
+		getStores();
+	}, [getStores]);
 
-  return (
-    <div className="col-span-12 w-full">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-8 gap-2 items-center w-full"
-      >
-        <Controller
-          control={control}
-          name="status"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="orderStatus"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Sipariş Durumu
-              </label>
+	return (
+		<div className="col-span-12 w-full">
+			<form
+				onSubmit={handleSubmit(onSubmit)}
+				className="grid grid-cols-8 gap-2 items-center w-full"
+			>
+				<Controller
+					control={control}
+					name="status"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="orderStatus"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Sipariş Durumu
+							</label>
 
-              <select
-                {...field}
-                id="status"
-                value={field.value}
-                defaultValue=""
-                className="w-full text-sm rounded-md border border-primary py-2 pl-3 pr-10 text-gray-900"
-              >
-                <option className="text-sm" value="">
-                  Hepsi
-                </option>
-                {session.data?.user?.role !== "ADMIN" && (
-                  <option className="text-sm" value="waitingMatch">
-                    Eşleşme Bekleyen
-                  </option>
-                )}
-                {session.data?.user?.role !== "ADMIN" && (
-                  <option className="text-sm" value="waitingPayment">
-                    Ödeme Bekleyen
-                  </option>
-                )}
-                <option className="text-sm" value="waitingProduction">
-                  Üretim Bekleyen
-                </option>
-                <option className="text-sm" value="processing">
-                  Üretiliyor
-                </option>
-                <option className="text-sm" value="shipped">
-                  Kargoya Verilenler
-                </option>
-              </select>
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="storeId"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="store"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Mağaza
-              </label>
+							<select
+								{...field}
+								id="status"
+								value={field.value}
+								defaultValue=""
+								className="w-full text-sm rounded-md border border-primary py-2 pl-3 pr-10 text-gray-900"
+							>
+								<option className="text-sm" value="">
+									Hepsi
+								</option>
+								{session.data?.user?.role !== "ADMIN" && (
+									<option className="text-sm" value="waitingMatch">
+										Eşleşme Bekleyen
+									</option>
+								)}
+								{session.data?.user?.role !== "ADMIN" && (
+									<option className="text-sm" value="waitingPayment">
+										Ödeme Bekleyen
+									</option>
+								)}
+								<option className="text-sm" value="waitingProduction">
+									Üretim Bekleyen
+								</option>
+								<option className="text-sm" value="processing">
+									Üretiliyor
+								</option>
+								<option className="text-sm" value="shipped">
+									Kargoya Verilenler
+								</option>
+							</select>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="storeId"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="store"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Mağaza
+							</label>
 
-              <select
-                {...field}
-                id="storeId"
-                value={field.value}
-                defaultValue="My Store"
-                className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
-              >
-                <option className="text-sm" value="">
-                  Hepsi
-                </option>
-                {stores.map((store: { storeId: string; storeName: string }) => (
-                  <option key={store.storeId} value={store.storeId}>
-                    {store.storeName}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="country"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="country"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Ülke
-              </label>
+							<select
+								{...field}
+								id="storeId"
+								value={field.value}
+								defaultValue="My Store"
+								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+							>
+								<option className="text-sm" value="">
+									Hepsi
+								</option>
+								{stores.map((store: { storeId: string; storeName: string }) => (
+									<option key={store.storeId} value={store.storeId}>
+										{store.storeName}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="country"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="country"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Ülke
+							</label>
 
-              <select
-                {...field}
-                id="country"
-                value={field.value}
-                defaultValue=""
-                className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
-              >
-                <option className="text-sm" value="">
-                  Hepsi
-                </option>
-                {COUNTRIES.map((country: { code: string; name: string }) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="warehouse"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="warehouse"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Ara Depo
-              </label>
+							<select
+								{...field}
+								id="country"
+								value={field.value}
+								defaultValue=""
+								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+							>
+								<option className="text-sm" value="">
+									Hepsi
+								</option>
+								{COUNTRIES.map((country: { code: string; name: string }) => (
+									<option key={country.code} value={country.code}>
+										{country.name}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="warehouse"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="warehouse"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Ara Depo
+							</label>
 
-              <select
-                {...field}
-                id="warehouse"
-                value={field.value}
-                defaultValue=""
-                className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
-              >
-                <option className="text-sm" value="">
-                  Hepsi
-                </option>
-                {WAREHOUSES.map((warehouse: { code: string; name: string }) => (
-                  <option key={warehouse.code} value={warehouse.code}>
-                    {warehouse.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="orderId"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="orderId"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Sipariş No
-              </label>
+							<select
+								{...field}
+								id="warehouse"
+								value={field.value}
+								defaultValue=""
+								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+							>
+								<option className="text-sm" value="">
+									Hepsi
+								</option>
+								{WAREHOUSES.map((warehouse: { code: string; name: string }) => (
+									<option key={warehouse.code} value={warehouse.code}>
+										{warehouse.name}
+									</option>
+								))}
+							</select>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="orderId"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="orderId"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Sipariş No
+							</label>
 
-              <input
-                {...field}
-                placeholder="Sipariş no giriniz"
-                className="w-full rounded-md border border-primary py-2 px-2 text-sm text-gray-900 h-9"
-              />
-            </div>
-          )}
-        />
+							<input
+								{...field}
+								placeholder="Sipariş no giriniz"
+								className="w-full rounded-md border border-primary py-2 px-2 text-sm text-gray-900 h-9"
+							/>
+						</div>
+					)}
+				/>
 
-        {/* <Controller
+				{/* <Controller
           control={control}
           name="customerUsername"
           render={({ field }) => (
@@ -324,67 +323,67 @@ const FilterForm = () => {
             </div>
           )}
         /> */}
-        <Controller
-          control={control}
-          {...register("orderDateStart")}
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="startDate"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Başlangıç
-              </label>
-              <DatePicker
-                className="rounded-md text-sm text-textPrimary pl-2 w-full pr-0 py-1.5"
-                id="orderDateStart"
-                selected={field.value}
-                onChange={(date) => field.onChange(date)}
-                maxDate={new Date()}
-                placeholderText="Başlangıç tarihi"
-                monthsShown={1}
-                locale={tr}
-                dateFormat="dd/MM/yyyy"
-              />
-            </div>
-          )}
-        />
-        <Controller
-          control={control}
-          name="orderDateEnd"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="endDate"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Bitiş
-              </label>
+				<Controller
+					control={control}
+					{...register("orderDateStart")}
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="startDate"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Başlangıç
+							</label>
+							<DatePicker
+								className="rounded-md text-sm text-text-primary pl-2 w-full pr-0 py-1.5"
+								id="orderDateStart"
+								selected={field.value}
+								onChange={(date) => field.onChange(date)}
+								maxDate={new Date()}
+								placeholderText="Başlangıç tarihi"
+								monthsShown={1}
+								locale={tr}
+								dateFormat="dd/MM/yyyy"
+							/>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="orderDateEnd"
+					render={({ field }) => (
+						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
+							<label
+								htmlFor="endDate"
+								className=" text-sm font-medium leading-6 text-gray-900"
+							>
+								Bitiş
+							</label>
 
-              <DatePicker
-                className="rounded-md text-sm border-primary text-textPrimary pl-2 w-full pr-0 py-1.5"
-                id="orderDateEnd"
-                selected={field.value}
-                onChange={(date) => field.onChange(date)}
-                maxDate={new Date()}
-                placeholderText="Bitiş tarihi"
-                monthsShown={1}
-                locale={tr}
-                dateFormat="dd/MM/yyyy"
-              />
-            </div>
-          )}
-        />
+							<DatePicker
+								className="rounded-md text-sm border-primary text-text-primary pl-2 w-full pr-0 py-1.5"
+								id="orderDateEnd"
+								selected={field.value}
+								onChange={(date) => field.onChange(date)}
+								maxDate={new Date()}
+								placeholderText="Bitiş tarihi"
+								monthsShown={1}
+								locale={tr}
+								dateFormat="dd/MM/yyyy"
+							/>
+						</div>
+					)}
+				/>
 
-        <button
-          type="submit"
-          className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1 mt-6 items-center gap-x-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
-        >
-          Filtrele
-        </button>
-      </form>
-    </div>
-  );
+				<button
+					type="submit"
+					className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1 mt-6 items-center gap-x-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-primary/90  focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
+				>
+					Filtrele
+				</button>
+			</form>
+		</div>
+	);
 };
 
 export default FilterForm;
