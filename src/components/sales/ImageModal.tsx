@@ -10,6 +10,8 @@ import { XCircleIcon } from "@heroicons/react/16/solid";
 import Image from "next/image";
 import React from "react";
 
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
+
 interface Props {
 	isModalOpen: boolean;
 	setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -69,7 +71,7 @@ const ImageModal: React.FC<Props> = ({
 								</DialogTitle>
 								<div className="flex justify-center items-center mt-4">
 									<Image
-										src={imgUrl}
+										src={normalizeImageSrc(imgUrl)}
 										loading="lazy"
 										alt="Ürün Fotoğrafı"
 										className="w-full"

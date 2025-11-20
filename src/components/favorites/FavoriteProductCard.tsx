@@ -9,8 +9,7 @@ import { useSession } from "next-auth/react";
 import type React from "react";
 
 import type { IProduct } from "@/models/Product";
-
-// import { Pathnames } from "@/i18n/routing";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 type Props = {
 	product: IProduct;
@@ -50,7 +49,7 @@ const FavoriteProductCard: React.FC<Props> = ({ product }) => {
 		>
 			<Image
 				alt={product.images[0]}
-				src={product.images[0]}
+				src={normalizeImageSrc(product.images[0])}
 				width={400}
 				height={400}
 				className="aspect-square w-full bg-gray-200 object-cover group-hover:opacity-75 sm:aspect-square"

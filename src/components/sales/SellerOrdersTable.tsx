@@ -16,6 +16,7 @@ import { classNames } from "@/utils/classNames";
 import { formatDate } from "@/utils/formatDate";
 import { formatStatus } from "@/utils/formatStatus";
 import httpClient from "@/utils/httpClient";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 import Pagination from "../shared/Pagination";
 import { Button } from "../ui/button";
@@ -529,7 +530,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 															<div className="flex flex-col min-w-24 items-center justify-between">
 																<div className="flex flex-col gap-2 items-start w-full justify-center">
 																	<Image
-																		src={item.imageUrl!}
+																		src={normalizeImageSrc(item.imageUrl!)}
 																		alt={item.sku}
 																		width={100}
 																		height={100}

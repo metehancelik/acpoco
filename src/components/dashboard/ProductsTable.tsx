@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { IProduct } from "@/models/Product";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 interface ProductsTableProps {
 	products: IProduct[];
@@ -119,7 +120,7 @@ const ProductsTable: React.FC<ProductsTableProps> = ({
 												className="relative h-12 w-12 rounded-lg overflow-hidden"
 											>
 												<Image
-													src={image}
+													src={normalizeImageSrc(image)}
 													alt={`${product.title} image ${index + 1}`}
 													fill
 													className="object-cover"
