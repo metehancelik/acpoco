@@ -16,6 +16,7 @@ export async function PUT(request: Request, params: { id: string }) {
 		const body = await request.json();
 		const {
 			title,
+			salutation,
 			addressLine1,
 			addressLine2,
 			city,
@@ -34,6 +35,7 @@ export async function PUT(request: Request, params: { id: string }) {
 			filter,
 			{
 				title,
+				salutation,
 				addressLine1,
 				addressLine2,
 				city,
