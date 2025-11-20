@@ -12,21 +12,21 @@ import UsersTable from "@/components/dashboard/UsersTable";
 import { authOptions } from "@/lib/auth";
 
 export default async function AdminDashboard() {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== "ADMIN") {
-    redirect("/");
-  }
+	const session = await getServerSession(authOptions);
+	if (!session || session.user?.role !== "ADMIN") {
+		redirect("/");
+	}
 
-  return (
-    <div className="p-8 text-text">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-      <p>Mağaza Bağlama</p>
-      <ShopConnect />
-      <br />
-      <GetProducts />
-      <br />
-      <UsersTable />
-      <AllWalletLogs />
-    </div>
-  );
+	return (
+		<div className="p-8 text-text">
+			<h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+			<p>Mağaza Bağlama</p>
+			<ShopConnect />
+			<br />
+			<GetProducts />
+			<br />
+			<UsersTable />
+			<AllWalletLogs />
+		</div>
+	);
 }

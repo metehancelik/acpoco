@@ -7,11 +7,11 @@ import Wallet from "./Wallet";
 import WalletLog from "./WalletLog";
 
 export {
-  User,
-  Store,
-  WalletLog,
-  DepositRequest,
-  BillingAddress,
-  Order,
-  Wallet,
+	User,
+	Store,
+	WalletLog,
+	DepositRequest,
+	BillingAddress,
+	Order,
+	Wallet,
 };

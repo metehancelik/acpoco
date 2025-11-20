@@ -1,50 +1,50 @@
 "use client";
 
 import {
-  ArrowLongLeftIcon,
-  ArrowLongRightIcon,
+	ArrowLongLeftIcon,
+	ArrowLongRightIcon,
 } from "@heroicons/react/20/solid";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface PaginationProps {
-  totalPages: number;
+	totalPages: number;
 }
 
 const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const currentPage = Math.min(
-    Math.max(1, parseInt(searchParams?.get("page") || "1")),
-    totalPages,
-  );
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const currentPage = Math.min(
+		Math.max(1, parseInt(searchParams?.get("page") || "1", 10)),
+		totalPages,
+	);
 
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams?.toString());
-    params.set("page", page.toString());
-    router.push(`${window.location.pathname}?${params.toString()}`);
-  };
+	const handlePageChange = (page: number) => {
+		const params = new URLSearchParams(searchParams?.toString());
+		params.set("page", page.toString());
+		router.push(`${window.location.pathname}?${params.toString()}`);
+	};
 
-  return (
-    <nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-6">
-      <div className="-mt-px flex w-0 flex-1">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 disabled:opacity-50"
-        >
-          <ArrowLongLeftIcon
-            aria-hidden="true"
-            className="mr-3 h-5 w-5 text-gray-400"
-          />
-          Önceki
-        </button>
-      </div>
-      <div className="hidden md:-mt-px md:flex">
-        <p>
-          {" "}
-          {currentPage}/{totalPages}
-        </p>
-        {/* {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+	return (
+		<nav className="flex items-center justify-between border-t border-gray-200 px-4 sm:px-0 mt-6">
+			<div className="-mt-px flex w-0 flex-1">
+				<button
+					onClick={() => handlePageChange(currentPage - 1)}
+					disabled={currentPage === 1}
+					className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 disabled:opacity-50"
+				>
+					<ArrowLongLeftIcon
+						aria-hidden="true"
+						className="mr-3 h-5 w-5 text-gray-400"
+					/>
+					Önceki
+				</button>
+			</div>
+			<div className="hidden md:-mt-px md:flex">
+				<p>
+					{" "}
+					{currentPage}/{totalPages}
+				</p>
+				{/* {Array.from({ length: totalPages }, (_, index) => index + 1).map(
           (page) => (
             <button
               key={page}
@@ -60,22 +60,22 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
             </button>
           ),
         )} */}
-      </div>
-      <div className="-mt-px flex w-0 flex-1 justify-end">
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 disabled:opacity-50"
-        >
-          Sonraki
-          <ArrowLongRightIcon
-            aria-hidden="true"
-            className="ml-3 h-5 w-5 text-gray-400"
-          />
-        </button>
-      </div>
-    </nav>
-  );
+			</div>
+			<div className="-mt-px flex w-0 flex-1 justify-end">
+				<button
+					onClick={() => handlePageChange(currentPage + 1)}
+					disabled={currentPage === totalPages}
+					className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 disabled:opacity-50"
+				>
+					Sonraki
+					<ArrowLongRightIcon
+						aria-hidden="true"
+						className="ml-3 h-5 w-5 text-gray-400"
+					/>
+				</button>
+			</div>
+		</nav>
+	);
 };
 
 export default Pagination;

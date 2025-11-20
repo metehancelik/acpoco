@@ -5,20 +5,20 @@ import { authOptions } from "@/lib/auth";
 import { User } from "@/models/index";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } },
+	request: Request,
+	{ params }: { params: { id: string } },
 ) {
-  const session = await getServerSession(authOptions);
+	const session = await getServerSession(authOptions);
 
-  if (!session || session.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+	if (!session || session.user?.role !== "ADMIN") {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 
-  const { warehousePriceRate } = await request.json();
+	const { warehousePriceRate } = await request.json();
 
-  const user = await User.findByIdAndUpdate(params.id, {
-    warehousePriceRate: warehousePriceRate,
-  });
+	const user = await User.findByIdAndUpdate(params.id, {
+		warehousePriceRate: warehousePriceRate,
+	});
 
-  return NextResponse.json(user);
+	return NextResponse.json(user);
 }
