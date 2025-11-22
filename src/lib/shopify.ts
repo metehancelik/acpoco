@@ -421,9 +421,9 @@ export async function getDefaultLocationId(): Promise<string> {
 	if (cachedDefaultLocationId) {
 		return cachedDefaultLocationId;
 	}
-	const data = await shopifyClient.request<{ locations: { edges: Array<{ node: { id: string } }> } }>(
-		GET_LOCATIONS_QUERY,
-	);
+	const data = await shopifyClient.request<{
+		locations: { edges: Array<{ node: { id: string } }> };
+	}>(GET_LOCATIONS_QUERY);
 	const first = data.locations.edges[0];
 	if (!first) {
 		throw new Error("No Shopify locations found");
@@ -432,29 +432,43 @@ export async function getDefaultLocationId(): Promise<string> {
 	return cachedDefaultLocationId;
 }
 
-export async function getInventoryItemIdBySku(sku: string): Promise<string | null> {
+export async function getInventoryItemIdBySku(
+	sku: string,
+): Promise<string | null> {
 	const query = `sku:${sku}`;
 	type ProductVariants = {
-		productVariants: { edges: Array<{ node: { inventoryItem: { id: string } | null } }> };
+		productVariants: {
+			edges: Array<{ node: { inventoryItem: { id: string } | null } }>;
+		};
 	};
-	const data = await shopifyClient.request<ProductVariants>(GET_VARIANT_BY_SKU_QUERY, { query });
+	const data = await shopifyClient.request<ProductVariants>(
+		GET_VARIANT_BY_SKU_QUERY,
+		{ query },
+	);
 	const edge = data.productVariants.edges[0];
 	return edge?.node.inventoryItem?.id ?? null;
 }
 
-export async function adjustInventoryBySku(sku: string, delta: number): Promise<{ ok: boolean; error?: string }> {
+export async function adjustInventoryBySku(
+	sku: string,
+	delta: number,
+): Promise<{ ok: boolean; error?: string }> {
 	try {
 		const [locationId, inventoryItemId] = await Promise.all([
 			getDefaultLocationId(),
 			getInventoryItemIdBySku(sku),
 		]);
 		if (!inventoryItemId) {
-			return { ok: false, error: "Inventory item not found for SKU " + sku };
+			return { ok: false, error: `Inventory item not found for SKU ${sku}` };
 		}
 		type AdjustInput = {
 			input: {
 				reason?: string;
-				changes: Array<{ inventoryItemId: string; locationId: string; delta: number }>;
+				changes: Array<{
+					inventoryItemId: string;
+					locationId: string;
+					delta: number;
+				}>;
 			};
 		};
 		const variables: AdjustInput = {
@@ -471,8 +485,13 @@ export async function adjustInventoryBySku(sku: string, delta: number): Promise<
 			},
 		};
 		const result = await shopifyClient.request<{
-			inventoryAdjustQuantities: { userErrors: Array<{ field: string[] | null; message: string }> };
-		}>(INVENTORY_ADJUST_MUTATION, variables as unknown as Record<string, unknown>);
+			inventoryAdjustQuantities: {
+				userErrors: Array<{ field: string[] | null; message: string }>;
+			};
+		}>(
+			INVENTORY_ADJUST_MUTATION,
+			variables as unknown as Record<string, unknown>,
+		);
 
 		const errors = result.inventoryAdjustQuantities?.userErrors || [];
 		if (errors.length > 0) {
