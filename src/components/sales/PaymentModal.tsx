@@ -118,13 +118,16 @@ const PaymentModal: React.FC<Props> = ({ order, onClose, open }) => {
 						Mevcut Bakiye: ${wallet?.data?.balance?.toFixed(2)}
 					</p>
 					<p className="text-lg text-sage-blue font-bold">
-						Toplam Fiyat: $
-						{order.items
-							.reduce(
+						Toplam Fiyat:
+						{(
+							order.items.reduce(
 								(acc, item) => acc + (item?.matchedPrice || 0) * item.quantity,
 								0,
-							)
-							.toFixed(2) + (order.warehousePrice?.toFixed(2) || 0)}
+							) + (order.warehousePrice || 0)
+						).toLocaleString("en-US", {
+							style: "currency",
+							currency: "USD",
+						})}
 					</p>
 				</div>
 				<div className="flex justify-end gap-2">

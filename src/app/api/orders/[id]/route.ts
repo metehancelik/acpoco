@@ -74,10 +74,9 @@ export async function POST(
 		for (const item of order.items) {
 			if (item.orderItemId === body.orderItemId) {
 				item.matchId = productVariant._id;
-				const basePrice = productVariant.price + user.productPriceRate;
+				const basePrice = productVariant.price;
 				const discountPercent = user?.discountPercent || 0;
-				const discounted =
-					basePrice * (1 - Math.min(100, Math.max(0, discountPercent)) / 100);
+				const discounted = (basePrice * (100 - discountPercent)) / 100;
 				item.matchedPrice = Math.max(0, Number(discounted.toFixed(2)));
 			}
 		}
