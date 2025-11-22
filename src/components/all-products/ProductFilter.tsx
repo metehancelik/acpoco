@@ -20,7 +20,7 @@ const ProductFilter = () => {
 	};
 	const handleAllProducts = (e: React.SyntheticEvent) => {
 		e.preventDefault();
-		router.push(`?`);
+		router.push(`?category=`);
 	};
 
 	return (

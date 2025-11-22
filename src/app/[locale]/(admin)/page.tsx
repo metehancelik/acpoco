@@ -6,14 +6,17 @@ import type { ICategory, IProduct } from "@/models/Product";
 
 type Props = {
 	params: { locale: string };
-	searchParams: { [key: string]: string | string[] | undefined };
+	searchParams: { [key: string]: string };
 };
 
 const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 	setRequestLocale(locale);
 
 	const page = Number(searchParams.page || 1);
-	const category = (searchParams.category as string) || "";
+	const DEFAULT_CATEGORY = "68fa224d4a779c7bb1e58ce5";
+	const rawCategory = searchParams.category;
+	const hasCategoryParam = Object.hasOwn(searchParams, "category");
+	const category = hasCategoryParam ? rawCategory : DEFAULT_CATEGORY;
 
 	// API base URL
 	const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
