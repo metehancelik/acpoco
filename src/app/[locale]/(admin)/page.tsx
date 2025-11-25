@@ -53,6 +53,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 				throw new Error(result.error || "Failed to fetch products");
 			}
 
+			console.log(result.data);
 			return result.data;
 		} catch (error) {
 			console.error("Error fetching products:", error);
@@ -82,6 +83,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 			}
 
 			const categories = await response.json();
+			console.log("categories", categories);
 
 			return categories;
 		} catch (error) {

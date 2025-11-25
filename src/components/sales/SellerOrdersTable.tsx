@@ -390,14 +390,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 												<p>Durum</p>
 											</div>
 										</th>
-										{session.data?.user?.role === "ADMIN" && (
-											<th
-												scope="col"
-												className="sticky top-0 z-10 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 bg-gray-50"
-											>
-												Tesis
-											</th>
-										)}
+
 										<th
 											scope="col"
 											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
@@ -409,7 +402,13 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 											scope="col"
 											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
 										>
-											Tarih
+											Sipariş Tarihi
+										</th>
+										<th
+											scope="col"
+											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
+										>
+											Son Teslim Tarihi
 										</th>
 
 										<th
@@ -502,13 +501,12 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 											</td>
 											<td className="px-3 py-1 text-xs ">
 												<div className="flex flex-col min-w-24">
-													<p>
-														Son Teslim Tarihi: <br />{" "}
-														{formatDate(order.shipByDate)}
-													</p>
-													<p>
-														Sipariş Tarihi: <br /> {formatDate(order.orderDate)}
-													</p>
+													<p>{formatDate(order.orderDate)}</p>
+												</div>
+											</td>
+											<td className="px-3 py-1 text-xs ">
+												<div className="flex flex-col min-w-24">
+													<p>{formatDate(order.shipByDate)}</p>
 												</div>
 											</td>
 											<td className="whitespace-nowrap px-3 py-1 text-xs relative">
@@ -555,7 +553,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																	</div>
 																)}
 															</div>
-															<div>
+															<div className="max-w-40 overflow-x-auto">
 																{
 																	<div
 																		key={item.orderItemId}
@@ -853,15 +851,13 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 															className="py-1 px-2 rounded-md border border-secondary"
 														>
 															<option value="">Ara depo seçiniz</option>
-															<option value="shipEntegra">ShipEntegra</option>
+															<option value="shipEntegra">Almanya</option>
 															<option value="kullanıcı">
 																Satıcı(Bana gelsin)
 															</option>
 														</select>
 													)}
-													<p className="text-xs">
-														Ara Depo Ücreti: ${order.warehousePrice}
-													</p>
+
 													{order.warehouseTrackingNumber && (
 														<p className="text-xs">
 															Takip No: {order.warehouseTrackingNumber}

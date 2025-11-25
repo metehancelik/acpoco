@@ -22,7 +22,7 @@ export default function AdminSalesPage() {
 			return res.data;
 		},
 	});
-
+	console.log(data);
 	if (error) {
 		AlertNotification("Error fetching orders", "error");
 	}
