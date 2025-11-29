@@ -117,8 +117,7 @@ export async function GET() {
 		const batchSize = 50; // Shopify'ın izin verdiği maksimum
 
 		// Tüm ürünleri batch batch çek
-		// eslint-disable-next-line no-console
-		console.log("Shopify'dan ürünler çekiliyor...");
+		console.info("Shopify'dan ürünler çekiliyor...");
 		while (hasNextPage) {
 			const variables: {
 				first: number;
@@ -144,12 +143,10 @@ export async function GET() {
 			hasNextPage = response.products.pageInfo.hasNextPage;
 			afterCursor = response.products.pageInfo.endCursor;
 
-			// eslint-disable-next-line no-console
-			console.log(`${allProducts.length} ürün çekildi...`);
+			console.info(`${allProducts.length} ürün çekildi...`);
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(
+		console.info(
 			`Toplam ${allProducts.length} ürün çekildi. Database'e kaydediliyor...`,
 		);
 
