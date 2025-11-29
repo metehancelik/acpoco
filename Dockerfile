@@ -15,9 +15,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV MONGO_REMOTE="mongodb://placeholder:27017/placeholder"
-ENV SHOPIFY_STORE_DOMAIN="placeholder.myshopify.com"
-ENV SHOPIFY_ADMIN_ACCESS_TOKEN="placeholder_token"
 
 RUN npm run build
 
