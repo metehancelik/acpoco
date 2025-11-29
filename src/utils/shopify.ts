@@ -239,8 +239,7 @@ export async function testShopifyConnection(): Promise<boolean> {
     `;
 
 		const result = await shopifyClient.request(testQuery);
-		// eslint-disable-next-line no-console
-		console.log("Shopify connection test successful:", result);
+		console.info("Shopify connection test successful:", result);
 
 		return true;
 	} catch (error) {
@@ -256,25 +255,21 @@ export async function fetchProductById(
 	id: string,
 ): Promise<{ product: ShopifyProduct }> {
 	try {
-		// eslint-disable-next-line no-console
-		console.log("Fetching product by ID:", id);
+		console.info("Fetching product by ID:", id);
 
 		const data = await shopifyClient.request<{ product: ShopifyProduct }>(
 			GET_PRODUCT_BY_ID_QUERY,
 			{ id },
 		);
 
-		// eslint-disable-next-line no-console
-		console.log(
+		console.info(
 			"Product fetch successful:",
 			data.product ? "Found" : "Not found",
 		);
 
 		return data;
 	} catch (error) {
-		// eslint-disable-next-line no-console
 		console.error("Error fetching product by ID from Shopify:", error);
-		// eslint-disable-next-line no-console
 		console.error("Error details:", JSON.stringify(error, null, 2));
 		throw new Error("Failed to fetch product");
 	}
@@ -285,8 +280,7 @@ export async function fetchProductByHandle(
 	handle: string,
 ): Promise<{ product: ShopifyProduct | null }> {
 	try {
-		// eslint-disable-next-line no-console
-		console.log("Fetching product by handle:", handle);
+		console.info("Fetching product by handle:", handle);
 		const query = `handle:${handle}`;
 
 		const data = await shopifyClient.request<{
@@ -294,8 +288,7 @@ export async function fetchProductByHandle(
 		}>(GET_PRODUCTS_BY_HANDLE_QUERY, { query, first: 1 });
 
 		const product = data.products.edges[0]?.node || null;
-		// eslint-disable-next-line no-console
-		console.log(
+		console.info(
 			"Product fetch by handle successful:",
 			product ? "Found" : "Not found",
 		);
