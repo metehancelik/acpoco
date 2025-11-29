@@ -21,7 +21,13 @@
 				"noNonNullAssertion": "off"
 			},
 			"suspicious": {
-				"noArrayIndexKey": "off"
+				"noArrayIndexKey": "off",
+				"noConsole": {
+					"options": {
+						"allow": ["error", "warn", "info", "debug"]
+					},
+					"level": "error"
+				}
 			},
 			"a11y": {
 				"useButtonType": "off",
