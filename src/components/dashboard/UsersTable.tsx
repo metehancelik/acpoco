@@ -1,10 +1,13 @@
 "use client";
 
-import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
+import httpClient from "@/utils/httpClient";
+
+import Loading from "../shared/Loading";
 import Pagination from "../shared/Pagination";
 
 interface IUser {
@@ -19,21 +22,60 @@ interface IUser {
 }
 
 const UsersTable = () => {
-	const [users, setUsers] = useState<IUser[] | null>([]);
 	const searchParams = useSearchParams();
-	const getUsers = useCallback(async () => {
-		try {
-			const res = await axios.get(
-				`/api/users?page=${searchParams?.get("page") || 1}`,
+	const queryClient = useQueryClient();
+	const page = searchParams?.get("page") || "1";
+
+	const {
+		data: users,
+		isLoading,
+		error,
+	} = useQuery<IUser[]>({
+		queryKey: ["users", page],
+		queryFn: async () => {
+			const response = await httpClient.get(`users?page=${page}`);
+			return response.data;
+		},
+	});
+
+	const updateDiscountMutation = useMutation({
+		mutationFn: async ({
+			userId,
+			discountPercent,
+		}: {
+			userId: string;
+			discountPercent: number;
+		}) => {
+			const response = await httpClient.put(`users/${userId}/discount`, {
+				discountPercent,
+			});
+			return response.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["users", page] });
+			toast.success("İndirim oranı güncellendi");
+		},
+		onError: (error: any) => {
+			toast.error(
+				error?.response?.data?.message ||
+					"İndirim güncellenirken bir hata oluştu",
 			);
-			setUsers(res.data);
-		} catch (error) {
-			console.error("Error fetching users:", error);
-		}
-	}, [searchParams]);
-	useEffect(() => {
-		getUsers();
-	}, [getUsers]);
+		},
+	});
+
+	const handleDiscountUpdate = async (userId: string, value: number) => {
+		const normalized = Math.max(0, Math.min(100, value));
+		updateDiscountMutation.mutate({ userId, discountPercent: normalized });
+	};
+
+	if (isLoading) {
+		return <Loading />;
+	}
+
+	if (error) {
+		toast.error("Kullanıcılar yüklenirken bir hata oluştu");
+		return null;
+	}
 
 	return (
 		<div className="rounded-md bg-gray-50 p-5 text-sm w-full">
@@ -116,6 +158,7 @@ const UsersTable = () => {
 													min={0}
 													max={100}
 													className="w-20 border rounded px-2 py-1 text-center"
+													disabled={updateDiscountMutation.isPending}
 													onBlur={async (e) => {
 														const value = Number(e.target.value || 0);
 														const normalized = Math.max(
@@ -123,13 +166,7 @@ const UsersTable = () => {
 															Math.min(100, value),
 														);
 														if (normalized !== (user.discountPercent || 0)) {
-															await axios.put(
-																`/api/users/${user._id}/discount`,
-																{
-																	discountPercent: normalized,
-																},
-															);
-															getUsers();
+															handleDiscountUpdate(user._id, normalized);
 														}
 													}}
 												/>
