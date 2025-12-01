@@ -62,6 +62,7 @@ export async function POST(
 
 		const productVariant = await ProductVariantModel.findOne({
 			$and: attributeConditions,
+			productId: body.productId,
 		});
 
 		if (!productVariant) {

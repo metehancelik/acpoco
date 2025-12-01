@@ -154,6 +154,7 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 											setSelectedAttributes((prev) => ({
 												...prev,
 												[attribute.name]: value,
+												productId: selectedProduct._id,
 											}));
 										}}
 									>
