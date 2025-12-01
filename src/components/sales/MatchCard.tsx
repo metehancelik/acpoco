@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -40,6 +39,7 @@ interface MatchCardProps {
 
 export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 	const session = useSession();
+	const [open, setOpen] = useState(false);
 	const [inputValue, setInputValue] = useState<string>("");
 	const [debouncedQuery, setDebouncedQuery] = useState<string>("");
 	const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
@@ -97,13 +97,36 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 		},
 	});
 
+	const resetDialog = () => {
+		setInputValue("");
+		setDebouncedQuery("");
+		setSelectedProduct(null);
+		setSelectedAttributes({});
+	};
+
+	const handleOpenChange = (isOpen: boolean) => {
+		setOpen(isOpen);
+		if (!isOpen) {
+			resetDialog();
+		}
+	};
+
+	const areAllAttributesSelected = () => {
+		if (!selectedProduct) return false;
+		return selectedProduct.attributes.every(
+			(attribute) => selectedAttributes[attribute.name],
+		);
+	};
+
 	const handleSave = () => {
 		if (!selectedProduct) return;
 		updateMatchMutation.mutate();
+		setOpen(false);
+		resetDialog();
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				{!orderItem.matchId &&
 					session.data?.user?.role === "SELLER" &&
@@ -125,6 +148,7 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 						<Input
 							id="query"
 							placeholder="Ürün arama"
+							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 						/>
 					</div>
@@ -175,15 +199,17 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 					)}
 				</div>
 				<DialogFooter>
-					<DialogClose asChild>
-						<Button
-							type="submit"
-							onClick={handleSave}
-							disabled={updateMatchMutation.isPending || !selectedProduct}
-						>
-							{updateMatchMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
-						</Button>
-					</DialogClose>
+					<Button
+						type="submit"
+						onClick={handleSave}
+						disabled={
+							updateMatchMutation.isPending ||
+							!selectedProduct ||
+							!areAllAttributesSelected()
+						}
+					>
+						{updateMatchMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
