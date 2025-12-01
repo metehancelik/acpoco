@@ -2,12 +2,16 @@ import { setRequestLocale } from "next-intl/server";
 
 import ProductList from "@/components/all-products/ProductList";
 import Pagination from "@/components/shared/Pagination";
-import type { ICategory, IProduct } from "@/models/Product";
+import dbConnect from "@/lib/db";
+import { CategoryModel } from "@/models/Category";
+import Product, { type ICategory, type IProduct } from "@/models/Product";
 
 type Props = {
 	params: { locale: string };
 	searchParams: { [key: string]: string };
 };
+
+const ITEMS_PER_PAGE = 24;
 
 const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 	setRequestLocale(locale);
@@ -17,9 +21,6 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 	const rawCategory = searchParams.category;
 	const hasCategoryParam = Object.hasOwn(searchParams, "category");
 	const category = hasCategoryParam ? rawCategory : DEFAULT_CATEGORY;
-
-	// API base URL
-	const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 	const getProducts = async (): Promise<{
 		products: IProduct[];
@@ -33,27 +34,35 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 		};
 	}> => {
 		try {
-			const params = new URLSearchParams();
-			params.set("page", page.toString());
+			await dbConnect();
+
+			const filter: { category?: string } = {};
 			if (category) {
-				params.set("category", category);
+				filter.category = category;
 			}
 
-			const response = await fetch(`${baseUrl}/catalog?${params}`, {
-				cache: "no-store",
-			});
+			const totalItems = await Product.countDocuments(filter);
+			const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+			const skip = (page - 1) * ITEMS_PER_PAGE;
 
-			if (!response.ok) {
-				throw new Error("Failed to fetch products");
-			}
+			const products = await Product.find(filter)
+				.populate("category")
+				.sort({ createdAt: -1 })
+				.skip(skip)
+				.limit(ITEMS_PER_PAGE)
+				.lean();
 
-			const result = await response.json();
-
-			if (!result.success) {
-				throw new Error(result.error || "Failed to fetch products");
-			}
-
-			return result.data;
+			return {
+				products: JSON.parse(JSON.stringify(products)),
+				pagination: {
+					currentPage: page,
+					totalPages,
+					totalItems,
+					itemsPerPage: ITEMS_PER_PAGE,
+					hasNextPage: page < totalPages,
+					hasPreviousPage: page > 1,
+				},
+			};
 		} catch (error) {
 			console.error("Error fetching products:", error);
 
@@ -63,7 +72,7 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 					currentPage: 1,
 					totalPages: 1,
 					totalItems: 0,
-					itemsPerPage: 24,
+					itemsPerPage: ITEMS_PER_PAGE,
 					hasNextPage: false,
 					hasPreviousPage: false,
 				},
@@ -73,17 +82,10 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 
 	const getCategories = async (): Promise<ICategory[]> => {
 		try {
-			const response = await fetch(`${baseUrl}/categories`, {
-				cache: "no-store",
-			});
+			await dbConnect();
+			const categories = await CategoryModel.find({}).sort({ name: 1 }).lean();
 
-			if (!response.ok) {
-				throw new Error("Failed to fetch categories");
-			}
-
-			const categories = await response.json();
-
-			return categories;
+			return JSON.parse(JSON.stringify(categories));
 		} catch (error) {
 			console.error("Error fetching categories:", error);
 
