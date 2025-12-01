@@ -49,20 +49,20 @@ export async function POST(
 		}
 
 		// Convert the attributes object to array of conditions for matching
-		const attributeConditions = Object.entries(body.selectedAttributes).map(
-			([name, value]) => ({
+		const attributeConditions = Object.entries(body.selectedAttributes)
+			.filter(([name]) => name !== "productId")
+			.map(([name, value]) => ({
 				attributes: {
 					$elemMatch: {
 						name,
 						value,
 					},
 				},
-			}),
-		);
+			}));
 
 		const productVariant = await ProductVariantModel.findOne({
+			productId: body.selectedAttributes.productId,
 			$and: attributeConditions,
-			productId: body.productId,
 		});
 
 		if (!productVariant) {
