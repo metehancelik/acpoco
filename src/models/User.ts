@@ -6,7 +6,7 @@ const UserSchema = new mongoose.Schema({
 	surname: { type: String, required: true },
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
-	role: { type: String, enum: ["USER", "SELLER", "ADMIN"], default: "USER" },
+	role: { type: String, enum: ["SELLER", "ADMIN"], default: "SELLER" },
 	stores: [{ type: mongoose.Schema.Types.ObjectId, ref: "Store" }],
 	billingAddress: {
 		type: mongoose.Schema.Types.ObjectId,

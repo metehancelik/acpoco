@@ -11,7 +11,7 @@
  *           type: string
  *         role:
  *           type: string
- *           enum: [USER, SELLER, ADMIN]
+ *           enum: [SELLER, ADMIN]
  *     Order:
  *       type: object
  *       properties:
