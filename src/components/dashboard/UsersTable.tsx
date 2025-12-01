@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
@@ -55,9 +56,9 @@ const UsersTable = () => {
 			queryClient.invalidateQueries({ queryKey: ["users", page] });
 			toast.success("İndirim oranı güncellendi");
 		},
-		onError: (error: any) => {
+		onError: (error: unknown) => {
 			toast.error(
-				error?.response?.data?.message ||
+				(error as AxiosError<{ message: string }>)?.response?.data?.message ||
 					"İndirim güncellenirken bir hata oluştu",
 			);
 		},

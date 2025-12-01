@@ -46,7 +46,7 @@ export async function GET(
 		const { id } = params;
 
 		// Ürünü bul ve category bilgisini populate et
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		// biome-ignore lint/suspicious/noExplicitAny: fix later
 		const product: any = await Product.findById(id).populate("category").lean();
 
 		if (!product) {
@@ -60,7 +60,7 @@ export async function GET(
 		}
 
 		// Ürüne ait variant'ları çek
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		// biome-ignore lint/suspicious/noExplicitAny: fix later
 		const variants: any[] = await ProductVariantModel.find({
 			productId: product._id,
 		}).lean();
