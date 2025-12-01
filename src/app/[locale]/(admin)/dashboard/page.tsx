@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth/next";
 
 import AllWalletLogs from "@/components/dashboard/AllWalletLogs";
 import GetProducts from "@/components/dashboard/GetProducts";
-import ProcessAmazonCustomizations from "@/components/dashboard/ProcessAmazonCustomizations";
 import ShopConnect from "@/components/dashboard/ShopConnect";
 import UsersTable from "@/components/dashboard/UsersTable";
 // import SyncOrders from "@/components/SyncOrders";
@@ -25,8 +24,6 @@ export default async function AdminDashboard() {
 			<ShopConnect />
 			<br />
 			<GetProducts />
-			<br />
-			<ProcessAmazonCustomizations />
 			<br />
 			<UsersTable />
 			<AllWalletLogs />
