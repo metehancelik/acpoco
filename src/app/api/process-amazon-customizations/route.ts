@@ -1,22 +1,31 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 
-import { processAllAmazonCustomizations } from "@/lib/shipstation/process-all-amazon-customizations";
+import { authOptions } from "@/lib/auth";
+import { processAllAmazonCustomizations } from "@/lib/customization";
 
 export async function POST() {
 	try {
+		const session = await getServerSession(authOptions);
+
+		if (!session || session.user.role !== "ADMIN") {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
 		const result = await processAllAmazonCustomizations();
 
 		return NextResponse.json({
 			success: true,
-			message: "Amazon customization processing completed",
+			message: "Amazon customizations processed successfully",
 			result,
 		});
 	} catch (error) {
-		console.error("Error in process Amazon customizations API:", error);
+		console.error("Error processing Amazon customizations:", error);
 
 		return NextResponse.json(
 			{
-				error: "Processing failed",
+				success: false,
+				error: "Failed to process Amazon customizations",
 				details: error instanceof Error ? error.message : "Unknown error",
 			},
 			{ status: 500 },

@@ -580,35 +580,35 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																			key={item.orderItemId}
 																			className="flex flex-col items-start justify-center h-full"
 																		>
-																			{item.options.map((option) => {
-																				return (
-																					<div
-																						className="flex items-center space-x-1"
-																						key={`$-${option.name}`}
-																					>
-																						<p className="text-[#1F2937] text-xs">
-																							{option.name}:
-																						</p>
-																						<p className="text-xs">
-																							{option.value}
-																						</p>
-																					</div>
-																				);
-																			})}
+																			{item.amazonCustomizationOptions &&
+																			item.amazonCustomizationOptions.length >
+																				0 ? (
+																				<AmazonCustomizationDisplay
+																					options={
+																						item.amazonCustomizationOptions
+																					}
+																					isVisible={true}
+																				/>
+																			) : (
+																				item.options.map((option) => {
+																					return (
+																						<div
+																							className="flex items-center space-x-1"
+																							key={`$-${option.name}`}
+																						>
+																							<p className="text-[#1F2937] text-xs">
+																								{option.name}:
+																							</p>
+																							<p className="text-xs">
+																								{option.value}
+																							</p>
+																						</div>
+																					);
+																				})
+																			)}
 																			<p className="text-xs font-bold">
 																				Adet:{item.quantity}
 																			</p>
-																			{/* Amazon Özelleştirme Verileri */}
-																			<AmazonCustomizationDisplay
-																				options={
-																					item.amazonCustomizationOptions || []
-																				}
-																				isVisible={
-																					!!item.amazonCustomizationOptions &&
-																					item.amazonCustomizationOptions
-																						.length > 0
-																				}
-																			/>
 																		</div>
 																	}
 																</div>

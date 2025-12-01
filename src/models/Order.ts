@@ -41,6 +41,7 @@ const OrderItemSchema = new mongoose.Schema(
 				label: String,
 				option: String,
 				priceDelta: Number,
+				unit: String,
 			},
 		],
 		productId: Number,
