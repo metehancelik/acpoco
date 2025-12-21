@@ -32,3 +32,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+## Coolify cron: ShipStation order sync (hourly)
+
+This app includes a secret-protected cron endpoint that pulls ShipStation orders modified in the last N hours and upserts them into MongoDB:
+
+- **Endpoint**: `GET /api/cron/shipstation-sync-orders?hours=2`
+- **Auth**: `x-cron-secret: <CRON_SECRET>` header (preferred) or `?secret=<CRON_SECRET>` query param
+- **Required env vars**:
+  - `CRON_SECRET`
+  - `SHIPSTATION_API_KEY`
+  - `SHIPSTATION_API_SECRET`
+  - `MONGODB_URI`
+
+### Coolify Scheduled Task example
+
+Create a scheduled task that runs hourly with a command like:
+
+```bash
+curl -fsS -H "x-cron-secret: $CRON_SECRET" "https://YOUR_DOMAIN/api/cron/shipstation-sync-orders?hours=2"
+```

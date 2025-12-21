@@ -14,6 +14,26 @@ import {
 } from "./amazon-customization";
 import type { ShipStationOrder } from "./types";
 
+type ShipStationAuth = {
+	apiKey: string;
+	apiSecret: string;
+};
+
+function getShipStationAuth(): ShipStationAuth {
+	const apiKey = process.env.SHIPSTATION_API_KEY;
+	const apiSecret = process.env.SHIPSTATION_API_SECRET;
+
+	if (!apiKey || !apiSecret) {
+		throw new Error("ShipStation API key or secret is not configured");
+	}
+
+	return { apiKey, apiSecret };
+}
+
+function getShipStationAuthHeader(auth: ShipStationAuth): string {
+	return `Basic ${Buffer.from(`${auth.apiKey}:${auth.apiSecret}`).toString("base64")}`;
+}
+
 export async function fetchShipStationOrders(userId?: string): Promise<{
 	orders: ShipStationOrder[];
 	products: Pick<IProduct, "parentSku" | "_id">[];
@@ -21,12 +41,7 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 	try {
 		await dbConnect();
 
-		const apiKey = process.env.SHIPSTATION_API_KEY;
-		const apiSecret = process.env.SHIPSTATION_API_SECRET;
-
-		if (!apiKey || !apiSecret) {
-			throw new Error("ShipStation API key or secret is not configured");
-		}
+		const auth = getShipStationAuth();
 
 		const stores = await Store.find({ userId });
 		const storeIds = stores.map((store) => store.storeId);
@@ -41,7 +56,7 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 				{
 					method: "GET",
 					headers: {
-						Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+						Authorization: getShipStationAuthHeader(auth),
 						"Content-Type": "application/json",
 					},
 				},
@@ -55,7 +70,7 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 					{
 						method: "GET",
 						headers: {
-							Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+							Authorization: getShipStationAuthHeader(auth),
 							"Content-Type": "application/json",
 						},
 					},
@@ -282,16 +297,11 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 
 export async function getStores(): Promise<IStore[]> {
 	try {
-		const apiKey = process.env.SHIPSTATION_API_KEY;
-		const apiSecret = process.env.SHIPSTATION_API_SECRET;
-
-		if (!apiKey || !apiSecret) {
-			throw new Error("ShipStation API key or secret is not configured");
-		}
+		const auth = getShipStationAuth();
 
 		const response = await axios("https://ssapi.shipstation.com/stores", {
 			headers: {
-				Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+				Authorization: getShipStationAuthHeader(auth),
 				"Content-Type": "application/json",
 			},
 		});
@@ -312,19 +322,14 @@ export async function getStores(): Promise<IStore[]> {
 export async function fetchNewOrders(url: string): Promise<void> {
 	await dbConnect();
 
-	const apiKey = process.env.SHIPSTATION_API_KEY;
-	const apiSecret = process.env.SHIPSTATION_API_SECRET;
-
-	if (!apiKey || !apiSecret) {
-		throw new Error("ShipStation API key or secret is not configured");
-	}
+	const auth = getShipStationAuth();
 
 	// const products = await Product.find({}, { _id: 1, sku: 1 });
 
 	try {
 		const response = await axios(url, {
 			headers: {
-				Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+				Authorization: getShipStationAuthHeader(auth),
 				"Content-Type": "application/json",
 			},
 		});
@@ -335,6 +340,55 @@ export async function fetchNewOrders(url: string): Promise<void> {
 		console.error("Error fetching new orders:", error);
 		throw error;
 	}
+}
+
+export async function fetchShipStationOrdersModifiedSince(options: {
+	userId?: string;
+	modifiedSince: Date;
+}): Promise<{ orders: ShipStationOrder[]; storeIds: number[] }> {
+	await dbConnect();
+
+	const auth = getShipStationAuth();
+
+	const stores = await Store.find({ userId: options.userId });
+	const storeIds = stores.map((store) => store.storeId);
+	const orders: ShipStationOrder[] = [];
+
+	const modifyDateStart = encodeURIComponent(
+		options.modifiedSince.toISOString(),
+	);
+
+	for (const storeId of storeIds) {
+		const baseUrl = `https://ssapi.shipstation.com/orders?storeId=${storeId}&modifyDateStart=${modifyDateStart}`;
+		const first = await axios(baseUrl, {
+			method: "GET",
+			headers: {
+				Authorization: getShipStationAuthHeader(auth),
+				"Content-Type": "application/json",
+			},
+		});
+
+		const firstData = first.data as {
+			orders: ShipStationOrder[];
+			pages?: number;
+		};
+		orders.push(...(firstData.orders || []));
+
+		const pages = Number(firstData.pages || 1);
+		for (let page = 2; page <= pages; page++) {
+			const resp = await axios(`${baseUrl}&page=${page}`, {
+				method: "GET",
+				headers: {
+					Authorization: getShipStationAuthHeader(auth),
+					"Content-Type": "application/json",
+				},
+			});
+			const data = resp.data as { orders: ShipStationOrder[] };
+			orders.push(...(data.orders || []));
+		}
+	}
+
+	return { orders, storeIds };
 }
 
 //TODO cron job to refresh store https://ssapi.shipstation.com/stores/refreshstore?storeId=storeId
