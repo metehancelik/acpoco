@@ -90,6 +90,12 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 	try {
 		await dbConnect();
+
+		const existing = await Order.findOne({ orderId: shipStationOrder.orderId });
+		if (existing) {
+			return existing;
+		}
+
 		const warehouse = await Warehouse.findOne({
 			country: shipStationOrder.shipTo.country,
 		});
@@ -100,7 +106,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 		let warehousePrice = 0;
 
 		if (warehouse) {
-			warehousePrice = warehouse.price + user.warehousePriceRate;
+			warehousePrice = warehouse.price + (user?.warehousePriceRate ?? 0);
 		}
 
 		const orderData: ShipStationOrder = {
@@ -284,11 +290,17 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			status: "waitingMatch",
 		};
 
-		return await Order.findOneAndUpdate(
-			{ orderId: shipStationOrder.orderId },
-			orderData,
-			{ upsert: true, new: true },
-		);
+		try {
+			const created = new Order(orderData);
+			return await created.save();
+		} catch (error) {
+			// If another sync created it concurrently, just return the existing record.
+			const concurrent = await Order.findOne({
+				orderId: shipStationOrder.orderId,
+			});
+			if (concurrent) return concurrent;
+			throw error;
+		}
 	} catch (error) {
 		console.error("Error syncing order to database:", error);
 		throw error;
