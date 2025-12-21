@@ -1,9 +1,45 @@
 import axios from "axios";
 import JSZip from "jszip";
 
-export interface AmazonCustomizationData {
+export type AmazonCustomizationData = {
 	customizationData: Record<string, unknown>;
 	rawJson: string;
+};
+
+type AmazonOption = { name?: string; value?: string } | null | undefined;
+
+function normalizeCustomizationUrl(raw: string): string {
+	const trimmed = raw.trim();
+	if (!trimmed) return trimmed;
+
+	// If the value contains a query param like CustomizedURL=... extract and decode it.
+	try {
+		const url = new URL(trimmed);
+		const candidates = [
+			url.searchParams.get("CustomizedURL"),
+			url.searchParams.get("customizedUrl"),
+			url.searchParams.get("customizedURL"),
+			url.searchParams.get("customizationUrl"),
+			url.searchParams.get("customizationURL"),
+		].filter(Boolean) as string[];
+		if (candidates.length) return decodeURIComponent(candidates[0]);
+	} catch {
+		// ignore
+	}
+
+	// Fallback: string contains CustomizedURL=... but is not a valid URL
+	const match = trimmed.match(
+		/(?:CustomizedURL|customizedUrl|customizationUrl)=([^&\s]+)/,
+	);
+	if (match?.[1]) {
+		try {
+			return decodeURIComponent(match[1]);
+		} catch {
+			return match[1];
+		}
+	}
+
+	return trimmed;
 }
 
 export async function fetchAmazonCustomizationData(
@@ -57,15 +93,19 @@ export async function fetchAmazonCustomizationData(
 }
 
 export function isAmazonCustomizationUrl(url: string): boolean {
-	return url.includes("amazon.com") && url.includes("CustomizedURL");
+	const u = url.toLowerCase();
+	return u.includes("amazon.") && u.includes("customized");
 }
 
 export function extractCustomizationUrlFromOptions(
 	options: Array<{ name: string; value: string }>,
 ): string | null {
-	const customizationOption = options.find(
-		(option) => option.name === "CustomizedURL",
-	);
+	const found = (options as AmazonOption[]).find((option) => {
+		const name = option?.name?.toLowerCase();
+		return Boolean(name?.includes("customized"));
+	});
 
-	return customizationOption?.value || null;
+	const raw = found?.value;
+	if (!raw) return null;
+	return normalizeCustomizationUrl(raw);
 }

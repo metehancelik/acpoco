@@ -38,7 +38,7 @@ export async function processAmazonCustomizationsForOrderIds(
 		orderId: { $in: orderIds },
 		"items.options": {
 			$elemMatch: {
-				name: "CustomizedURL",
+				name: { $regex: "customized", $options: "i" },
 			},
 		},
 	});
