@@ -350,7 +350,9 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 
 	const auth = getShipStationAuth();
 
-	const stores = await Store.find({ userId: options.userId });
+	const stores = await Store.find(
+		options.userId ? { userId: options.userId } : {},
+	);
 	const storeIds = stores.map((store) => store.storeId);
 	const orders: ShipStationOrder[] = [];
 

@@ -105,6 +105,7 @@ export async function GET(req: NextRequest) {
 			success: true,
 			hours,
 			modifiedSince: modifiedSince.toISOString(),
+			storeIds,
 			summary,
 			results,
 		});
