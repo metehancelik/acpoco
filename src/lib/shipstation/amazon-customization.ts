@@ -6,6 +6,13 @@ export type AmazonCustomizationData = {
 	rawJson: string;
 };
 
+export type AmazonCustomizationOption = {
+	label: string;
+	option: string;
+	priceDelta: number;
+	unit?: string;
+};
+
 type AmazonOption = { name?: string; value?: string } | null | undefined;
 
 function normalizeCustomizationUrl(raw: string): string {
@@ -108,4 +115,95 @@ export function extractCustomizationUrlFromOptions(
 	const raw = found?.value;
 	if (!raw) return null;
 	return normalizeCustomizationUrl(raw);
+}
+
+function extractAmazonCustomizationOptionsFromData(
+	customizationData: Record<string, unknown>,
+): AmazonCustomizationOption[] {
+	const options: AmazonCustomizationOption[] = [];
+
+	const v3 = customizationData["version3.0"] as
+		| {
+				customizationInfo?: {
+					surfaces?: Array<{
+						areas?: Array<{
+							label?: string;
+							name?: string;
+							optionValue?: string;
+							text?: string;
+							unit?: string;
+							priceDelta?: number | { value?: number };
+						}>;
+					}>;
+				};
+		  }
+		| undefined;
+
+	const surfaces = v3?.customizationInfo?.surfaces;
+	if (!surfaces) return options;
+
+	for (const surface of surfaces) {
+		if (!surface.areas) continue;
+		for (const area of surface.areas) {
+			const priceDelta =
+				typeof area.priceDelta === "number"
+					? area.priceDelta
+					: (area.priceDelta?.value ?? 0);
+			options.push({
+				label: area.label || area.name || "",
+				option: area.optionValue || area.text || "",
+				priceDelta,
+				unit: area.unit || undefined,
+			});
+		}
+	}
+
+	return options;
+}
+
+export async function getAmazonCustomizationFromOptions(
+	options: Array<{ name: string; value: string }>,
+): Promise<{
+	amazonCustomizationData: Record<string, unknown> | null;
+	amazonCustomizationOptions?: AmazonCustomizationOption[];
+	customizationUrl: string | null;
+}> {
+	const customizationUrl = extractCustomizationUrlFromOptions(options);
+	if (!customizationUrl) {
+		return {
+			amazonCustomizationData: null,
+			amazonCustomizationOptions: undefined,
+			customizationUrl: null,
+		};
+	}
+
+	if (!/^https?:\/\//i.test(customizationUrl)) {
+		return {
+			amazonCustomizationData: null,
+			amazonCustomizationOptions: undefined,
+			customizationUrl,
+		};
+	}
+
+	// Do not gate on hostname; some accounts return signed URLs that don't contain "amazon.com".
+	const customization = await fetchAmazonCustomizationData(customizationUrl);
+	const customizationData = customization?.customizationData;
+	if (!customizationData) {
+		return {
+			amazonCustomizationData: null,
+			amazonCustomizationOptions: undefined,
+			customizationUrl,
+		};
+	}
+
+	const amazonCustomizationOptions =
+		extractAmazonCustomizationOptionsFromData(customizationData);
+
+	return {
+		amazonCustomizationData: customizationData,
+		amazonCustomizationOptions: amazonCustomizationOptions.length
+			? amazonCustomizationOptions
+			: undefined,
+		customizationUrl,
+	};
 }

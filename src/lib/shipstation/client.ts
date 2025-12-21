@@ -7,11 +7,7 @@ import Store, { type IStore } from "@/models/Store";
 import User from "@/models/User";
 import Warehouse from "@/models/Warehouse";
 
-import {
-	extractCustomizationUrlFromOptions,
-	fetchAmazonCustomizationData,
-	isAmazonCustomizationUrl,
-} from "./amazon-customization";
+import { getAmazonCustomizationFromOptions } from "./amazon-customization";
 import type { ShipStationOrder } from "./types";
 
 type ShipStationAuth = {
@@ -136,70 +132,8 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 				shipStationOrder.items
 					.filter((item) => item.adjustment === false)
 					.map(async (item) => {
-						// Amazon özelleştirme verilerini kontrol et
-						const customizationUrl = extractCustomizationUrlFromOptions(
-							item.options,
-						);
-						let amazonCustomizationData = null;
-						const amazonCustomizationOptions: Array<{
-							label: string;
-							option: string;
-							priceDelta: number;
-							unit?: string;
-						}> = [];
-
-						if (
-							customizationUrl &&
-							isAmazonCustomizationUrl(customizationUrl)
-						) {
-							try {
-								amazonCustomizationData =
-									await fetchAmazonCustomizationData(customizationUrl);
-
-								if (amazonCustomizationData?.customizationData) {
-									// Version 3.0'dan özelleştirme seçeneklerini çıkar
-									const version3Data = amazonCustomizationData
-										.customizationData["version3.0"] as
-										| {
-												customizationInfo?: {
-													surfaces?: Array<{
-														areas?: Array<{
-															label?: string;
-															name?: string;
-															optionValue?: string;
-															text?: string;
-															unit?: string;
-															priceDelta?: { value?: number };
-														}>;
-													}>;
-												};
-										  }
-										| undefined;
-
-									if (version3Data?.customizationInfo?.surfaces) {
-										const surfaces = version3Data.customizationInfo.surfaces;
-
-										for (const surface of surfaces) {
-											if (surface.areas) {
-												for (const area of surface.areas) {
-													amazonCustomizationOptions.push({
-														label: area.label || area.name || "",
-														option: area.optionValue || area.text || "",
-														priceDelta: area.priceDelta?.value || 0,
-														unit: area.unit || undefined,
-													});
-												}
-											}
-										}
-									}
-								}
-							} catch (error) {
-								console.error(
-									`Error fetching Amazon customization data for item ${item.sku}:`,
-									error,
-								);
-							}
-						}
+						const { amazonCustomizationData, amazonCustomizationOptions } =
+							await getAmazonCustomizationFromOptions(item.options);
 
 						return {
 							orderItemId: item.orderItemId,
@@ -214,12 +148,8 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 							weight: item.weight,
 							shippingAmount: item.shippingAmount,
 							options: item.options,
-							amazonCustomizationData:
-								amazonCustomizationData?.customizationData || null,
-							amazonCustomizationOptions:
-								amazonCustomizationOptions.length > 0
-									? amazonCustomizationOptions
-									: undefined,
+							amazonCustomizationData: amazonCustomizationData || null,
+							amazonCustomizationOptions,
 							productId: item.productId,
 							adjustment: item.adjustment,
 							warehouseLocation: item.warehouseLocation,

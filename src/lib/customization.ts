@@ -1,10 +1,7 @@
 import dbConnect from "@/lib/db";
 import Order from "@/models/Order";
 
-import {
-	extractCustomizationUrlFromOptions,
-	fetchAmazonCustomizationData,
-} from "./amazon-customization";
+import { getAmazonCustomizationFromOptions } from "./amazon-customization";
 
 export interface AmazonCustomizationOption {
 	label: string;
@@ -55,62 +52,21 @@ export async function processAmazonCustomizationsForOrderIds(
 				continue;
 			}
 
-			const customizationUrl = extractCustomizationUrlFromOptions(item.options);
-			if (!customizationUrl) {
+			const { amazonCustomizationData, amazonCustomizationOptions } =
+				await getAmazonCustomizationFromOptions(item.options);
+			if (!amazonCustomizationData) {
 				skippedCount++;
 				continue;
 			}
 
 			try {
-				const customizationData =
-					await fetchAmazonCustomizationData(customizationUrl);
-				if (!customizationData?.customizationData) {
-					errorCount++;
-					continue;
-				}
-
-				const options: AmazonCustomizationOption[] = [];
-
-				const version3Data = customizationData.customizationData[
-					"version3.0"
-				] as
-					| {
-							customizationInfo?: {
-								surfaces?: Array<{
-									areas?: Array<{
-										label?: string;
-										name?: string;
-										optionValue?: string;
-										text?: string;
-										unit?: string;
-										priceDelta?: { value?: number };
-									}>;
-								}>;
-							};
-					  }
-					| undefined;
-
-				if (version3Data?.customizationInfo?.surfaces) {
-					for (const surface of version3Data.customizationInfo.surfaces) {
-						if (!surface.areas) continue;
-						for (const area of surface.areas) {
-							options.push({
-								label: area.label || area.name || "",
-								option: area.optionValue || area.text || "",
-								priceDelta: area.priceDelta?.value || 0,
-								unit: area.unit || undefined,
-							});
-						}
-					}
-				}
-
 				const res = await Order.updateOne(
 					{ orderId: order.orderId },
 					{
 						$set: {
-							"items.$[i].amazonCustomizationData":
-								customizationData.customizationData,
-							"items.$[i].amazonCustomizationOptions": options,
+							"items.$[i].amazonCustomizationData": amazonCustomizationData,
+							"items.$[i].amazonCustomizationOptions":
+								amazonCustomizationOptions || [],
 						},
 					},
 					{
@@ -154,7 +110,7 @@ export async function processAllAmazonCustomizations() {
 		const amazonOrders = await Order.find({
 			"items.options": {
 				$elemMatch: {
-					name: "CustomizedURL",
+					name: { $regex: "customized", $options: "i" },
 				},
 			},
 		});
@@ -166,62 +122,12 @@ export async function processAllAmazonCustomizations() {
 			for (let itemIndex = 0; itemIndex < order.items.length; itemIndex++) {
 				const item = order.items[itemIndex];
 
-				// CustomizedURL'yi kontrol et
-				const customizationUrl = extractCustomizationUrlFromOptions(
-					item.options,
-				);
-
-				if (!customizationUrl) {
-					continue; // Bu item'da CustomizedURL yok, sonrakine geç
-				}
-
 				try {
-					// Zip dosyasını indir ve JSON'u çıkar
-					const customizationData =
-						await fetchAmazonCustomizationData(customizationUrl);
-
-					if (!customizationData) {
+					const { amazonCustomizationData, amazonCustomizationOptions } =
+						await getAmazonCustomizationFromOptions(item.options);
+					if (!amazonCustomizationData) {
 						errorCount++;
 						continue;
-					}
-
-					// Version 3.0'dan özelleştirme seçeneklerini çıkar
-					const options: AmazonCustomizationOption[] = [];
-
-					const version3Data = customizationData.customizationData[
-						"version3.0"
-					] as
-						| {
-								customizationInfo?: {
-									surfaces?: Array<{
-										areas?: Array<{
-											label?: string;
-											name?: string;
-											optionValue?: string;
-											text?: string;
-											unit?: string;
-											priceDelta?: { value?: number };
-										}>;
-									}>;
-								};
-						  }
-						| undefined;
-
-					if (version3Data?.customizationInfo?.surfaces) {
-						const surfaces = version3Data.customizationInfo.surfaces;
-
-						for (const surface of surfaces) {
-							if (surface.areas) {
-								for (const area of surface.areas) {
-									options.push({
-										label: area.label || area.name || "",
-										option: area.optionValue || area.text || "",
-										priceDelta: area.priceDelta?.value || 0,
-										unit: area.unit || undefined,
-									});
-								}
-							}
-						}
 					}
 
 					// Veritabanını güncelle
@@ -232,9 +138,9 @@ export async function processAllAmazonCustomizations() {
 						},
 						{
 							$set: {
-								"items.$.amazonCustomizationData":
-									customizationData.customizationData,
-								"items.$.amazonCustomizationOptions": options,
+								"items.$.amazonCustomizationData": amazonCustomizationData,
+								"items.$.amazonCustomizationOptions":
+									amazonCustomizationOptions || [],
 							},
 						},
 					);
