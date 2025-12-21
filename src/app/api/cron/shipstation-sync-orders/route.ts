@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { processAmazonCustomizationsForOrderIds } from "@/lib/customization";
 import {
 	fetchShipStationOrdersModifiedSince,
 	syncOrderToDatabase,
@@ -65,6 +66,7 @@ export async function GET(req: NextRequest) {
 		});
 
 		summary.totalFetched = orders.length;
+		const fetchedOrderIds = Array.from(new Set(orders.map((o) => o.orderId)));
 
 		const results: Array<{
 			orderId: number;
@@ -88,6 +90,9 @@ export async function GET(req: NextRequest) {
 			}
 		}
 
+		const customizationSummary =
+			await processAmazonCustomizationsForOrderIds(fetchedOrderIds);
+
 		await new LogModel({
 			message: "Cron ShipStation sync completed",
 			level: "info",
@@ -98,6 +103,7 @@ export async function GET(req: NextRequest) {
 				endedAt: new Date().toISOString(),
 				storeIds,
 				summary,
+				customizationSummary,
 			},
 		}).save();
 
@@ -107,6 +113,7 @@ export async function GET(req: NextRequest) {
 			modifiedSince: modifiedSince.toISOString(),
 			storeIds,
 			summary,
+			customizationSummary,
 			results,
 		});
 	} catch (error) {
