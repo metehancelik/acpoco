@@ -356,37 +356,52 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 	const storeIds = stores.map((store) => store.storeId);
 	const orders: ShipStationOrder[] = [];
 
-	const modifyDateStart = encodeURIComponent(
-		options.modifiedSince.toISOString(),
-	);
+	const sinceIso = options.modifiedSince.toISOString();
+	const modifyDateStart = encodeURIComponent(sinceIso);
+	const createDateStart = encodeURIComponent(sinceIso);
 
 	for (const storeId of storeIds) {
-		const baseUrl = `https://ssapi.shipstation.com/orders?storeId=${storeId}&modifyDateStart=${modifyDateStart}`;
-		const first = await axios(baseUrl, {
-			method: "GET",
-			headers: {
-				Authorization: getShipStationAuthHeader(auth),
-				"Content-Type": "application/json",
-			},
-		});
+		const commonParams = `storeId=${storeId}&pageSize=500&sortBy=ModifyDate&sortDir=DESC`;
 
-		const firstData = first.data as {
-			orders: ShipStationOrder[];
-			pages?: number;
-		};
-		orders.push(...(firstData.orders || []));
-
-		const pages = Number(firstData.pages || 1);
-		for (let page = 2; page <= pages; page++) {
-			const resp = await axios(`${baseUrl}&page=${page}`, {
+		const fetchPaged = async (dateParam: string, dateValue: string) => {
+			const baseUrl = `https://ssapi.shipstation.com/orders?${commonParams}&${dateParam}=${dateValue}`;
+			const first = await axios(baseUrl, {
 				method: "GET",
 				headers: {
 					Authorization: getShipStationAuthHeader(auth),
 					"Content-Type": "application/json",
 				},
 			});
-			const data = resp.data as { orders: ShipStationOrder[] };
-			orders.push(...(data.orders || []));
+
+			const firstData = first.data as {
+				orders?: ShipStationOrder[];
+				pages?: number;
+			};
+			const batch = firstData.orders || [];
+			orders.push(...batch);
+
+			const pages = Number(firstData.pages || 1);
+			for (let page = 2; page <= pages; page++) {
+				const resp = await axios(`${baseUrl}&page=${page}`, {
+					method: "GET",
+					headers: {
+						Authorization: getShipStationAuthHeader(auth),
+						"Content-Type": "application/json",
+					},
+				});
+				const data = resp.data as { orders?: ShipStationOrder[] };
+				orders.push(...(data.orders || []));
+			}
+
+			return batch.length;
+		};
+
+		// Primary: orders modified since the timestamp
+		const modifiedCount = await fetchPaged("modifyDateStart", modifyDateStart);
+
+		// Fallback: pull by createDateStart for accounts where modifyDateStart is unreliable
+		if (modifiedCount === 0) {
+			await fetchPaged("createDateStart", createDateStart);
 		}
 	}
 
