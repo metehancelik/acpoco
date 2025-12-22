@@ -14,20 +14,27 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { Fragment, useState } from "react";
 
 type LoginModalProps = {
 	isOpen: boolean;
 	onClose: () => void;
+	onSwitchToRegister?: () => void;
 };
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
+const LoginModal: React.FC<LoginModalProps> = ({
+	isOpen,
+	onClose,
+	onSwitchToRegister,
+}) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
+	const t = useTranslations("Auth");
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -46,10 +53,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 				onClose();
 				window.location.href = result.url || "/";
 			} else {
-				setError("Invalid email or password");
+				setError(t("invalidCredentials"));
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError(t("errorOccurred"));
 		} finally {
 			setIsLoading(false);
 		}
@@ -113,10 +120,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 											as="h2"
 											className="text-2xl font-bold text-gray-900"
 										>
-											Welcome Back
+											{t("welcomeBack")}
 										</DialogTitle>
 										<p className="text-gray-500 mt-2 text-sm">
-											Sign in to continue to your account
+											{t("signInToContinue")}
 										</p>
 									</div>
 
@@ -128,7 +135,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 												htmlFor="modal-email"
 												className="block text-sm font-medium text-gray-700"
 											>
-												Email
+												{t("email")}
 											</label>
 											<div className="relative">
 												<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
@@ -153,7 +160,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 												htmlFor="modal-password"
 												className="block text-sm font-medium text-gray-700"
 											>
-												Password
+												{t("password")}
 											</label>
 											<div className="relative">
 												<div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
@@ -201,7 +208,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 											<span
 												className={`flex items-center justify-center gap-2 transition-all duration-300 ${isLoading ? "opacity-0" : "opacity-100"}`}
 											>
-												Sign In
+												{t("signIn")}
 											</span>
 											{isLoading && (
 												<div className="absolute inset-0 flex items-center justify-center">
@@ -235,14 +242,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 									{/* Footer */}
 									<div className="mt-6 text-center">
 										<p className="text-sm text-gray-500">
-											Don&apos;t have an account?{" "}
-											<a
-												href="/register"
-												onClick={handleClose}
+											{t("noAccount")}{" "}
+											<button
+												type="button"
+												onClick={() => {
+													handleClose();
+													onSwitchToRegister?.();
+												}}
 												className="font-semibold text-gold hover:text-amber-600 transition-colors"
 											>
-												Sign up
-											</a>
+												{t("signUp")}
+											</button>
 										</p>
 									</div>
 								</div>

@@ -6,6 +6,7 @@ import {
 } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import AlertNotification from "@/utils/alertNotification";
@@ -22,6 +23,7 @@ const BalanceModal: React.FC<Props> = ({
 }) => {
 	const [amount, setAmount] = React.useState<number>(0);
 	const [loading, setLoading] = React.useState(false);
+	const t = useTranslations("Wallet");
 
 	const createDepositRequest = async (e: React.SyntheticEvent) => {
 		e.preventDefault();
@@ -30,7 +32,7 @@ const BalanceModal: React.FC<Props> = ({
 			await axios.post("/api/wallet", {
 				requestedAmount: amount,
 			});
-			AlertNotification("Talep başarıyla oluşturuldu", "success");
+			AlertNotification(t("requestCreated"), "success");
 		} catch (error: unknown) {
 			console.error(error);
 		} finally {
@@ -85,21 +87,18 @@ const BalanceModal: React.FC<Props> = ({
 								>
 									<div className="border-b-2 border-lightGray">
 										<p className="text-[24px] font-bold text-headerPrimary mb-2">
-											Cüzdan:{" "}
+											{t("wallet")}:{" "}
 										</p>
 										<p className="text-3xl font-bold text-[#059669]">
 											${Number(balance).toFixed(2)}
 										</p>
 									</div>
 								</DialogTitle>
-								<p className="mt-2">Hesap Bilgileri:</p>
-								<p className="text-bold text-danger">
-									Havale/EFT yaparken açıklama kısmına İsim Soyisim veya Şirket
-									İsminizi yazmayı unutmayınız!
-								</p>
+								<p className="mt-2">{t("accountInfo")}:</p>
+								<p className="text-bold text-danger">{t("transferWarning")}</p>
 								<div className="w-full rounded-xl mt-2 p-4 bg-[#e7f3e6] mx-auto">
 									<form className="w-full" onSubmit={createDepositRequest}>
-										<label htmlFor="amount">Gönderilecek Tutar($)</label>
+										<label htmlFor="amount">{t("amountToSend")}</label>
 										<input
 											className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 											type="number"
@@ -114,7 +113,7 @@ const BalanceModal: React.FC<Props> = ({
 												disabled={loading}
 												className="bg-primary text-white rounded-lg font-medium px-4 py-1 w-full hover:bg-secondary"
 											>
-												{loading ? "Gönderiliyor..." : "Gönder"}
+												{loading ? t("sending") : t("send")}
 											</button>
 										</div>
 									</form>

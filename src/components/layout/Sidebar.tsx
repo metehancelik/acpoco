@@ -20,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Link } from "@/i18n/routing";
@@ -27,6 +28,7 @@ import { classNames } from "@/utils/classNames";
 import httpClient from "@/utils/httpClient";
 
 import LoginModal from "../auth/LoginModal";
+import RegisterModal from "../auth/RegisterModal";
 import BalanceModal from "../sales/BalanceModal";
 import LocaleSwitcher from "./LocaleSwitcher";
 
@@ -34,14 +36,18 @@ export default function Sidebar() {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+	const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const session = useSession();
 	const location = usePathname();
-	const navigation = [{ name: "Ürünler", href: "/", icon: GiftIcon }];
+	const t = useTranslations("Navigation");
+	const tCommon = useTranslations("Common");
+	const tWallet = useTranslations("Wallet");
+
+	const navigation = [{ name: t("products"), href: "/", icon: GiftIcon }];
 	if (session?.data?.user) {
 		const item = {
-			name:
-				session?.data?.user.role === "ADMIN" ? "Siparişler" : "Siparişlerim",
+			name: session?.data?.user.role === "ADMIN" ? t("orders") : t("myOrders"),
 			href:
 				session?.data?.user.role === "ADMIN"
 					? "/sales?status=waitingProduction"
@@ -52,7 +58,7 @@ export default function Sidebar() {
 	}
 	if (session?.data?.user.role === "SELLER") {
 		navigation.push({
-			name: "Profil",
+			name: tCommon("profile"),
 			href: "profile",
 			icon: UserCircleIcon,
 		});
@@ -101,7 +107,7 @@ export default function Sidebar() {
 									onClick={() => setSidebarOpen(false)}
 									className="-m-2.5 p-2.5 hover:bg-white/10 rounded-full transition-colors"
 								>
-									<span className="sr-only">Close sidebar</span>
+									<span className="sr-only">{tCommon("closeSidebar")}</span>
 									<XMarkIcon
 										aria-hidden="true"
 										className="h-6 w-6 text-white"
@@ -153,7 +159,7 @@ export default function Sidebar() {
 														)}
 													>
 														<PresentationChartBarIcon width={24} height={24} />{" "}
-														Dashboard
+														{t("dashboard")}
 													</Link>
 												</li>
 											)}
@@ -170,7 +176,7 @@ export default function Sidebar() {
 														)}
 													>
 														<WalletIcon width={24} height={24} />
-														Bakiye Talepleri{" "}
+														{t("balanceRequests")}{" "}
 													</Link>
 												</li>
 											)}
@@ -211,7 +217,7 @@ export default function Sidebar() {
 													"group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200",
 												)}
 											>
-												Dashboard
+												{t("dashboard")}
 											</Link>
 										</li>
 									)}
@@ -246,7 +252,7 @@ export default function Sidebar() {
 												)}
 											>
 												<WalletIcon width={24} height={24} />
-												Bakiye Talepleri{" "}
+												{t("balanceRequests")}{" "}
 											</Link>
 										</li>
 									)}
@@ -264,7 +270,7 @@ export default function Sidebar() {
 						>
 							{session?.data?.user.role !== "ADMIN" && (
 								<div className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-center text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200">
-									Bakiye: ${wallet?.data?.balance}
+									{tWallet("balance")}: ${wallet?.data?.balance}
 								</div>
 							)}
 						</button>
@@ -300,12 +306,12 @@ export default function Sidebar() {
 												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 											/>
 										</svg>
-										Çıkış...
+										{tCommon("loggingOut")}
 									</>
 								) : (
 									<>
 										<ArrowRightStartOnRectangleIcon className="h-4 w-4" />
-										Çıkış Yap
+										{tCommon("logout")}
 									</>
 								)}
 							</button>
@@ -316,7 +322,7 @@ export default function Sidebar() {
 								className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-gold/30 hover:shadow-xl hover:shadow-gold/40 transition-all duration-200"
 							>
 								<UserCircleIcon className="h-5 w-5" />
-								Giriş Yap
+								{tCommon("login")}
 							</button>
 						)}
 					</div>
@@ -334,7 +340,7 @@ export default function Sidebar() {
 					onClick={() => setSidebarOpen(true)}
 					className="-m-2.5 p-2.5 text-white lg:hidden hover:bg-white/10 rounded-xl transition-colors"
 				>
-					<span className="sr-only">Open sidebar</span>
+					<span className="sr-only">{tCommon("openSidebar")}</span>
 					<Bars3Icon aria-hidden="true" className="h-6 w-6" />
 				</button>
 			</div>
@@ -343,6 +349,14 @@ export default function Sidebar() {
 			<LoginModal
 				isOpen={isLoginModalOpen}
 				onClose={() => setIsLoginModalOpen(false)}
+				onSwitchToRegister={() => setIsRegisterModalOpen(true)}
+			/>
+
+			{/* Register Modal */}
+			<RegisterModal
+				isOpen={isRegisterModalOpen}
+				onClose={() => setIsRegisterModalOpen(false)}
+				onSwitchToLogin={() => setIsLoginModalOpen(true)}
 			/>
 		</div>
 	);

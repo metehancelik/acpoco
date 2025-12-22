@@ -9,6 +9,75 @@
 	"AllProducts": {
 		"title": "Alle Produkte",
 		"description": "Hier finden Sie alle unsere Produkte"
+	},
+	"Common": {
+		"login": "Anmelden",
+		"logout": "Abmelden",
+		"loggingOut": "Abmelden...",
+		"register": "Registrieren",
+		"profile": "Profil",
+		"myAccount": "Mein Konto",
+		"closeSidebar": "Menü schließen",
+		"openSidebar": "Menü öffnen",
+		"loading": "Laden...",
+		"submit": "Absenden",
+		"cancel": "Abbrechen",
+		"save": "Speichern",
+		"delete": "Löschen",
+		"edit": "Bearbeiten",
+		"search": "Suchen",
+		"filter": "Filtern",
+		"back": "Zurück",
+		"next": "Weiter",
+		"previous": "Vorherige"
+	},
+	"Navigation": {
+		"products": "Produkte",
+		"orders": "Bestellungen",
+		"myOrders": "Meine Bestellungen",
+		"dashboard": "Dashboard",
+		"balanceRequests": "Guthaben-Anfragen",
+		"supplySystem": "Liefersystem",
+		"allProducts": "Alle Produkte"
+	},
+	"Footer": {
+		"membership": "Mitgliedschaft",
+		"shortcuts": "Verknüpfungen",
+		"aboutUs": "Über uns",
+		"contact": "Kontakt",
+		"termsOfUse": "Nutzungsbedingungen",
+		"distanceSalesContract": "Fernabsatzvertrag",
+		"privacyPolicy": "Datenschutzrichtlinie",
+		"deliveryAndReturn": "Liefer- und Rückgaberichtlinie"
+	},
+	"Auth": {
+		"welcomeBack": "Willkommen zurück",
+		"signInToContinue": "Melden Sie sich an, um fortzufahren",
+		"email": "E-Mail",
+		"password": "Passwort",
+		"invalidCredentials": "Ungültige E-Mail oder Passwort",
+		"errorOccurred": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+		"signIn": "Anmelden",
+		"noAccount": "Kein Konto?",
+		"signUp": "Registrieren",
+		"createAccount": "Konto erstellen",
+		"joinUs": "Treten Sie uns bei und beginnen Sie mit dem Einkaufen",
+		"name": "Vorname",
+		"surname": "Nachname",
+		"confirmPassword": "Passwort bestätigen",
+		"passwordMismatch": "Passwörter stimmen nicht überein",
+		"emailInUse": "Diese E-Mail wird bereits verwendet",
+		"registrationFailed": "Registrierung fehlgeschlagen",
+		"alreadyHaveAccount": "Haben Sie bereits ein Konto?"
+	},
+	"Wallet": {
+		"wallet": "Brieftasche",
+		"balance": "Guthaben",
+		"accountInfo": "Kontoinformationen",
+		"transferWarning": "Vergessen Sie nicht, Ihren Namen oder Firmennamen in der Beschreibung anzugeben!",
+		"amountToSend": "Zu sendender Betrag ($)",
+		"sending": "Senden...",
+		"send": "Senden",
+		"requestCreated": "Anfrage erfolgreich erstellt"
 	}
 }
-

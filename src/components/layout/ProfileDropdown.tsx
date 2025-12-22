@@ -9,10 +9,13 @@ import {
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 const ProfileDropdown = () => {
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const t = useTranslations("Common");
+	const tNav = useTranslations("Navigation");
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
@@ -32,7 +35,7 @@ const ProfileDropdown = () => {
 						<UserCircleIcon className="w-5 h-5 text-white" />
 					</div>
 					<span className="group-hover:text-gold transition-colors">
-						Hesabım
+						{t("myAccount")}
 					</span>
 					<ChevronDownIcon
 						aria-hidden="true"
@@ -55,7 +58,7 @@ const ProfileDropdown = () => {
 								} flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150`}
 							>
 								<UserCircleIcon className="w-5 h-5" />
-								Profil
+								{t("profile")}
 							</Link>
 						)}
 					</MenuItem>
@@ -68,7 +71,7 @@ const ProfileDropdown = () => {
 								} flex items-center gap-3 px-4 py-3 text-sm transition-colors duration-150`}
 							>
 								<TruckIcon className="w-5 h-5" />
-								Tedarik Sistemine Giriş
+								{tNav("supplySystem")}
 							</Link>
 						)}
 					</MenuItem>
@@ -107,12 +110,12 @@ const ProfileDropdown = () => {
 												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 											/>
 										</svg>
-										Çıkış yapılıyor...
+										{t("loggingOut")}
 									</>
 								) : (
 									<>
 										<ArrowRightStartOnRectangleIcon className="w-5 h-5" />
-										Çıkış Yap
+										{t("logout")}
 									</>
 								)}
 							</button>

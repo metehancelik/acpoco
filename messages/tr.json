@@ -1,7 +1,7 @@
 {
 	"HomePage": {
 		"title": "Merhaba Dünya!",
-		"about": "Get lo!"
+		"about": "Hakkımızda sayfasına git"
 	},
 	"LocaleSwitcher": {
 		"label": "Dil"
@@ -9,5 +9,75 @@
 	"AllProducts": {
 		"title": "Tüm ürünler",
 		"description": "Tüm ürünlerimizi burada bulabilirsiniz"
+	},
+	"Common": {
+		"login": "Giriş Yap",
+		"logout": "Çıkış Yap",
+		"loggingOut": "Çıkış yapılıyor...",
+		"register": "Üye Ol",
+		"profile": "Profil",
+		"myAccount": "Hesabım",
+		"closeSidebar": "Menüyü kapat",
+		"openSidebar": "Menüyü aç",
+		"loading": "Yükleniyor...",
+		"submit": "Gönder",
+		"cancel": "İptal",
+		"save": "Kaydet",
+		"delete": "Sil",
+		"edit": "Düzenle",
+		"search": "Ara",
+		"filter": "Filtrele",
+		"back": "Geri",
+		"next": "İleri",
+		"previous": "Önceki"
+	},
+	"Navigation": {
+		"products": "Ürünler",
+		"orders": "Siparişler",
+		"myOrders": "Siparişlerim",
+		"dashboard": "Dashboard",
+		"balanceRequests": "Bakiye Talepleri",
+		"supplySystem": "Tedarik Sistemine Giriş",
+		"allProducts": "Tüm Ürünler"
+	},
+	"Footer": {
+		"membership": "Üyelik",
+		"shortcuts": "Kısayollar",
+		"aboutUs": "Hakkımızda",
+		"contact": "İletişim",
+		"termsOfUse": "Kullanım Koşulları",
+		"distanceSalesContract": "Mesafeli Satış Sözleşmesi",
+		"privacyPolicy": "Gizlilik Sözleşmesi",
+		"deliveryAndReturn": "Teslimat ve İade Şartları"
+	},
+	"Auth": {
+		"welcomeBack": "Tekrar Hoşgeldiniz",
+		"signInToContinue": "Hesabınıza devam etmek için giriş yapın",
+		"email": "E-posta",
+		"password": "Şifre",
+		"invalidCredentials": "Geçersiz e-posta veya şifre",
+		"errorOccurred": "Bir hata oluştu. Lütfen tekrar deneyin.",
+		"signIn": "Giriş Yap",
+		"noAccount": "Hesabınız yok mu?",
+		"signUp": "Üye Ol",
+		"createAccount": "Hesap Oluştur",
+		"joinUs": "Bize katılın ve alışverişe başlayın",
+		"name": "Ad",
+		"surname": "Soyad",
+		"confirmPassword": "Şifre Tekrar",
+		"passwordMismatch": "Şifreler eşleşmiyor",
+		"emailInUse": "Bu e-posta adresi zaten kullanılıyor",
+		"registrationFailed": "Kayıt başarısız oldu",
+		"alreadyHaveAccount": "Zaten hesabınız var mı?"
+	},
+	"Wallet": {
+		"wallet": "Cüzdan",
+		"balance": "Bakiye",
+		"accountInfo": "Hesap Bilgileri",
+		"transferWarning": "Havale/EFT yaparken açıklama kısmına İsim Soyisim veya Şirket İsminizi yazmayı unutmayınız!",
+		"amountToSend": "Gönderilecek Tutar($)",
+		"sending": "Gönderiliyor...",
+		"send": "Gönder",
+		"requestCreated": "Talep başarıyla oluşturuldu"
 	}
 }

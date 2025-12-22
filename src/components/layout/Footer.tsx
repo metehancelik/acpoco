@@ -1,37 +1,46 @@
+"use client";
+
 import { Facebook, Instagram } from "iconsax-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const Footer = () => {
+	const t = useTranslations("Footer");
+	const tCommon = useTranslations("Common");
+	const tNav = useTranslations("Navigation");
+
 	return (
 		<div className="bg-gray-800 text-white py-12">
 			<div className="container mx-auto px-4 max-w-6xl">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 					<div className="flex flex-col gap-2">
-						<h1 className="text-lg font-bold">Üyelik</h1>
-						<Link href={"/register"}>Üye Ol</Link>
-						<Link href={"/login"}>Giriş Yap</Link>
-						<Link href={"/profile"}>Profil</Link>
+						<h1 className="text-lg font-bold">{t("membership")}</h1>
+						<Link href={"/register"}>{tCommon("register")}</Link>
+						<Link href={"/login"}>{tCommon("login")}</Link>
+						<Link href={"/profile"}>{tCommon("profile")}</Link>
 					</div>
 					<div className="flex flex-col gap-2">
-						<h1 className="text-lg font-bold">Kısayollar</h1>
+						<h1 className="text-lg font-bold">{t("shortcuts")}</h1>
 						<Link
 							target="_blank"
 							href={"https://www.angoragumus.com/hakkimizda"}
 						>
-							Hakkımızda
+							{t("aboutUs")}
 						</Link>
-						<Link href={"/"}>Tüm Ürünler</Link>
-						<Link href={"https://www.angoragumus.com/iletisim"}>İletişim</Link>
+						<Link href={"/"}>{tNav("allProducts")}</Link>
+						<Link href={"https://www.angoragumus.com/iletisim"}>
+							{t("contact")}
+						</Link>
 					</div>
 					<div className="flex flex-col gap-2">
-						<h1 className="text-lg font-bold">Kullanım Koşulları</h1>
+						<h1 className="text-lg font-bold">{t("termsOfUse")}</h1>
 						<Link href={"/mesafeli-satis-sozlesmesi"}>
-							Mesafeli Satış Sözleşmesi
+							{t("distanceSalesContract")}
 						</Link>
-						<Link href={"/gizlilik-sozlesmesi"}>Gizlilik Sözleşmesi</Link>
+						<Link href={"/gizlilik-sozlesmesi"}>{t("privacyPolicy")}</Link>
 						<Link href={"/teslimat-iade-sartlari"}>
-							Teslimat ve İade Şartları
+							{t("deliveryAndReturn")}
 						</Link>
 					</div>
 					<div>

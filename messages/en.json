@@ -9,5 +9,75 @@
 	"AllProducts": {
 		"title": "All products",
 		"description": "Here you can find all our products"
+	},
+	"Common": {
+		"login": "Login",
+		"logout": "Logout",
+		"loggingOut": "Logging out...",
+		"register": "Register",
+		"profile": "Profile",
+		"myAccount": "My Account",
+		"closeSidebar": "Close sidebar",
+		"openSidebar": "Open sidebar",
+		"loading": "Loading...",
+		"submit": "Submit",
+		"cancel": "Cancel",
+		"save": "Save",
+		"delete": "Delete",
+		"edit": "Edit",
+		"search": "Search",
+		"filter": "Filter",
+		"back": "Back",
+		"next": "Next",
+		"previous": "Previous"
+	},
+	"Navigation": {
+		"products": "Products",
+		"orders": "Orders",
+		"myOrders": "My Orders",
+		"dashboard": "Dashboard",
+		"balanceRequests": "Balance Requests",
+		"supplySystem": "Supply System",
+		"allProducts": "All Products"
+	},
+	"Footer": {
+		"membership": "Membership",
+		"shortcuts": "Shortcuts",
+		"aboutUs": "About Us",
+		"contact": "Contact",
+		"termsOfUse": "Terms of Use",
+		"distanceSalesContract": "Distance Sales Contract",
+		"privacyPolicy": "Privacy Policy",
+		"deliveryAndReturn": "Delivery and Return Policy"
+	},
+	"Auth": {
+		"welcomeBack": "Welcome Back",
+		"signInToContinue": "Sign in to continue to your account",
+		"email": "Email",
+		"password": "Password",
+		"invalidCredentials": "Invalid email or password",
+		"errorOccurred": "An error occurred. Please try again.",
+		"signIn": "Sign In",
+		"noAccount": "Don't have an account?",
+		"signUp": "Sign up",
+		"createAccount": "Create Account",
+		"joinUs": "Join us and start shopping",
+		"name": "First Name",
+		"surname": "Last Name",
+		"confirmPassword": "Confirm Password",
+		"passwordMismatch": "Passwords do not match",
+		"emailInUse": "This email is already in use",
+		"registrationFailed": "Registration failed",
+		"alreadyHaveAccount": "Already have an account?"
+	},
+	"Wallet": {
+		"wallet": "Wallet",
+		"balance": "Balance",
+		"accountInfo": "Account Information",
+		"transferWarning": "Don't forget to write your Name Surname or Company Name in the description when making a transfer!",
+		"amountToSend": "Amount to Send ($)",
+		"sending": "Sending...",
+		"send": "Send",
+		"requestCreated": "Request created successfully"
 	}
 }

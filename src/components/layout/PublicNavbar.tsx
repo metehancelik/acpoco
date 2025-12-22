@@ -13,11 +13,13 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Link } from "@/i18n/routing";
 
 import LoginModal from "../auth/LoginModal";
+import RegisterModal from "../auth/RegisterModal";
 import LocaleSwitcher from "./LocaleSwitcher";
 import ProfileDropdown from "./ProfileDropdown";
 
@@ -25,7 +27,10 @@ const PublicNavbar = () => {
 	const session = useSession();
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+	const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const t = useTranslations("Common");
+	const tNav = useTranslations("Navigation");
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
@@ -61,7 +66,7 @@ const PublicNavbar = () => {
 									onClick={() => setSidebarOpen(false)}
 									className="-m-2.5 p-2.5"
 								>
-									<span className="sr-only">Close sidebar</span>
+									<span className="sr-only">{t("closeSidebar")}</span>
 									<XMarkIcon
 										aria-hidden="true"
 										className="h-6 w-6 text-white"
@@ -99,7 +104,7 @@ const PublicNavbar = () => {
 													className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-xl hover:bg-gold/10 hover:text-gold transition-colors"
 												>
 													<UserIcon className="w-5 h-5" />
-													Profil
+													{t("profile")}
 												</Link>
 											</li>
 											<li>
@@ -121,7 +126,7 @@ const PublicNavbar = () => {
 															d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
 														/>
 													</svg>
-													Tedarik Sistemine Giriş
+													{tNav("supplySystem")}
 												</Link>
 											</li>
 											<li className="mt-auto">
@@ -153,12 +158,12 @@ const PublicNavbar = () => {
 																	d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 																/>
 															</svg>
-															Çıkış yapılıyor...
+															{t("loggingOut")}
 														</>
 													) : (
 														<>
 															<ArrowRightStartOnRectangleIcon className="w-5 h-5" />
-															Çıkış Yap
+															{t("logout")}
 														</>
 													)}
 												</button>
@@ -175,7 +180,7 @@ const PublicNavbar = () => {
 												className="flex items-center gap-3 w-full px-4 py-3 text-white bg-gradient-to-r from-gold to-amber-500 rounded-xl shadow-lg shadow-gold/30 hover:shadow-xl hover:shadow-gold/40 transition-all"
 											>
 												<UserIcon className="w-5 h-5" />
-												Giriş Yap
+												{t("login")}
 											</button>
 										</li>
 									)}
@@ -211,7 +216,7 @@ const PublicNavbar = () => {
 								<div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-gold/20 flex items-center justify-center transition-colors">
 									<UserIcon className="w-5 h-5" />
 								</div>
-								<p className="font-medium">Giriş Yap</p>
+								<p className="font-medium">{t("login")}</p>
 							</button>
 						)}
 						{session?.data && <ProfileDropdown />}
@@ -226,7 +231,7 @@ const PublicNavbar = () => {
 					onClick={() => setSidebarOpen(true)}
 					className="-m-2.5 p-2.5 text-white lg:hidden hover:bg-white/10 rounded-xl transition-colors"
 				>
-					<span className="sr-only">Open sidebar</span>
+					<span className="sr-only">{t("openSidebar")}</span>
 					<Bars3Icon aria-hidden="true" className="h-6 w-6" />
 				</button>
 				<div className="flex-1 flex justify-center">
@@ -247,6 +252,14 @@ const PublicNavbar = () => {
 			<LoginModal
 				isOpen={isLoginModalOpen}
 				onClose={() => setIsLoginModalOpen(false)}
+				onSwitchToRegister={() => setIsRegisterModalOpen(true)}
+			/>
+
+			{/* Register Modal */}
+			<RegisterModal
+				isOpen={isRegisterModalOpen}
+				onClose={() => setIsRegisterModalOpen(false)}
+				onSwitchToLogin={() => setIsLoginModalOpen(true)}
 			/>
 		</div>
 	);
