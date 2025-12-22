@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
 			type: "WITHDRAW",
 			orderId,
-			info: "Sipariş ödemesi",
+			info: "orderPayment",
 			changedBy: userId,
 			changeAmount: totalPrice,
 			currentBalance: userWallet.balance,

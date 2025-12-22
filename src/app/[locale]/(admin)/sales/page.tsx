@@ -4,12 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import FilterForm from "@/components/sales/FilterForm";
 import SellerOrdersTable from "@/components/sales/SellerOrdersTable";
 import AlertNotification from "@/utils/alertNotification";
 
 export default function AdminSalesPage() {
+	const t = useTranslations("Orders");
 	const searchParams = useSearchParams();
 
 	const { data, isLoading, error } = useQuery({
@@ -23,7 +25,7 @@ export default function AdminSalesPage() {
 		},
 	});
 	if (error) {
-		AlertNotification("Error fetching orders", "error");
+		AlertNotification(t("errorFetchingOrders"), "error");
 	}
 
 	return (

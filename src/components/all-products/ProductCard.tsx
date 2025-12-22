@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 
 import type { IProduct } from "@/models/Product";
@@ -34,6 +35,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 		"N/A";
 
 	const { data: session } = useSession();
+	const t = useTranslations("Common");
 	const discountPercent = session?.user?.discountPercent || 0;
 	const showDiscount = discountPercent > 0;
 	const basePrice = product.price;
@@ -71,12 +73,12 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 									€{basePrice}
 								</span>
 								<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-									%{discountPercent} indirim
+									%{discountPercent} {t("discount")}
 								</span>
 							</>
 						) : (
 							<span className="text-base font-medium text-gray-900">
-								Fiyat: €{basePrice}
+								{t("price")}: €{basePrice}
 							</span>
 						)}
 					</div>
@@ -86,7 +88,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 						href={`/product/${product._id}`}
 						className="flex items-center gap-x-2 bg-slate-700 text-white rounded-md px-2 py-2 text-sm w-full justify-center"
 					>
-						<p>İncele</p>
+						<p>{t("view")}</p>
 						<MagnifyingGlassIcon className="" width={24} height={24} />
 					</Link>
 				</div>

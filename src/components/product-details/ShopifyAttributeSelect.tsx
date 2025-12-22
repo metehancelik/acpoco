@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import {
@@ -24,6 +25,7 @@ const ShopifyAttributeSelect = ({
 	selectedVariant,
 	onVariantChange,
 }: ShopifyAttributeSelectProps) => {
+	const t = useTranslations("Products");
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [selectedOptions, setSelectedOptions] = useState<
@@ -116,7 +118,7 @@ const ShopifyAttributeSelect = ({
 
 	return (
 		<div className="mt-6 space-y-4">
-			<h3 className="text-sm font-medium text-gray-900">Options</h3>
+			<h3 className="text-sm font-medium text-gray-900">{t("options")}</h3>
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{product.options.map((option) => {
 					const availableValues = getAvailableValues(option.name);
@@ -136,7 +138,7 @@ const ShopifyAttributeSelect = ({
 								}
 							>
 								<SelectTrigger className="w-full">
-									<SelectValue placeholder={`Select ${option.name}`} />
+									<SelectValue placeholder={`${t("select")} ${option.name}`} />
 								</SelectTrigger>
 								<SelectContent>
 									{option.values.map((value) => {
@@ -149,7 +151,7 @@ const ShopifyAttributeSelect = ({
 												disabled={!isAvailable}
 												className={!isAvailable ? "text-gray-400" : ""}
 											>
-												{value} {!isAvailable && "(Out of stock)"}
+												{value} {!isAvailable && `(${t("outOfStock")})`}
 											</SelectItem>
 										);
 									})}
@@ -163,35 +165,39 @@ const ShopifyAttributeSelect = ({
 			{selectedVariant && (
 				<div className="mt-4 space-y-2 rounded-lg bg-gray-50 p-4">
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-gray-600">Selected variant:</span>
+						<span className="text-sm text-gray-600">
+							{t("selectedVariant")}
+						</span>
 						<span className="font-medium">{selectedVariant.title}</span>
 					</div>
 					{selectedVariant.sku && (
 						<div className="flex items-center justify-between">
-							<span className="text-sm text-gray-600">SKU:</span>
+							<span className="text-sm text-gray-600">{t("sku")}</span>
 							<span className="font-medium">{selectedVariant.sku}</span>
 						</div>
 					)}
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-gray-600">Price:</span>
+						<span className="text-sm text-gray-600">{t("price")}</span>
 						<span className="font-medium">€{selectedVariant.price}</span>
 					</div>
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-gray-600">Stock:</span>
+						<span className="text-sm text-gray-600">{t("stock")}</span>
 						<span
 							className={`font-medium ${selectedVariant.inventoryQuantity > 0 ? "text-green-600" : "text-red-600"}`}
 						>
 							{selectedVariant.inventoryQuantity > 0
-								? `${selectedVariant.inventoryQuantity} available`
-								: "Out of stock"}
+								? `${selectedVariant.inventoryQuantity} ${t("available")}`
+								: t("outOfStock")}
 						</span>
 					</div>
 					<div className="flex items-center justify-between">
-						<span className="text-sm text-gray-600">Available for sale:</span>
+						<span className="text-sm text-gray-600">
+							{t("availableForSale")}
+						</span>
 						<span
 							className={`font-medium ${selectedVariant.availableForSale ? "text-green-600" : "text-red-600"}`}
 						>
-							{selectedVariant.availableForSale ? "Yes" : "No"}
+							{selectedVariant.availableForSale ? t("yes") : t("no")}
 						</span>
 					</div>
 				</div>

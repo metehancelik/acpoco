@@ -13,6 +13,7 @@ import {
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
@@ -27,6 +28,7 @@ const ShopifyProductClient = ({
 	product,
 	initialVariant,
 }: ShopifyProductClientProps) => {
+	const t = useTranslations("Products");
 	const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant | null>(
 		initialVariant || product.variants.edges[0]?.node || null,
 	);
@@ -122,7 +124,7 @@ const ShopifyProductClient = ({
 												€{selectedVariant.price}
 											</span>
 											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-												%{discountPercent} indirim
+												%{discountPercent} {t("discount")}
 											</span>
 										</>
 									) : (
@@ -140,15 +142,15 @@ const ShopifyProductClient = ({
 									>
 										{selectedVariant.availableForSale &&
 										selectedVariant.inventoryQuantity > 0
-											? `${selectedVariant.inventoryQuantity} in stock`
-											: "Out of stock"}
+											? `${selectedVariant.inventoryQuantity} ${t("inStock")}`
+											: t("outOfStock")}
 									</span>
 								</div>
 							</>
 						)}
 
 						<div className="mt-6">
-							<h3 className="sr-only">Description</h3>
+							<h3 className="sr-only">{t("description")}</h3>
 							<div
 								//biome-ignore lint/security/noDangerouslySetInnerHtml: fix late
 								dangerouslySetInnerHTML={{ __html: product.description }}
@@ -183,7 +185,7 @@ const ShopifyProductClient = ({
 						{/* Product Details */}
 						<section aria-labelledby="details-heading" className="mt-12">
 							<h2 id="details-heading" className="sr-only">
-								Additional details
+								{t("additionalDetails")}
 							</h2>
 
 							<div className="divide-y divide-gray-200 border-t">
@@ -192,7 +194,7 @@ const ShopifyProductClient = ({
 									<h3>
 										<DisclosureButton className="group relative flex w-full items-center justify-between py-6 text-left">
 											<span className="text-sm font-medium text-gray-900 group-data-open:text-indigo-600">
-												Product Information
+												{t("productInformation")}
 											</span>
 											<span className="ml-6 flex items-center">
 												<PlusIcon
@@ -210,7 +212,7 @@ const ShopifyProductClient = ({
 										<dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
 											<div>
 												<dt className="text-sm font-medium text-gray-500">
-													Vendor
+													{t("vendor")}
 												</dt>
 												<dd className="text-sm text-gray-900">
 													{product.vendor}
@@ -218,7 +220,7 @@ const ShopifyProductClient = ({
 											</div>
 											<div>
 												<dt className="text-sm font-medium text-gray-500">
-													Product Type
+													{t("productType")}
 												</dt>
 												<dd className="text-sm text-gray-900">
 													{product.productType}
@@ -227,7 +229,7 @@ const ShopifyProductClient = ({
 											{product.tags.length > 0 && (
 												<div className="sm:col-span-2">
 													<dt className="text-sm font-medium text-gray-500">
-														Tags
+														{t("tags")}
 													</dt>
 													<dd className="text-sm text-gray-900">
 														<div className="flex flex-wrap gap-1 mt-1">

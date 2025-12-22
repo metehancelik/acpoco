@@ -4,6 +4,7 @@ import { Download, Printer, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -13,8 +14,6 @@ import { getWarehouseLocation } from "@/lib/utils";
 import type { IProduct } from "@/models/Product";
 import AlertNotification from "@/utils/alertNotification";
 import { classNames } from "@/utils/classNames";
-import { formatDate } from "@/utils/formatDate";
-import { formatStatus } from "@/utils/formatStatus";
 import httpClient from "@/utils/httpClient";
 import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
@@ -45,8 +44,36 @@ interface Props {
 	totalPages: number;
 }
 const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
+	const t = useTranslations("Orders");
+	const tMonths = useTranslations("Months");
 	const session = useSession();
 	const queryClient = useQueryClient();
+
+	const formatDateLocalized = (dateString: string) => {
+		const monthKeys = [
+			"january",
+			"february",
+			"march",
+			"april",
+			"may",
+			"june",
+			"july",
+			"august",
+			"september",
+			"october",
+			"november",
+			"december",
+		] as const;
+
+		const date = new Date(dateString);
+		const day = date.getUTCDate().toString().padStart(2, "0");
+		const month = tMonths(monthKeys[date.getUTCMonth()]);
+		const year = date.getUTCFullYear();
+		const hour = date.getUTCHours().toString().padStart(2, "0");
+		const minute = date.getUTCMinutes().toString().padStart(2, "0");
+
+		return `${day} ${month} ${year} - ${hour}:${minute}`;
+	};
 	const [noteModalOpen, setNoteModalOpen] = React.useState(false);
 	const [messageModal, setMessageModal] = React.useState(false);
 	const [message, setMessage] = React.useState("");
@@ -77,6 +104,23 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 		setIsAllSelected(false);
 	};
 
+	const getStatusLabel = (status: string) => {
+		switch (status) {
+			case "waitingMatch":
+				return t("waitingMatchStatus");
+			case "waitingPayment":
+				return t("waitingPaymentStatus");
+			case "waitingProduction":
+				return t("waitingProductionStatus");
+			case "processing":
+				return t("processingStatus");
+			case "shipped":
+				return t("shippedStatus");
+			default:
+				return status;
+		}
+	};
+
 	const renderStatus = (status: string) => {
 		if (status === "waitingMatch") {
 			return (
@@ -85,7 +129,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 						"py-2 px-4 bg-orange-500 text-white rounded-md text-center font-bold"
 					}
 				>
-					{formatStatus(status) || "Ödeme Bekliyor"}
+					{getStatusLabel(status)}
 				</p>
 			);
 		}
@@ -96,7 +140,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 						"py-2 px-4 bg-sage-blue text-white rounded-md text-center font-bold"
 					}
 				>
-					{formatStatus(status) || "Ödeme Bekliyor"}
+					{getStatusLabel(status)}
 				</p>
 			);
 		}
@@ -107,7 +151,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 						"py-2 px-4 bg-warning text-white rounded-md text-center font-bold"
 					}
 				>
-					{formatStatus(status) || "Ödeme Bekliyor"}
+					{getStatusLabel(status)}
 				</p>
 			);
 		}
@@ -118,7 +162,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 						"py-2 px-4 bg-sage-blue text-white rounded-md text-center font-bold"
 					}
 				>
-					{formatStatus(status) || "Ödeme Bekliyor"}
+					{getStatusLabel(status)}
 				</p>
 			);
 		}
@@ -129,7 +173,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 						"py-2 px-4 bg-primary text-white rounded-md text-center font-bold"
 					}
 				>
-					{formatStatus(status) || "Ödeme Bekliyor"}
+					{getStatusLabel(status)}
 				</p>
 			);
 		}
@@ -178,7 +222,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 		onError: (error) => {
 			// Handle error appropriately - you might want to show a toast notification here
 			console.error("Error uploading label:", error);
-			AlertNotification("Etiket yükleme hatası", "error");
+			AlertNotification(t("labelUploadError"), "error");
 		},
 	});
 
@@ -193,7 +237,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 		},
 		onError: (error) => {
 			console.error("Error deleting label:", error);
-			AlertNotification("Etiket silme hatası", "error");
+			AlertNotification(t("labelDeleteError"), "error");
 		},
 	});
 
@@ -214,7 +258,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 		onError: (error) => {
 			// Handle error appropriately - you might want to show a toast notification here
 			console.error("Error uploading label:", error);
-			AlertNotification("Görsel yükleme hatası", "error");
+			AlertNotification(t("imageUploadError"), "error");
 		},
 	});
 
@@ -231,7 +275,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 		},
 		onError: (error) => {
 			console.error("Error deleting image:", error);
-			AlertNotification("Görsel silme hatası", "error");
+			AlertNotification(t("imageDeleteError"), "error");
 		},
 	});
 	const updateWarehouseMutation = useMutation({
@@ -250,7 +294,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 			queryClient.invalidateQueries({ queryKey: ["orders"] });
 		},
 		onError: () => {
-			AlertNotification("Depo güncelleme hatası", "error");
+			AlertNotification(t("warehouseUpdateError"), "error");
 		},
 	});
 
@@ -260,20 +304,20 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 	const getEmptyMessage = () => {
 		switch (currentStatus) {
 			case "waitingProduction":
-				return "Üretim bekleyen siparişiniz bulunmamaktadır";
+				return t("noOrdersWaitingProduction");
 			case "processing":
-				return "Üretimde olan siparişiniz bulunmamaktadır";
+				return t("noOrdersInProduction");
 			case "shipped":
-				return "Kargo teslim edilmiş siparişiniz bulunmamaktadır";
+				return t("noShippedOrders");
 			default:
-				return "Bekleyen siparişiniz bulunmamaktadır";
+				return t("noPendingOrders");
 		}
 	};
 
 	const handlePrint = async () => {
 		try {
 			setIsLoading(true);
-			AlertNotification("Generating PDF...", "info");
+			AlertNotification(t("generatingPdf"), "info");
 
 			let response: Response;
 
@@ -320,13 +364,13 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 			// Clean up the object URL
 			URL.revokeObjectURL(url);
 
-			AlertNotification("PDF generated successfully", "success");
+			AlertNotification(t("pdfGenerated"), "success");
 
 			// Revalidate the orders query to reflect the status changes
 			queryClient.invalidateQueries({ queryKey: ["orders"] });
 		} catch (err) {
 			console.error("PDF generation error:", err);
-			AlertNotification("Error generating PDF", "error");
+			AlertNotification(t("errorGeneratingPdf"), "error");
 		} finally {
 			setIsLoading(false);
 		}
@@ -353,14 +397,18 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 									}}
 								>
 									<SelectTrigger className="bg-sage-blue text-white w-[200px]">
-										<SelectValue placeholder="Durum Değiştir" />
+										<SelectValue placeholder={t("changeStatus")} />
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="waitingProduction">
-											Üretim Bekliyor
+											{t("waitingProductionStatus")}
 										</SelectItem>
-										<SelectItem value="processing">Üretiliyor</SelectItem>
-										<SelectItem value="shipped">Kargo Teslim</SelectItem>
+										<SelectItem value="processing">
+											{t("processingStatus")}
+										</SelectItem>
+										<SelectItem value="shipped">
+											{t("shippedStatus")}
+										</SelectItem>
 									</SelectContent>
 								</Select>
 							)}
@@ -372,7 +420,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 										disabled={isLoading || !data}
 									>
 										<Printer className="h-4 w-4" />
-										Siparişleri Yazdır
+										{t("printOrders")}
 									</Button>
 								</div>
 							)}
@@ -402,7 +450,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 														}}
 													/>
 												)}
-												<p>Durum</p>
+												<p>{t("status")}</p>
 											</div>
 										</th>
 
@@ -410,27 +458,27 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 											scope="col"
 											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
 										>
-											Mağaza İsmi
+											{t("storeName")}
 										</th>
 
 										<th
 											scope="col"
 											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
 										>
-											Sipariş Tarihi
+											{t("orderDate")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 bg-gray-50"
 										>
-											Son Teslim Tarihi
+											{t("dueDate")}
 										</th>
 
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50"
 										>
-											Ürün Bilgileri
+											{t("productInfo")}
 										</th>
 										{/* <th
                       scope="col"
@@ -448,43 +496,43 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50"
 										>
-											Notlar
+											{t("notes")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50 "
 										>
-											Adres
+											{t("address")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50 "
 										>
-											Kargo
+											{t("shipping")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50 "
 										>
-											Ara Depo
+											{t("warehouse")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50"
 										>
-											Ücret
+											{t("price")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50"
 										>
-											Görsel
+											{t("image")}
 										</th>
 										<th
 											scope="col"
 											className="sticky top-0 z-10 py-3.5 text-sm pl-3 pr-4 sm:pr-6 bg-gray-50 rounded-tr-lg"
 										>
-											İşlemler
+											{t("actions")}
 										</th>
 									</tr>
 								</thead>
@@ -522,12 +570,12 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 												</td>
 												<td className="px-3 py-1 text-xs ">
 													<div className="flex flex-col min-w-24">
-														<p>{formatDate(order.orderDate)}</p>
+														<p>{formatDateLocalized(order.orderDate)}</p>
 													</div>
 												</td>
 												<td className="px-3 py-1 text-xs ">
 													<div className="flex flex-col min-w-24">
-														<p>{formatDate(order.shipByDate)}</p>
+														<p>{formatDateLocalized(order.shipByDate)}</p>
 													</div>
 												</td>
 												<td className="whitespace-nowrap px-3 py-1 text-xs relative">
@@ -562,7 +610,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																			variant="outline"
 																			className="bg-green-500 text-white hover:bg-green-600 peer cursor-pointer"
 																		>
-																			Eşleşti
+																			{t("matched")}
 																		</Badge>
 																	) : (
 																		<div className="w-full flex justify-start">
@@ -607,7 +655,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																				})
 																			)}
 																			<p className="text-xs font-bold">
-																				Adet:{item.quantity}
+																				{t("quantity")}:{item.quantity}
 																			</p>
 																		</div>
 																	}
@@ -680,7 +728,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 															)}
 														>
 															<Tooltip
-																content="Hediye Mesajı"
+																content={t("giftMessage")}
 																anchorSelect={`#gift-${order.orderId}`}
 																place="right"
 																offset={10}
@@ -721,7 +769,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 															)}
 														>
 															<Tooltip
-																content="Müşteri Notu"
+																content={t("customerNote")}
 																style={{
 																	backgroundColor: "#87c484",
 																	zIndex: 9999,
@@ -759,7 +807,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																	zIndex: 9999,
 																	opacity: 1,
 																}}
-																content="Not Ekle"
+																content={t("addNote")}
 																place="right"
 																anchorSelect={`#seller-${order.orderId}`}
 															/>
@@ -804,14 +852,14 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																<Upload className="size-4" />{" "}
 																{uploadLabelMutation.isPending &&
 																selectedOrder?._id === order._id
-																	? "Yükleniyor..."
-																	: "Label Yükle"}
+																	? t("uploading")
+																	: t("uploadLabel")}
 															</label>
 															<Input
 																type="file"
 																id="label"
 																className="hidden"
-																placeholder="Label yükle"
+																placeholder={t("uploadLabel")}
 																onChange={async (e) => {
 																	setSelectedOrder(order);
 																	const file = e.target.files?.[0];
@@ -840,8 +888,8 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 														>
 															{deleteLabelMutation.isPending &&
 															selectedOrder?._id === order._id
-																? "Siliniyor..."
-																: "Label Sil"}
+																? t("deleting")
+																: t("deleteLabel")}
 														</Button>
 													)}
 													{session.data?.user?.role === "ADMIN" &&
@@ -853,7 +901,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																className="flex mt-2 items-center gap-2 text-xs text-white hover:bg-blue-700 cursor-pointer bg-blue-600 rounded-md px-2 py-1"
 															>
 																<Download className="size-4" />
-																<p>Etiket İndir</p>
+																<p>{t("downloadLabel")}</p>
 															</a>
 														)}
 												</td>
@@ -871,22 +919,25 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																defaultValue={order?.warehouse}
 																className="py-1 px-2 rounded-md border border-secondary"
 															>
-																<option value="">Ara depo seçiniz</option>
-																<option value="shipEntegra">Almanya</option>
+																<option value="">{t("selectWarehouse")}</option>
+																<option value="shipEntegra">
+																	{t("germany")}
+																</option>
 																<option value="kullanıcı">
-																	Satıcı(Bana gelsin)
+																	{t("sellerSendToMe")}
 																</option>
 															</select>
 														)}
 
 														{order.warehouseTrackingNumber && (
 															<p className="text-xs">
-																Takip No: {order.warehouseTrackingNumber}
+																{t("trackingNo")}:{" "}
+																{order.warehouseTrackingNumber}
 															</p>
 														)}
 														{order.warehouseShippingService && (
 															<p className="text-xs">
-																Servis: {order.warehouseShippingService}
+																{t("service")}: {order.warehouseShippingService}
 															</p>
 														)}
 														{session.data?.user?.role === "ADMIN" && (
@@ -894,7 +945,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																size={"sm"}
 																onClick={() => handleWareHouseModal(order)}
 															>
-																Kargo Bilgisi Gir
+																{t("enterShippingInfo")}
 															</Button>
 														)}
 													</div>
@@ -975,14 +1026,14 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																		>
 																			<Upload className="size-4" />{" "}
 																			{uploadImageMutation.isPending
-																				? "Yükleniyor..."
-																				: "Görsel Yükle"}
+																				? t("uploading")
+																				: t("uploadImage")}
 																		</label>
 																		<Input
 																			type="file"
 																			id="image"
 																			className="hidden"
-																			placeholder="Görsel Yükle"
+																			placeholder={t("uploadImage")}
 																			onChange={async (e) => {
 																				const file = e.target.files?.[0];
 																				if (!file) return;
@@ -1011,7 +1062,7 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 																onClick={() => handlePayment(order)}
 																className="bg-sage-blue text-white rounded-md px-4 py-1 font-bold"
 															>
-																Ödeme Yap
+																{t("makePayment")}
 															</button>
 														)}
 													</div>

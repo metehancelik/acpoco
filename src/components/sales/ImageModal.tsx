@@ -8,6 +8,7 @@ import {
 } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/16/solid";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
@@ -22,6 +23,7 @@ const ImageModal: React.FC<Props> = ({
 	setIsModalOpen,
 	imgUrl,
 }) => {
+	const t = useTranslations("Orders");
 	return (
 		<Transition show={isModalOpen} as={React.Fragment}>
 			<Dialog
@@ -65,7 +67,7 @@ const ImageModal: React.FC<Props> = ({
 								>
 									<div className="border-b-2 border-lightGray">
 										<p className="text-[24px] font-bold text-headerPrimary mb-2">
-											Ürün Fotoğrafı{" "}
+											{t("productPhoto")}
 										</p>
 									</div>
 								</DialogTitle>
@@ -73,7 +75,7 @@ const ImageModal: React.FC<Props> = ({
 									<Image
 										src={normalizeImageSrc(imgUrl)}
 										loading="lazy"
-										alt="Ürün Fotoğrafı"
+										alt={t("productPhoto")}
 										className="w-full"
 										width={400}
 										height={400}
@@ -87,7 +89,7 @@ const ImageModal: React.FC<Props> = ({
 											setIsModalOpen(false);
 										}}
 									>
-										Kapat
+										{t("close")}
 									</button>
 								</div>
 							</DialogPanel>

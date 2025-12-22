@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import httpClient from "@/utils/httpClient";
@@ -23,6 +24,7 @@ interface IUser {
 }
 
 const UsersTable = () => {
+	const t = useTranslations("Dashboard");
 	const searchParams = useSearchParams();
 	const queryClient = useQueryClient();
 	const page = searchParams?.get("page") || "1";
@@ -54,12 +56,12 @@ const UsersTable = () => {
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["users", page] });
-			toast.success("İndirim oranı güncellendi");
+			toast.success(t("discountUpdated"));
 		},
 		onError: (error: unknown) => {
 			toast.error(
 				(error as AxiosError<{ message: string }>)?.response?.data?.message ||
-					"İndirim güncellenirken bir hata oluştu",
+					t("discountUpdateError"),
 			);
 		},
 	});
@@ -74,13 +76,13 @@ const UsersTable = () => {
 	}
 
 	if (error) {
-		toast.error("Kullanıcılar yüklenirken bir hata oluştu");
+		toast.error(t("usersLoadError"));
 		return null;
 	}
 
 	return (
 		<div className="rounded-md bg-gray-50 p-5 text-sm w-full">
-			<h2 className="text-2xl font-bold mb-4">Kullanıcılar</h2>
+			<h2 className="text-2xl font-bold mb-4">{t("users")}</h2>
 			<div className="flow-root ">
 				<div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 h-[40vh] overflow-y-auto relative">
 					<div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -91,43 +93,43 @@ const UsersTable = () => {
 										scope="col"
 										className="sticky bg-gray-50 top-0 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0"
 									>
-										İsim
+										{t("firstName")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
 									>
-										Soyisim
+										{t("lastName")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
 									>
-										Email
+										{t("email")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
 									>
-										Mağaza Adı
+										{t("storeName")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
 									>
-										Bakiye
+										{t("balance")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
 									>
-										İndirim (%)
+										{t("discountPercent")}
 									</th>
 									<th
 										scope="col"
 										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
 									>
-										Detay
+										{t("detail")}
 									</th>
 								</tr>
 							</thead>
@@ -182,7 +184,7 @@ const UsersTable = () => {
 												href={`/users/${user._id}`}
 												className="bg-sage-blue hover:bg-indigo-400 text-center py-2 px-4 rounded-md text-white"
 											>
-												Detay
+												{t("detail")}
 											</Link>
 										</td>
 									</tr>

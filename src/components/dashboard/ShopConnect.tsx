@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -33,6 +34,8 @@ interface FormValues {
 }
 
 const ShopConnect = () => {
+	const t = useTranslations("Dashboard");
+	const tCommon = useTranslations("Common");
 	const queryClient = useQueryClient();
 	const { control, handleSubmit, reset } = useForm<FormValues>({
 		defaultValues: {
@@ -62,7 +65,7 @@ const ShopConnect = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["mystores"] });
 			queryClient.invalidateQueries({ queryKey: ["users"] });
-			toast.success("Mağaza başarıyla bağlandı");
+			toast.success(t("storeConnected"));
 			reset();
 		},
 		onError: (error: unknown) => {
@@ -78,7 +81,7 @@ const ShopConnect = () => {
 				"message" in error.response.data &&
 				typeof error.response.data.message === "string"
 					? error.response.data.message
-					: "Mağaza bağlanırken bir hata oluştu";
+					: t("storeConnectError");
 			toast.error(errorMessage);
 		},
 	});
@@ -88,7 +91,7 @@ const ShopConnect = () => {
 
 	const onSubmit = (data: FormValues) => {
 		if (!data.shopId || !data.userId) {
-			toast.error("Lütfen mağaza ve kullanıcı seçiniz");
+			toast.error(t("selectStoreAndUser"));
 			return;
 		}
 
@@ -111,7 +114,7 @@ const ShopConnect = () => {
 						value={field.value}
 					>
 						<SelectTrigger>
-							<SelectValue placeholder="Mağaza seçiniz" />
+							<SelectValue placeholder={t("selectStore")} />
 						</SelectTrigger>
 						<SelectContent>
 							{shops?.stores?.map((shop: Shop) => (
@@ -135,7 +138,7 @@ const ShopConnect = () => {
 						value={field.value}
 					>
 						<SelectTrigger>
-							<SelectValue placeholder="Kullanıcı seçiniz" />
+							<SelectValue placeholder={t("selectUser")} />
 						</SelectTrigger>
 						<SelectContent>
 							{users?.map((user) => (
@@ -149,7 +152,7 @@ const ShopConnect = () => {
 			/>
 
 			<Button type="submit" disabled={isLoading}>
-				Onayla
+				{tCommon("submit")}
 			</Button>
 		</form>
 	);

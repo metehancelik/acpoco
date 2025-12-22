@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { useForm } from "react-hook-form";
 
@@ -28,6 +29,8 @@ const WarehouseModal: React.FC<Props> = ({
 	setIsWarehouseModalOpen,
 	order,
 }) => {
+	const t = useTranslations("Orders");
+	const tCommon = useTranslations("Common");
 	const form = useForm<FormValues>({
 		defaultValues: {
 			trackingNumber: "",
@@ -66,16 +69,16 @@ const WarehouseModal: React.FC<Props> = ({
 		<Dialog open={isWarehouseModalOpen} onOpenChange={handleClose}>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Kargo Bilgileri</DialogTitle>
+					<DialogTitle>{t("shippingInfo")}</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="trackingNumber">Takip Numarası</Label>
+						<Label htmlFor="trackingNumber">{t("trackingNumber")}</Label>
 						<Input
 							id="trackingNumber"
-							placeholder="Takip numarasını girin"
+							placeholder={t("enterTrackingNumber")}
 							{...form.register("trackingNumber", {
-								required: "Takip numarası gerekli",
+								required: t("trackingNumberRequired"),
 							})}
 						/>
 						{form.formState.errors.trackingNumber && (
@@ -86,12 +89,12 @@ const WarehouseModal: React.FC<Props> = ({
 					</div>
 
 					<div className="flex flex-col gap-2">
-						<Label htmlFor="shippingService">Kargo Servisi</Label>
+						<Label htmlFor="shippingService">{t("shippingService")}</Label>
 						<Input
 							id="shippingService"
-							placeholder="Kargo servisini girin"
+							placeholder={t("enterShippingService")}
 							{...form.register("shippingService", {
-								required: "Kargo servisi gerekli",
+								required: t("shippingServiceRequired"),
 							})}
 						/>
 						{form.formState.errors.shippingService && (
@@ -103,10 +106,10 @@ const WarehouseModal: React.FC<Props> = ({
 
 					<div className="flex justify-end gap-2 pt-4">
 						<Button type="button" variant="outline" onClick={handleClose}>
-							İptal
+							{tCommon("cancel")}
 						</Button>
 						<Button type="submit" size="lg" disabled={mutation.isPending}>
-							{mutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+							{mutation.isPending ? tCommon("saving") : tCommon("save")}
 						</Button>
 					</div>
 				</form>

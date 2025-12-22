@@ -9,6 +9,7 @@ import {
 } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -27,6 +28,7 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 
 	// refetchData,
 }) => {
+	const t = useTranslations("Orders");
 	const session = useSession();
 	const queryClient = useQueryClient();
 	// const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -50,7 +52,7 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["orders"] });
-			toast.success("Not güncellendi");
+			toast.success(t("noteUpdated"));
 		},
 	});
 
@@ -107,7 +109,7 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 									as="h3"
 									className="text-lg mb-8 font-medium text-center leading-6 text-gray-900"
 								>
-									Sipariş Notu
+									{t("orderNote")}
 								</DialogTitle>
 
 								<div className="py-8 px-8">
@@ -115,7 +117,7 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 										className="w-full h-40 rounded-lg border border-gray-300 resize-none text-sm px-2"
 										value={note}
 										disabled={session.data?.user?.role === "ADMIN"}
-										placeholder="Lütfen sipariş hakkındaki notunuzu giriniz"
+										placeholder={t("enterOrderNote")}
 										onChange={handleNoteChange}
 									/>
 								</div>
@@ -125,7 +127,7 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 										className="inline-flex justify-center rounded-md border border-transparent bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 										onClick={() => setIsModalOpen(false)}
 									>
-										Vazgeç
+										{t("cancel")}
 									</button>
 									<button
 										type="button"
@@ -134,8 +136,8 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 										onClick={handleAddNote}
 									>
 										{updateNoteMutation.isPending
-											? "Güncelleniyor..."
-											: "Onayla"}
+											? t("updating")
+											: t("confirm")}
 									</button>
 								</div>
 							</DialogPanel>

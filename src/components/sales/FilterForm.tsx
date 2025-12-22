@@ -4,6 +4,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale/tr";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
 import DatePicker, { registerLocale, setDefaultLocale } from "react-datepicker";
 import { Controller, useForm } from "react-hook-form";
@@ -78,6 +79,7 @@ type Inputs = {
 };
 
 const FilterForm = () => {
+	const t = useTranslations("Orders");
 	const session = useSession();
 	const [stores, setStores] = React.useState([]);
 	const {
@@ -153,7 +155,7 @@ const FilterForm = () => {
 								htmlFor="orderStatus"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Sipariş Durumu
+								{t("orderStatus")}
 							</label>
 
 							<select
@@ -164,26 +166,26 @@ const FilterForm = () => {
 								className="w-full text-sm rounded-md border border-primary py-2 pl-3 pr-10 text-gray-900"
 							>
 								<option className="text-sm" value="">
-									Hepsi
+									{t("all")}
 								</option>
 								{session.data?.user?.role !== "ADMIN" && (
 									<option className="text-sm" value="waitingMatch">
-										Eşleşme Bekleyen
+										{t("waitingMatch")}
 									</option>
 								)}
 								{session.data?.user?.role !== "ADMIN" && (
 									<option className="text-sm" value="waitingPayment">
-										Ödeme Bekleyen
+										{t("waitingPayment")}
 									</option>
 								)}
 								<option className="text-sm" value="waitingProduction">
-									Üretim Bekleyen
+									{t("waitingProduction")}
 								</option>
 								<option className="text-sm" value="processing">
-									Üretiliyor
+									{t("processing")}
 								</option>
 								<option className="text-sm" value="shipped">
-									Kargoya Verilenler
+									{t("shipped")}
 								</option>
 							</select>
 						</div>
@@ -198,7 +200,7 @@ const FilterForm = () => {
 								htmlFor="store"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Mağaza
+								{t("store")}
 							</label>
 
 							<select
@@ -209,7 +211,7 @@ const FilterForm = () => {
 								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 							>
 								<option className="text-sm" value="">
-									Hepsi
+									{t("all")}
 								</option>
 								{stores.map((store: { storeId: string; storeName: string }) => (
 									<option key={store.storeId} value={store.storeId}>
@@ -229,7 +231,7 @@ const FilterForm = () => {
 								htmlFor="country"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Ülke
+								{t("country")}
 							</label>
 
 							<select
@@ -240,7 +242,7 @@ const FilterForm = () => {
 								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 							>
 								<option className="text-sm" value="">
-									Hepsi
+									{t("all")}
 								</option>
 								{COUNTRIES.map((country: { code: string; name: string }) => (
 									<option key={country.code} value={country.code}>
@@ -260,7 +262,7 @@ const FilterForm = () => {
 								htmlFor="warehouse"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Ara Depo
+								{t("warehouse")}
 							</label>
 
 							<select
@@ -271,7 +273,7 @@ const FilterForm = () => {
 								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 							>
 								<option className="text-sm" value="">
-									Hepsi
+									{t("all")}
 								</option>
 								{WAREHOUSES.map((warehouse: { code: string; name: string }) => (
 									<option key={warehouse.code} value={warehouse.code}>
@@ -291,12 +293,12 @@ const FilterForm = () => {
 								htmlFor="orderId"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Sipariş No
+								{t("orderNo")}
 							</label>
 
 							<input
 								{...field}
-								placeholder="Sipariş no giriniz"
+								placeholder={t("enterOrderNo")}
 								className="w-full rounded-md border border-primary py-2 px-2 text-sm text-gray-900 h-9"
 							/>
 						</div>
@@ -332,7 +334,7 @@ const FilterForm = () => {
 								htmlFor="startDate"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Başlangıç
+								{t("startDate")}
 							</label>
 							<DatePicker
 								className="rounded-md text-sm text-text-primary pl-2 w-full pr-0 py-1.5"
@@ -340,7 +342,7 @@ const FilterForm = () => {
 								selected={field.value}
 								onChange={(date) => field.onChange(date)}
 								maxDate={new Date()}
-								placeholderText="Başlangıç tarihi"
+								placeholderText={t("startDatePlaceholder")}
 								monthsShown={1}
 								locale={tr}
 								dateFormat="dd/MM/yyyy"
@@ -357,7 +359,7 @@ const FilterForm = () => {
 								htmlFor="endDate"
 								className=" text-sm font-medium leading-6 text-gray-900"
 							>
-								Bitiş
+								{t("endDate")}
 							</label>
 
 							<DatePicker
@@ -366,7 +368,7 @@ const FilterForm = () => {
 								selected={field.value}
 								onChange={(date) => field.onChange(date)}
 								maxDate={new Date()}
-								placeholderText="Bitiş tarihi"
+								placeholderText={t("endDatePlaceholder")}
 								monthsShown={1}
 								locale={tr}
 								dateFormat="dd/MM/yyyy"
@@ -379,7 +381,7 @@ const FilterForm = () => {
 					type="submit"
 					className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1 mt-6 items-center gap-x-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-primary/90  focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
 				>
-					Filtrele
+					{t("filter")}
 				</button>
 			</form>
 		</div>

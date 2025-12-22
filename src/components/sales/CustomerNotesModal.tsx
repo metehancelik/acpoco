@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	Dialog,
 	DialogPanel,
@@ -5,6 +7,7 @@ import {
 	Transition,
 } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/16/solid";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 interface Props {
@@ -19,6 +22,7 @@ const CustomerNotesModal: React.FC<Props> = ({
 	message,
 	isGift,
 }) => {
+	const t = useTranslations("Orders");
 	return (
 		<Transition show={isModalOpen} as={React.Fragment}>
 			<Dialog
@@ -62,7 +66,7 @@ const CustomerNotesModal: React.FC<Props> = ({
 								>
 									<div className="border-b-2 border-lightGray">
 										<p className="text-[24px] font-bold text-headerPrimary mb-2">
-											{isGift ? "Hediye Notu" : "Müşteri Notu"}
+											{isGift ? t("giftNote") : t("customerNote")}
 										</p>
 									</div>
 								</DialogTitle>
@@ -77,7 +81,7 @@ const CustomerNotesModal: React.FC<Props> = ({
 											setIsModalOpen(false);
 										}}
 									>
-										Kapat
+										{t("close")}
 									</button>
 								</div>
 							</DialogPanel>

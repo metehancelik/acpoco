@@ -1,7 +1,9 @@
+"use client";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 import AlertNotification from "@/utils/alertNotification";
-import { formatStatus } from "@/utils/formatStatus";
 import httpClient from "@/utils/httpClient";
 
 import { Button } from "../ui/button";
@@ -29,7 +31,21 @@ const ConfirmStatusChange = ({
 	open,
 	onClose,
 }: ConfirmStatusChangeProps) => {
+	const t = useTranslations("Orders");
 	const queryClient = useQueryClient();
+
+	const getStatusLabel = (statusKey: string) => {
+		switch (statusKey) {
+			case "waitingProduction":
+				return t("waitingProductionStatus");
+			case "processing":
+				return t("processingStatus");
+			case "shipped":
+				return t("shippedStatus");
+			default:
+				return statusKey;
+		}
+	};
 
 	const mutation = useMutation({
 		mutationFn: async () => {
@@ -44,11 +60,11 @@ const ConfirmStatusChange = ({
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["orders"] }); // to refresh orders list
-			AlertNotification("Status successfully updated", "success");
+			AlertNotification(t("statusUpdated"), "success");
 			onClose();
 		},
 		onError: () => {
-			AlertNotification("Failed to update status", "error");
+			AlertNotification(t("statusUpdateFailed"), "error");
 		},
 	});
 
@@ -56,28 +72,31 @@ const ConfirmStatusChange = ({
 		<Dialog open={open} onOpenChange={onClose}>
 			<DialogContent className="max-w-xl">
 				<DialogHeader>
-					<DialogTitle>Durum Değiştirme</DialogTitle>
+					<DialogTitle>{t("statusChange")}</DialogTitle>
 					<DialogDescription>
 						<p>
 							{isAllSelected
-								? "Tüm siparişlerin durumunu"
-								: `Seçilen ${orderIds?.length} adet siparişin durumunu`}
+								? t("allOrdersStatus")
+								: t("selectedOrdersStatus", { count: orderIds?.length })}
 						</p>
 						<p>
-							{formatStatus(status)} olarak değiştirmek istediğinize emin
-							misiniz?
+							{getStatusLabel(status)} {t("confirmStatusChange")}
 						</p>
 					</DialogDescription>
 				</DialogHeader>
 				<DialogFooter>
-					<Button variant="outline" className="bg-danger text-white">
-						Kapat
+					<Button
+						variant="outline"
+						className="bg-danger text-white"
+						onClick={onClose}
+					>
+						{t("close")}
 					</Button>
 					<Button
 						className="bg-primary text-white"
 						onClick={() => mutation.mutate()}
 					>
-						Onayla
+						{t("confirm")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

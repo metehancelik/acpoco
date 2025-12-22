@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
+import { getTranslations } from "next-intl/server";
 
 import AllWalletLogs from "@/components/dashboard/AllWalletLogs";
 import GetProducts from "@/components/dashboard/GetProducts";
@@ -17,10 +18,12 @@ export default async function AdminDashboard() {
 		redirect("/");
 	}
 
+	const t = await getTranslations("Dashboard");
+
 	return (
 		<div className="p-8 text-text">
-			<h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-			<p>Mağaza Bağlama</p>
+			<h1 className="text-3xl font-bold mb-6">{t("adminDashboard")}</h1>
+			<p>{t("storeConnect")}</p>
 			<ShopConnect />
 			<br />
 			<GetProducts />

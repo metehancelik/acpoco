@@ -1,4 +1,7 @@
+"use client";
+
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import AlertNotification from "@/utils/alertNotification";
@@ -18,6 +21,8 @@ interface IWalletLog {
 	changedBy: { name: string };
 }
 const WalletLogs = () => {
+	const t = useTranslations("Wallet");
+	const tCommon = useTranslations("Common");
 	const [walletLogs, setWalletLogss] = useState<IWalletLog[] | null>([]);
 	const [totalPages, setTotalPages] = useState<number>(0);
 	useEffect(() => {
@@ -27,23 +32,23 @@ const WalletLogs = () => {
 				setWalletLogss(res.data.logs);
 				setTotalPages(res.data.totalPages);
 			} catch (error: unknown) {
-				AlertNotification("Bir hata oluştu!", "error");
+				AlertNotification(tCommon("loading"), "error");
 				console.error(error);
 			}
 		};
 		getWalletLogs();
-	}, []);
+	}, [tCommon]);
 
 	return (
 		<div className="bg-gray-50 p-4">
-			<p className="font-bold text-primary mb-2">Cüzdan Hareketleri</p>
+			<p className="font-bold text-primary mb-2">{t("walletTransactions")}</p>
 			<div className="w-full flex text-center rounded-t-md border-b border-b-primary bg-gray-50 py-2 text-text-primary font-bold">
-				<p className="w-1/6">İsim</p>
-				<p className="w-1/6">Tutar</p>
-				<p className="w-1/6">Tipi</p>
-				<p className="w-1/6">Tarih</p>
-				<p className="w-1/6">Bilgi</p>
-				<p className="w-1/6">İşlem Sahibi</p>
+				<p className="w-1/6">{t("name")}</p>
+				<p className="w-1/6">{t("amount")}</p>
+				<p className="w-1/6">{t("type")}</p>
+				<p className="w-1/6">{t("date")}</p>
+				<p className="w-1/6">{t("info")}</p>
+				<p className="w-1/6">{t("transactionOwner")}</p>
 			</div>
 			<div className="w-full flex flex-col text-center rounded-t-md bg-gray-50 text-sm">
 				{walletLogs && walletLogs.length > 0 ? (
@@ -60,7 +65,7 @@ const WalletLogs = () => {
 						);
 					})
 				) : (
-					<p>Yükleniyor...</p>
+					<p>{tCommon("loading")}</p>
 				)}
 			</div>
 			<Pagination totalPages={totalPages} />

@@ -3,6 +3,7 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { useEffect, useState } from "react";
 
@@ -36,6 +37,8 @@ interface IStoreTable {
 
 const Profile = () => {
 	const session = useSession();
+	const t = useTranslations("Profile");
+	const tCommon = useTranslations("Common");
 	const [stores, setStores] = useState<IStoreTable[] | null>(null);
 	const [name, setName] = useState<string>("");
 	const [surname, setSurname] = useState<string>("");
@@ -53,10 +56,7 @@ const Profile = () => {
 		e.preventDefault();
 		try {
 			await axios.put("/api/users/", { name, surname });
-			AlertNotification(
-				"Profil bilgileriniz başarıyla güncellendi.",
-				"success",
-			);
+			AlertNotification(t("profileUpdated"), "success");
 		} catch (error) {
 			console.error("Error updating user:", error);
 		}
@@ -82,10 +82,10 @@ const Profile = () => {
 			<div className="w-full flex space-x-4">
 				<div className="flex flex-col items-stretch w-full  space-y-4 md:w-1/2">
 					<div className="flex flex-col w-full rounded-md bg-gray-100 p-5 space-y-4">
-						<p className="font-bold text-primary">Profil Bilgileri</p>
+						<p className="font-bold text-primary">{t("profileInfo")}</p>
 						<div className="flex justify-between items-center bg-white p-3 rounded-md shadow-md">
 							<div className="flex items-center">
-								<p className="mr-3 text-sm">İsim:</p>
+								<p className="mr-3 text-sm">{t("firstName")}:</p>
 								<input
 									type="text"
 									id="name"
@@ -96,7 +96,7 @@ const Profile = () => {
 								/>
 							</div>
 							<div className="flex items-center">
-								<p className="mr-3 text-sm">Soyisim:</p>
+								<p className="mr-3 text-sm">{t("lastName")}:</p>
 								<input
 									type="text"
 									id="surname"
@@ -111,7 +111,7 @@ const Profile = () => {
 								className="text-primary px-4 py-1 text-sm flex items-center justify-center space-x-3 border border-primary rounded-md bg-white"
 							>
 								<PencilSquareIcon width={24} height={24} />
-								<p className="font-bold">Düzenle</p>
+								<p className="font-bold">{tCommon("edit")}</p>
 							</button>
 						</div>
 						<div className="flex justify-start items-center bg-white text-sm p-3 rounded-md shadow-md">
@@ -124,7 +124,7 @@ const Profile = () => {
 								"flex flex-col rounded-md bg-gray-100 space-y-4",
 							)}
 						>
-							<p className="font-bold text-primary">Mağazalarım</p>
+							<p className="font-bold text-primary">{t("myStores")}</p>
 
 							<div className="w-full space-y-4">
 								{stores && stores?.length > 0 ? (
@@ -137,7 +137,7 @@ const Profile = () => {
 										</div>
 									))
 								) : (
-									<p>Henüz mağaza yok!</p>
+									<p>{t("noStoresYet")}</p>
 								)}
 							</div>
 						</div>

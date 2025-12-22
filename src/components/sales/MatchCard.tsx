@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import debounce from "debounce";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ interface MatchCardProps {
 }
 
 export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
+	const t = useTranslations("Orders");
+	const tCommon = useTranslations("Common");
 	const session = useSession();
 	const [open, setOpen] = useState(false);
 	const [inputValue, setInputValue] = useState<string>("");
@@ -95,7 +98,7 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 			// Invalidate relevant queries to refetch the data
 			queryClient.invalidateQueries({ queryKey: ["orders"] });
 			AlertNotification({
-				message: "Ürün eşleştirildi",
+				message: t("productMatched"),
 				type: "success",
 			});
 			setOpen(false);
@@ -104,7 +107,7 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 		onError: (error) => {
 			console.error("Match error:", error);
 			AlertNotification({
-				message: "Eşleştirme sırasında bir hata oluştu",
+				message: t("matchError"),
 				type: "error",
 			});
 		},
@@ -146,22 +149,22 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 					session.data?.user?.role === "SELLER" &&
 					orderStatus === "waitingMatch" && (
 						<Button className="bg-red-500 text-white hover:bg-red-600 h-auto px-2.5 py-0.5 text-xs font-semibold">
-							Eşleştir
+							{t("match")}
 						</Button>
 					)}
 			</DialogTrigger>
 			<DialogContent className="max-w-2xl">
 				<DialogHeader>
-					<DialogTitle>Ürün Eşleştirme</DialogTitle>
+					<DialogTitle>{t("productMatching")}</DialogTitle>
 					<DialogDescription>
-						Ürün eslestirmek icin arama yapiniz.
+						{t("productMatchingDescription")}
 					</DialogDescription>
 				</DialogHeader>
 				<div className="py-4">
 					<div className="flex items-center gap-4">
 						<Input
 							id="query"
-							placeholder="Ürün arama"
+							placeholder={t("productSearch")}
 							value={inputValue}
 							onChange={(e) => setInputValue(e.target.value)}
 						/>
@@ -221,7 +224,9 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 							!areAllAttributesSelected()
 						}
 					>
-						{updateMatchMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+						{updateMatchMutation.isPending
+							? tCommon("saving")
+							: tCommon("save")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

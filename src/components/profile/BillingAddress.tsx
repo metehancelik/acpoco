@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -41,6 +42,8 @@ type IBillingAddress = {
 
 const BillingAddress = () => {
 	const queryClient = useQueryClient();
+	const t = useTranslations("Billing");
+	const tCommon = useTranslations("Common");
 	const [billingAddress, setBillingAddress] =
 		React.useState<IBillingAddress | null>(null);
 	const {
@@ -140,7 +143,7 @@ const BillingAddress = () => {
 			);
 		},
 		onSuccess: () => {
-			AlertNotification("Fatura adresi güncellendi", "success");
+			AlertNotification(t("billingAddressUpdated"), "success");
 			queryClient.invalidateQueries({ queryKey: ["billing-address"] });
 		},
 		onError: (error: unknown) => {
@@ -156,7 +159,9 @@ const BillingAddress = () => {
 
 	return (
 		<div className="w-full lg:w-1/2 rounded-md bg-gray-100 p-5 text-sm">
-			<p className="font-bold text-primary mb-4 text-base"> Fatura Bilgileri</p>
+			<p className="font-bold text-primary mb-4 text-base">
+				{t("billingInfo")}
+			</p>
 			<form
 				className="grid grid-cols-12 gap-3 "
 				onSubmit={handleSubmit(onSubmit)}
@@ -166,17 +171,17 @@ const BillingAddress = () => {
 					name="salutation"
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Hitap</label>
+							<label htmlFor="">{t("salutation")}</label>
 							<select
 								{...field}
 								id="salutation"
 								name="salutation"
 								className="w-full p-2 border border-gray-300 rounded-md text-sm bg-white"
 							>
-								<option value="">Seçiniz</option>
-								<option value="Mr">Bay</option>
-								<option value="Ms">Bayan</option>
-								<option value="Other">Diğer</option>
+								<option value="">{t("select")}</option>
+								<option value="Mr">{t("mr")}</option>
+								<option value="Ms">{t("ms")}</option>
+								<option value="Other">{t("other")}</option>
 							</select>
 						</div>
 					)}
@@ -186,13 +191,13 @@ const BillingAddress = () => {
 					name="title"
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Başlık</label>
+							<label htmlFor="">{t("title")}</label>
 							<input
 								{...field}
 								type="text"
 								id="title"
 								name="title"
-								placeholder="Fatura başlığı"
+								placeholder={t("invoiceTitle")}
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
 							/>
@@ -204,14 +209,16 @@ const BillingAddress = () => {
 					name="firstName"
 					rules={{
 						validate: (v) =>
-							isCompany ? true : Boolean((v || "").trim()) || "İsim gereklidir",
+							isCompany
+								? true
+								: Boolean((v || "").trim()) || t("firstNameRequired"),
 					}}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">İsim</label>
+							<label htmlFor="">{t("firstName")}</label>
 							<input
 								{...field}
-								placeholder="İsminizi giriniz"
+								placeholder={t("enterFirstName")}
 								type="text"
 								id="firstName"
 								name="firstName"
@@ -233,15 +240,15 @@ const BillingAddress = () => {
 						validate: (v) =>
 							isCompany
 								? true
-								: Boolean((v || "").trim()) || "Soyisim gereklidir",
+								: Boolean((v || "").trim()) || t("lastNameRequired"),
 					}}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Soyisim</label>
+							<label htmlFor="">{t("lastName")}</label>
 							<input
 								{...field}
 								type="text"
-								placeholder="Soyisminizi giriniz"
+								placeholder={t("enterLastName")}
 								id="lastName"
 								name="lastName"
 								value={field.value}
@@ -258,14 +265,14 @@ const BillingAddress = () => {
 				<Controller
 					control={control}
 					name="street"
-					rules={{ required: "Sokak gereklidir" }}
+					rules={{ required: t("streetRequired") }}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Sokak</label>
+							<label htmlFor="">{t("street")}</label>
 							<input
 								{...field}
 								type="text"
-								placeholder="Sokak adı"
+								placeholder={t("streetName")}
 								id="street"
 								name="street"
 								value={field.value}
@@ -282,15 +289,15 @@ const BillingAddress = () => {
 				<Controller
 					control={control}
 					name="houseNumber"
-					rules={{ required: "No gereklidir" }}
+					rules={{ required: t("houseNumberRequired") }}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">No</label>
+							<label htmlFor="">{t("houseNumber")}</label>
 							<input
 								{...field}
 								type="text"
 								id="houseNumber"
-								placeholder="Ev/Bina No"
+								placeholder={t("houseBuildingNo")}
 								name="houseNumber"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -308,12 +315,12 @@ const BillingAddress = () => {
 					name="addressLine2"
 					render={({ field }) => (
 						<div className="col-span-12">
-							<label htmlFor="">Adres Ek</label>
+							<label htmlFor="">{t("addressLine2")}</label>
 							<input
 								{...field}
 								type="text"
 								id="addressLine2"
-								placeholder="Daire, kat, blok vb. (opsiyonel)"
+								placeholder={t("addressLine2Placeholder")}
 								name="addressLine2"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -324,15 +331,15 @@ const BillingAddress = () => {
 				<Controller
 					control={control}
 					name="city"
-					rules={{ required: "Şehir gereklidir" }}
+					rules={{ required: t("cityRequired") }}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Şehir (Ort)</label>
+							<label htmlFor="">{t("city")}</label>
 							<input
 								{...field}
 								type="text"
 								id="city"
-								placeholder="Şehir giriniz"
+								placeholder={t("enterCity")}
 								name="city"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -348,15 +355,15 @@ const BillingAddress = () => {
 				<Controller
 					control={control}
 					name="country"
-					rules={{ required: "Ülke gereklidir" }}
+					rules={{ required: t("countryRequired") }}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Ülke</label>
+							<label htmlFor="">{t("country")}</label>
 							<input
 								{...field}
 								type="text"
 								id="country"
-								placeholder="Ülke giriniz (örn. Almanya)"
+								placeholder={t("enterCountry")}
 								name="country"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -373,17 +380,17 @@ const BillingAddress = () => {
 					control={control}
 					name="zipCode"
 					rules={{
-						required: "Posta kodu gereklidir",
-						pattern: { value: /^[0-9]{5}$/, message: "PLZ 5 haneli olmalıdır" },
+						required: t("zipCodeRequired"),
+						pattern: { value: /^[0-9]{5}$/, message: t("zipCode5Digits") },
 					}}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Posta Kodu (PLZ)</label>
+							<label htmlFor="">{t("zipCode")}</label>
 							<input
 								{...field}
 								type="text"
 								id="zipCode"
-								placeholder="Posta kodu giriniz"
+								placeholder={t("enterZipCode")}
 								name="zipCode"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -401,12 +408,12 @@ const BillingAddress = () => {
 					name="gsmNumber"
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Telefon</label>
+							<label htmlFor="">{t("phone")}</label>
 							<input
 								{...field}
 								type="text"
 								id="gsmNumber"
-								placeholder="GSM Numarası"
+								placeholder={t("gsmNumber")}
 								name="gsmNumber"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -419,12 +426,12 @@ const BillingAddress = () => {
 					name="companyName"
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">Şirket Adı</label>
+							<label htmlFor="">{t("companyName")}</label>
 							<input
 								{...field}
 								type="text"
 								id="companyName"
-								placeholder="Şirket adı (varsa)"
+								placeholder={t("companyNamePlaceholder")}
 								name="companyName"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -439,17 +446,17 @@ const BillingAddress = () => {
 						validate: (v) => {
 							if (!isCompany) return true;
 							const ok = /^DE[0-9]{9}$/.test((v || "").toUpperCase());
-							return ok || "USt-IdNr. 'DE' + 9 rakam olmalıdır";
+							return ok || t("vatNumberInvalid");
 						},
 					}}
 					render={({ field }) => (
 						<div className="col-span-6">
-							<label htmlFor="">USt-IdNr. (DEXXXXXXXXX)</label>
+							<label htmlFor="">{t("vatNumber")}</label>
 							<input
 								{...field}
 								type="text"
 								id="vatNumber"
-								placeholder="DE ile başlayan KDV Numarası"
+								placeholder={t("vatNumberPlaceholder")}
 								name="vatNumber"
 								value={field.value}
 								className="w-full p-2 border border-gray-300 rounded-md text-sm"
@@ -467,7 +474,7 @@ const BillingAddress = () => {
 						disabled={isFetching || isUpdating}
 						className="text-primary font-bold w-full px-4 py-2 text-sm flex items-center justify-center space-x-3 border border-primary rounded-md bg-white hover:bg-primary hover:text-white"
 					>
-						<p>{isUpdating ? "Bekleyiniz..." : "Kaydet"}</p>
+						<p>{isUpdating ? tCommon("pleaseWait") : tCommon("save")}</p>
 					</button>
 				</div>
 			</form>

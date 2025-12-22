@@ -1,11 +1,13 @@
+"use client";
+
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import type React from "react";
 
 import AlertNotification from "@/utils/alertNotification";
 import { classNames } from "@/utils/classNames";
-import { formatDate } from "@/utils/formatDate";
 
 interface IWalletDeposit {
 	_id: number;
@@ -20,7 +22,35 @@ interface WalletItemProps {
 }
 
 const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
+	const t = useTranslations("Wallets");
+	const tMonths = useTranslations("Months");
 	const queryClient = useQueryClient();
+
+	const formatDateLocalized = (dateString: string) => {
+		const monthKeys = [
+			"january",
+			"february",
+			"march",
+			"april",
+			"may",
+			"june",
+			"july",
+			"august",
+			"september",
+			"october",
+			"november",
+			"december",
+		] as const;
+
+		const date = new Date(dateString);
+		const day = date.getUTCDate().toString().padStart(2, "0");
+		const month = tMonths(monthKeys[date.getUTCMonth()]);
+		const year = date.getUTCFullYear();
+		const hour = date.getUTCHours().toString().padStart(2, "0");
+		const minute = date.getUTCMinutes().toString().padStart(2, "0");
+
+		return `${day} ${month} ${year} - ${hour}:${minute}`;
+	};
 
 	const updateStatusMutation = useMutation({
 		mutationFn: async (status: "APPROVED" | "REJECTED") => {
@@ -28,13 +58,13 @@ const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
 		},
 		onSuccess: (_, status) => {
 			const message =
-				status === "APPROVED" ? "Talep onaylandı" : "Talep reddedildi";
+				status === "APPROVED" ? t("requestApproved") : t("requestRejected");
 			AlertNotification(message, "success");
 			queryClient.invalidateQueries({ queryKey: ["wallets"] });
 		},
 		onError: (error) => {
 			console.error(error);
-			AlertNotification("Bir hata oluştu!", "error");
+			AlertNotification(t("errorOccurred"), "error");
 		},
 	});
 
@@ -44,11 +74,11 @@ const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
 
 	const refactorStatus = (status: string) => {
 		if (status === "PENDING") {
-			return "Beklemede";
+			return t("pending");
 		} else if (status === "APPROVED") {
-			return "Onaylandı";
+			return t("approved");
 		} else if (status === "REJECTED") {
-			return "Red";
+			return t("rejected");
 		}
 	};
 
@@ -67,14 +97,16 @@ const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
 					/>
 				)}
 			</div>
-			<div className="w-1/6 text-center">{formatDate(item.createdAt)}</div>
+			<div className="w-1/6 text-center">
+				{formatDateLocalized(item.createdAt)}
+			</div>
 			<div className="w-1/6 text-center">
 				<button
 					onClick={() => handleUpdateStatus("APPROVED")}
 					disabled={updateStatusMutation.isPending || item.status !== "PENDING"}
 					className="w-1/6 text-center text-green-600 hover:text-green-800 disabled:opacity-50 disabled:hover:text-green-600"
 				>
-					{updateStatusMutation.isPending ? "İşleniyor..." : "Onayla"}
+					{updateStatusMutation.isPending ? t("processing") : t("approve")}
 				</button>
 			</div>
 			<div className="w-1/6 text-center">
@@ -86,7 +118,7 @@ const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
 						"px-2 text-white rounded-md py-1",
 					)}
 				>
-					{updateStatusMutation.isPending ? "İşleniyor..." : "Reddet"}
+					{updateStatusMutation.isPending ? t("processing") : t("reject")}
 				</button>
 			</div>
 		</div>

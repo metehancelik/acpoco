@@ -1,9 +1,14 @@
+"use client";
+
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import AlertNotification from "@/utils/alertNotification";
 
 const PasswordChange = () => {
+	const t = useTranslations("Profile");
+	const tCommon = useTranslations("Common");
 	const [oldPassword, setOldPassword] = React.useState("");
 	const [newPassword, setNewPassword] = React.useState("");
 	const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -22,7 +27,7 @@ const PasswordChange = () => {
 	const handleSubmit = async (e: React.SyntheticEvent) => {
 		e.preventDefault();
 		if (newPassword !== confirmPassword) {
-			AlertNotification("Şifreler uyuşmuyor", "success");
+			AlertNotification(t("passwordsDoNotMatch"), "error");
 
 			return;
 		}
@@ -32,7 +37,7 @@ const PasswordChange = () => {
 				newPassword,
 				confirmPassword,
 			});
-			AlertNotification("Şifre başarıyla değiştirildi", "success");
+			AlertNotification(t("passwordChanged"), "success");
 		} catch (error: unknown) {
 			AlertNotification(error as string, "error");
 		}
@@ -43,10 +48,10 @@ const PasswordChange = () => {
 			onSubmit={handleSubmit}
 			className="flex flex-col w-full rounded-md bg-gray-100 p-5 space-y-3 text-sm"
 		>
-			<p className="font-bold text-primary text-base">Şifre Değiştir</p>
+			<p className="font-bold text-primary text-base">{t("changePassword")}</p>
 			<div className="flex flex-col">
 				<label htmlFor="old-password" className="mr-3">
-					Eski Şifre:
+					{t("oldPassword")}:
 				</label>
 				<input
 					type="password"
@@ -59,7 +64,7 @@ const PasswordChange = () => {
 			</div>
 			<div className="flex flex-col">
 				<label htmlFor="new-password" className="mr-3">
-					Yeni Şifre:
+					{t("newPassword")}:
 				</label>
 				<input
 					onChange={handleChange}
@@ -72,7 +77,7 @@ const PasswordChange = () => {
 			</div>
 			<div className="flex flex-col">
 				<label htmlFor="confirm-password" className="mr-3">
-					Yeni Şifre Tekrar:
+					{t("confirmNewPassword")}:
 				</label>
 				<input
 					onChange={handleChange}
@@ -87,7 +92,7 @@ const PasswordChange = () => {
 				type="submit"
 				className="text-primary font-bold px-4 py-2 text-sm flex items-center justify-center space-x-3 border border-primary rounded-md bg-white hover:bg-primary hover:text-white"
 			>
-				<p>Kaydet</p>
+				<p>{tCommon("save")}</p>
 			</button>
 		</form>
 	);

@@ -5,6 +5,7 @@ import {
 	ArrowLongRightIcon,
 } from "@heroicons/react/20/solid";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface PaginationProps {
 	totalPages: number;
@@ -13,6 +14,7 @@ interface PaginationProps {
 const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
 	const searchParams = useSearchParams();
 	const router = useRouter();
+	const t = useTranslations("Common");
 	const currentPage = Math.min(
 		Math.max(1, parseInt(searchParams?.get("page") || "1", 10)),
 		totalPages,
@@ -36,7 +38,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
 						aria-hidden="true"
 						className="mr-3 h-5 w-5 text-gray-400"
 					/>
-					Önceki
+					{t("previous")}
 				</button>
 			</div>
 			<div className="hidden md:-mt-px md:flex">
@@ -67,7 +69,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages }) => {
 					disabled={currentPage === totalPages}
 					className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700 disabled:opacity-50"
 				>
-					Sonraki
+					{t("next")}
 					<ArrowLongRightIcon
 						aria-hidden="true"
 						className="ml-3 h-5 w-5 text-gray-400"
