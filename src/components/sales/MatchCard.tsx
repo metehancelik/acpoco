@@ -79,12 +79,16 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 	};
 
 	const updateMatchMutation = useMutation({
-		mutationFn: async () => {
-			if (!selectedProduct) return;
-
-			return httpClient.post(`/orders/${orderId}/`, {
+		mutationFn: async (data: {
+			productId: string;
+			attributes: Record<string, string>;
+		}) => {
+			return httpClient.post(`/orders/${orderId}`, {
 				orderItemId: orderItem.orderItemId,
-				selectedAttributes,
+				selectedAttributes: {
+					...data.attributes,
+					productId: data.productId,
+				},
 			});
 		},
 		onSuccess: () => {
@@ -93,6 +97,15 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 			AlertNotification({
 				message: "Ürün eşleştirildi",
 				type: "success",
+			});
+			setOpen(false);
+			resetDialog();
+		},
+		onError: (error) => {
+			console.error("Match error:", error);
+			AlertNotification({
+				message: "Eşleştirme sırasında bir hata oluştu",
+				type: "error",
 			});
 		},
 	});
@@ -120,9 +133,10 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 
 	const handleSave = () => {
 		if (!selectedProduct) return;
-		updateMatchMutation.mutate();
-		setOpen(false);
-		resetDialog();
+		updateMatchMutation.mutate({
+			productId: selectedProduct._id as string,
+			attributes: selectedAttributes,
+		});
 	};
 
 	return (
@@ -178,7 +192,6 @@ export function MatchCard({ orderId, orderItem, orderStatus }: MatchCardProps) {
 											setSelectedAttributes((prev) => ({
 												...prev,
 												[attribute.name]: value,
-												productId: selectedProduct._id,
 											}));
 										}}
 									>
