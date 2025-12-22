@@ -28,6 +28,7 @@ import httpClient from "@/utils/httpClient";
 
 import LoginModal from "../auth/LoginModal";
 import BalanceModal from "../sales/BalanceModal";
+import LocaleSwitcher from "./LocaleSwitcher";
 
 export default function Sidebar() {
 	const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -110,6 +111,9 @@ export default function Sidebar() {
 						</TransitionChild>
 						{/* Sidebar component */}
 						<div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 ring-1 ring-gray-100 pt-4 shadow-2xl">
+							<div className="flex justify-end">
+								<LocaleSwitcher />
+							</div>
 							<nav className="flex flex-1 flex-col">
 								<ul className="flex flex-1 flex-col gap-y-7">
 									<li>
@@ -266,6 +270,7 @@ export default function Sidebar() {
 						</button>
 					)}
 					<div className="flex items-center gap-x-3 ml-2">
+						<LocaleSwitcher />
 						{session?.data?.user ? (
 							<button
 								type="button"

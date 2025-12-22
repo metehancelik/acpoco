@@ -35,7 +35,7 @@ export default async function RootLayout({
 	params: { locale },
 }: Readonly<{
 	children: React.ReactNode;
-	params: { locale: "en" | "tr" };
+	params: { locale: "en" | "tr" | "de" };
 }>) {
 	setRequestLocale(locale);
 

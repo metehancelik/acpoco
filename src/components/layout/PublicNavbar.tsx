@@ -18,6 +18,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/routing";
 
 import LoginModal from "../auth/LoginModal";
+import LocaleSwitcher from "./LocaleSwitcher";
 import ProfileDropdown from "./ProfileDropdown";
 
 const PublicNavbar = () => {
@@ -71,7 +72,7 @@ const PublicNavbar = () => {
 						{/* Sidebar component */}
 						<div className="flex grow flex-col gap-y-3 overflow-y-auto bg-white px-6 pb-6 shadow-2xl">
 							{/* Header */}
-							<div className="flex h-16 shrink-0 items-center border-b border-gray-100">
+							<div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-100">
 								<Link
 									href="/"
 									className="text-2xl font-bold"
@@ -84,6 +85,7 @@ const PublicNavbar = () => {
 										height={60}
 									/>
 								</Link>
+								<LocaleSwitcher />
 							</div>
 
 							<nav className="flex flex-1 flex-col">
@@ -199,6 +201,7 @@ const PublicNavbar = () => {
 					</div>
 
 					<div className="flex items-center space-x-3">
+						<LocaleSwitcher />
 						{!session?.data && (
 							<button
 								type="button"

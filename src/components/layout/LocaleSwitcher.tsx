@@ -16,6 +16,9 @@ export default function LocaleSwitcher() {
 			<option key={"en"} value={"en"}>
 				🇺🇸 EN
 			</option>
+			<option key={"de"} value={"de"}>
+				🇩🇪 DE
+			</option>
 		</LocaleSwitcherSelect>
 	);
 }

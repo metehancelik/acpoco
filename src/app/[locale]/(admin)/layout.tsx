@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 
 import localFont from "next/font/local";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { ToastContainer } from "react-toastify";
 
 import Sidebar from "@/components/layout/Sidebar";
+import { routing } from "@/i18n/routing";
 import "react-datepicker/dist/react-datepicker.css";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -25,21 +29,33 @@ export const metadata: Metadata = {
 	description: "Acpoco B2B",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
+	params: { locale },
 }: Readonly<{
 	children: React.ReactNode;
+	params: { locale: "en" | "tr" | "de" };
 }>) {
+	setRequestLocale(locale);
+
+	if (!routing.locales.includes(locale)) {
+		notFound();
+	}
+
+	const messages = await getMessages();
+
 	return (
-		<html lang="en">
+		<html lang={locale}>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<ToastContainer />
-				<Sidebar />
-				<main className="py-24">
-					<div className="px-4 sm:px-6">{children}</div>
-				</main>
+				<NextIntlClientProvider messages={messages}>
+					<ToastContainer />
+					<Sidebar />
+					<main className="py-24">
+						<div className="px-4 sm:px-6">{children}</div>
+					</main>
+				</NextIntlClientProvider>
 			</body>
 		</html>
 	);
