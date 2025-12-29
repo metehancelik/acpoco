@@ -99,6 +99,15 @@ export async function GET(request: Request) {
 					localField: "advancedOptions.storeId",
 					foreignField: "storeId",
 				},
+				{
+					path: "items.matchId",
+					model: "ProductVariant",
+					populate: {
+						path: "productId",
+						model: "Product",
+						select: "images",
+					},
+				},
 			]);
 
 		const orders = await ordersQuery;
@@ -160,6 +169,15 @@ export async function POST(request: Request) {
 				model: "Store",
 				localField: "advancedOptions.storeId",
 				foreignField: "storeId",
+			},
+			{
+				path: "items.matchId",
+				model: "ProductVariant",
+				populate: {
+					path: "productId",
+					model: "Product",
+					select: "images",
+				},
 			},
 		]);
 
