@@ -53,6 +53,7 @@ const ProductPage = async ({
 			title: dbProduct.title,
 			handle: dbProduct.parentSku,
 			description: dbProduct.description,
+			descriptionHtml: dbProduct.descriptionHtml,
 			status: "ACTIVE",
 			vendor: "ACPOCO",
 			productType: dbProduct.category?.name || "Uncategorized",

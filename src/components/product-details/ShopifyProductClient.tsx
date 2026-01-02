@@ -153,8 +153,10 @@ const ShopifyProductClient = ({
 							<h3 className="sr-only">{t("description")}</h3>
 							<div
 								//biome-ignore lint/security/noDangerouslySetInnerHtml: fix late
-								dangerouslySetInnerHTML={{ __html: product.description }}
-								className="space-y-6 text-base text-gray-700"
+								dangerouslySetInnerHTML={{
+									__html: product.descriptionHtml || product.description,
+								}}
+								className="space-y-4 text-base text-gray-700 html-content"
 							/>
 						</div>
 

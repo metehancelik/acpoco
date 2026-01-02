@@ -82,6 +82,7 @@ export interface ShopifyCollection {
 	title: string;
 	handle: string;
 	description?: string;
+	descriptionHtml?: string;
 	image?: ShopifyImage;
 }
 
