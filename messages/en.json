@@ -16,6 +16,7 @@
 		"loggingOut": "Logging out...",
 		"register": "Register",
 		"profile": "Profile",
+		"favorites": "Favorites",
 		"myAccount": "My Account",
 		"closeSidebar": "Close sidebar",
 		"openSidebar": "Open sidebar",
@@ -44,6 +45,7 @@
 		"adding": "Adding...",
 		"addToFavorites": "Add to Favorites",
 		"addedToFavorites": "Product added to favorites",
+		"inFavorites": "In Favorites",
 		"errorAddingToFavorites": "Error adding product to favorites",
 		"discount": "discount",
 		"inStock": "in stock",
@@ -113,6 +115,7 @@
 		"myOrders": "My Orders",
 		"dashboard": "Dashboard",
 		"balanceRequests": "Balance Requests",
+		"discountRequests": "Discount Requests",
 		"supplySystem": "Supply System",
 		"allProducts": "All Products"
 	},

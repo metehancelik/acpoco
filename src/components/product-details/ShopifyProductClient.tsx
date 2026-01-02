@@ -12,11 +12,12 @@ import {
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import AddToFavoritesButton from "@/components/product-details/addToFavoritesButton";
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
+import { useDiscounts } from "@/hooks/useDiscounts";
 import type { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
 
 interface ShopifyProductClientProps {
@@ -80,17 +81,15 @@ const ShopifyProductClient = ({
 		}
 	}, [selectedVariant, uniqueImages]);
 
-	const { data: session } = useSession();
-	const discountPercent = session?.user?.discountPercent || 0;
+	const { getDiscountedPrice } = useDiscounts();
+
+	const { finalPrice: discountedVariantPrice, discountPercent } =
+		getDiscountedPrice(
+			selectedVariant ? Number(selectedVariant.price) : 0,
+			(product as any).category?._id || (product as any).category,
+			selectedVariant?.id,
+		);
 	const showDiscount = discountPercent > 0;
-	const discountedVariantPrice = selectedVariant
-		? Number(
-				(
-					Number(selectedVariant.price) *
-					(1 - Math.min(100, Math.max(0, discountPercent)) / 100)
-				).toFixed(2),
-			)
-		: null;
 
 	return (
 		<div className="bg-white w-full mt-8 lg:mt-12">
@@ -209,21 +208,9 @@ const ShopifyProductClient = ({
 						/>
 
 						{/* Action Buttons */}
-						{/* <div className="mt-10 flex items-center space-x-4">
-              {selectedVariant && selectedVariant.availableForSale && selectedVariant.inventoryQuantity > 0 ? (
-                <AddToCartButton productId={selectedVariant.id} />
-              ) : (
-                <button
-                  disabled
-                  className="flex items-center justify-center rounded-md border border-transparent bg-gray-300 px-8 py-3 text-base font-medium text-white cursor-not-allowed"
-                >
-                  Out of Stock
-                </button>
-              )}
-              {hasSession && (
-                <AddToFavoritesButton productId={product.id} />
-              )}
-            </div> */}
+						<div className="mt-10 flex flex-col sm:flex-row items-center gap-4 justify-end">
+							{selectedVariant && <AddToFavoritesButton product={product} />}
+						</div>
 
 						{/* Product Details */}
 						<section aria-labelledby="details-heading" className="mt-12">

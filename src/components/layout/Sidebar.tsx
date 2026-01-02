@@ -10,7 +10,9 @@ import {
 	ArrowRightStartOnRectangleIcon,
 	Bars3Icon,
 	GiftIcon,
+	HeartIcon,
 	PresentationChartBarIcon,
+	TagIcon,
 	TruckIcon,
 	UserCircleIcon,
 	WalletIcon,
@@ -59,8 +61,13 @@ export default function Sidebar() {
 	if (session?.data?.user.role === "SELLER") {
 		navigation.push({
 			name: tCommon("profile"),
-			href: "profile",
+			href: "/profile",
 			icon: UserCircleIcon,
+		});
+		navigation.push({
+			name: tCommon("favorites"),
+			href: "/favorites",
+			icon: HeartIcon,
 		});
 	}
 	const { data: wallet } = useQuery({
@@ -166,6 +173,24 @@ export default function Sidebar() {
 											{session?.data?.user?.role === "ADMIN" && (
 												<li>
 													<Link
+														href={"/discount-requests"}
+														onClick={() => setSidebarOpen(false)}
+														className={classNames(
+															"/discount-requests" ===
+																getLocationAfterLocale(location!)
+																? "bg-gold/10 text-gold"
+																: "text-gray-700 hover:bg-gold/10 hover:text-gold",
+															"group flex gap-x-3 rounded-xl p-3 text-sm font-semibold leading-6 transition-all duration-200",
+														)}
+													>
+														<TagIcon width={24} height={24} />
+														{t("discountRequests")}
+													</Link>
+												</li>
+											)}
+											{session?.data?.user?.role === "ADMIN" && (
+												<li>
+													<Link
 														href={"/wallets"}
 														onClick={() => setSidebarOpen(false)}
 														className={classNames(
@@ -240,6 +265,23 @@ export default function Sidebar() {
 											</Link>
 										</li>
 									))}
+									{session?.data?.user?.role === "ADMIN" && (
+										<li>
+											<Link
+												href={"/discount-requests"}
+												className={classNames(
+													"/discount-requests" ===
+														getLocationAfterLocale(location!)
+														? "bg-gold/10 text-gold"
+														: "text-gray-600 hover:bg-gold/10 hover:text-gold",
+													"group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition-all duration-200",
+												)}
+											>
+												<TagIcon width={20} height={20} />
+												{t("discountRequests")}
+											</Link>
+										</li>
+									)}
 									{session?.data?.user?.role === "ADMIN" && (
 										<li>
 											<Link

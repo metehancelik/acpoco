@@ -16,6 +16,7 @@
 		"loggingOut": "Abmelden...",
 		"register": "Registrieren",
 		"profile": "Profil",
+		"favorites": "Favoriten",
 		"myAccount": "Mein Konto",
 		"closeSidebar": "Menü schließen",
 		"openSidebar": "Menü öffnen",
@@ -63,7 +64,8 @@
 		"available": "verfügbar",
 		"availableForSale": "Zum Verkauf verfügbar:",
 		"yes": "Ja",
-		"no": "Nein"
+		"no": "Nein",
+		"inFavorites": "In Favoriten"
 	},
 	"Billing": {
 		"billingInfo": "Rechnungsinformationen",
@@ -113,6 +115,7 @@
 		"myOrders": "Meine Bestellungen",
 		"dashboard": "Dashboard",
 		"balanceRequests": "Guthaben-Anfragen",
+		"discountRequests": "Rabattanfragen",
 		"supplySystem": "Liefersystem",
 		"allProducts": "Alle Produkte"
 	},

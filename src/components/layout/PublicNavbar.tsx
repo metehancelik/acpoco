@@ -9,6 +9,7 @@ import {
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/16/solid";
 import {
 	ArrowRightStartOnRectangleIcon,
+	HeartIcon,
 	UserIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -105,6 +106,16 @@ const PublicNavbar = () => {
 												>
 													<UserIcon className="w-5 h-5" />
 													{t("profile")}
+												</Link>
+											</li>
+											<li>
+												<Link
+													href="/favorites"
+													onClick={() => setSidebarOpen(false)}
+													className="flex items-center gap-3 px-4 py-3 text-gray-700 rounded-xl hover:bg-gold/10 hover:text-gold transition-colors"
+												>
+													<HeartIcon className="w-5 h-5" />
+													{tNav("favorites")}
 												</Link>
 											</li>
 											<li>
@@ -207,6 +218,17 @@ const PublicNavbar = () => {
 
 					<div className="flex items-center space-x-3">
 						<LocaleSwitcher />
+						{session?.data && (
+							<Link
+								href="/favorites"
+								className="text-gray-600 hover:text-gold flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-gold/10 transition-all duration-200 group relative"
+							>
+								<div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-gold/20 flex items-center justify-center transition-colors">
+									<HeartIcon className="w-5 h-5" />
+								</div>
+								<p className="font-medium">{tNav("favorites")}</p>
+							</Link>
+						)}
 						{!session?.data && (
 							<button
 								type="button"

@@ -16,6 +16,7 @@
 		"loggingOut": "Çıkış yapılıyor...",
 		"register": "Üye Ol",
 		"profile": "Profil",
+		"favorites": "Favorilerim",
 		"myAccount": "Hesabım",
 		"closeSidebar": "Menüyü kapat",
 		"openSidebar": "Menüyü aç",
@@ -44,6 +45,7 @@
 		"adding": "Ekleniyor...",
 		"addToFavorites": "Favoriye Ekle",
 		"addedToFavorites": "Ürün favorilere eklendi",
+		"inFavorites": "Favorilerimde",
 		"errorAddingToFavorites": "Ürün favorilere eklenirken bir hata oluştu",
 		"discount": "indirim",
 		"inStock": "stokta",
@@ -113,6 +115,7 @@
 		"myOrders": "Siparişlerim",
 		"dashboard": "Dashboard",
 		"balanceRequests": "Bakiye Talepleri",
+		"discountRequests": "İndirim Talepleri",
 		"supplySystem": "Tedarik Sistemine Giriş",
 		"allProducts": "Tüm Ürünler"
 	},

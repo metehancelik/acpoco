@@ -5,27 +5,31 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import type React from "react";
 
+import { useDiscounts } from "@/hooks/useDiscounts";
 import type { IProduct } from "@/models/Product";
 import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 type Props = {
 	product: IProduct;
+	isSelected?: boolean;
+	onSelectChange?: (checked: boolean) => void;
 };
-const FavoriteProductCard: React.FC<Props> = ({ product }) => {
+const FavoriteProductCard: React.FC<Props> = ({
+	product,
+	isSelected,
+	onSelectChange,
+}) => {
 	const queryClient = useQueryClient();
-	const { data: session } = useSession();
-	const discountPercent = session?.user?.discountPercent || 0;
+	const { getDiscountedPrice } = useDiscounts();
+
+	const { finalPrice: discounted, discountPercent } = getDiscountedPrice(
+		product.price,
+		product.category?._id || (product.category as any),
+	);
 	const showDiscount = discountPercent > 0;
 	const basePrice = product.price;
-	const discounted = Number(
-		(
-			basePrice *
-			(1 - Math.min(100, Math.max(0, discountPercent)) / 100)
-		).toFixed(2),
-	);
 	const removeFromFavorites = async () => {
 		await axios.delete(`/api/favorites`, {
 			data: { productId: product._id },
@@ -47,6 +51,14 @@ const FavoriteProductCard: React.FC<Props> = ({ product }) => {
 			key={product._id}
 			className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md"
 		>
+			<div className="absolute top-2 left-2 z-10 bg-white/80 p-1 rounded-md shadow-sm">
+				<input
+					type="checkbox"
+					checked={isSelected}
+					onChange={(e) => onSelectChange?.(e.target.checked)}
+					className="w-5 h-5 rounded border-gray-300 text-sage-blue focus:ring-sage-blue cursor-pointer"
+				/>
+			</div>
 			<Image
 				alt={product.images[0]}
 				src={normalizeImageSrc(product.images[0])}

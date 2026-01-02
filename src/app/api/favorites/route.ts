@@ -66,7 +66,9 @@ export async function GET() {
 		return NextResponse.json({ error: "User not found" }, { status: 404 });
 	}
 
-	const favorites = await Product.find({ _id: { $in: user.favorites } });
+	const favorites = await Product.find({
+		_id: { $in: user.favorites },
+	}).populate("category");
 
 	return NextResponse.json({ favorites }, { status: 200 });
 }
