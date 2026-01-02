@@ -34,6 +34,7 @@ interface OrderItemForPDF {
 	orderDate: Date;
 	order: OrderWithPopulatedItems & { _id: string };
 	matchImage: string | null;
+	attributes: ProductAttribute[] | null;
 }
 
 // Define interface for attribute structure
@@ -81,20 +82,34 @@ export async function generateOrdersPDF(
 		orders.forEach((order) => {
 			if (order.items && order.items.length > 0) {
 				order.items.forEach((item) => {
-					// Extract the match image URL if it exists
+					// Extract the match image URL and attributes if they exist
 					let matchImage = null;
+					let attributes: ProductAttribute[] | null = null;
+
 					if (
 						item.matchId &&
 						typeof item.matchId === "object" &&
-						"productId" in item.matchId &&
-						"images" in item.matchId.productId &&
-						Array.isArray(item.matchId.productId.images) &&
-						item.matchId.productId.images.length > 0
+						"productId" in item.matchId
 					) {
-						matchImage =
-							item.matchId?.productId?.images?.[0]
-								.replace("[", "")
-								.replace("]", "") || null;
+						// Extract images
+						if (
+							"images" in item.matchId.productId &&
+							Array.isArray(item.matchId.productId.images) &&
+							item.matchId.productId.images.length > 0
+						) {
+							matchImage =
+								item.matchId?.productId?.images?.[0]
+									.replace("[", "")
+									.replace("]", "") || null;
+						}
+
+						// Extract attributes
+						if (
+							"attributes" in item.matchId &&
+							Array.isArray(item.matchId.attributes)
+						) {
+							attributes = item.matchId.attributes as ProductAttribute[];
+						}
 					}
 
 					allOrderItems.push({
@@ -109,6 +124,7 @@ export async function generateOrdersPDF(
 						orderDate: new Date(order.orderDate),
 						order,
 						matchImage,
+						attributes,
 					});
 				});
 			}
@@ -258,13 +274,30 @@ export async function generateOrdersPDF(
 			detailsY += lineHeight;
 
 			pdf.setFont("Noto Sans", "bold");
-			if (item.options?.length) {
+			if (item.options?.length && order.advancedOptions.source === "etsy") {
 				item.options.forEach((option: { name: string; value: string }) => {
 					if (option.name && option.value) {
 						pdf.text(`${option.name}: ${option.value}`, detailsX, detailsY);
 						detailsY += lineHeight;
 					}
 				});
+			}
+			if (
+				order.advancedOptions.source === "amazon" &&
+				item.amazonCustomizationOptions?.length
+			) {
+				item.amazonCustomizationOptions.forEach(
+					(option: { label: string; option: string; priceDelta: number }) => {
+						if (option.label && option.option) {
+							pdf.text(
+								`${option.label}: ${option.option} `,
+								detailsX,
+								detailsY,
+							);
+							detailsY += lineHeight;
+						}
+					},
+				);
 			}
 
 			pdf.text(`SKU: ${item.sku || "N/A"}`, detailsX, detailsY);
@@ -370,7 +403,7 @@ export async function generateOrdersPDF(
 			// Draw country code / region marker in the bottom
 			pdf.setFont("Noto Sans", "bold");
 			pdf.setFontSize(16);
-			const warehouse = order.warehouse || "US";
+			const warehouse = order.warehouse || "DE";
 			pdf.text(warehouse, x + 20, bottomSectionY + 12, {
 				align: "center",
 			});
@@ -381,19 +414,15 @@ export async function generateOrdersPDF(
 			const standardX = x + 40;
 			let standardY = bottomSectionY + 5;
 
-			// Default attributes since matchId.attributes is not in the type
-			const defaultAttributes = [
+			// Default attributes if none are available
+			const defaultAttributes: ProductAttribute[] = [
 				{ name: "Material", value: "Gümüş" },
 				{ name: "Tip", value: "Tipli Kolye" },
 				{ name: "Zincir", value: "Normal Damla 7x5" },
 			];
 
-			// Get attributes safely or use defaults
-			// Using unknown + type guard since attributes is not defined in the type but may exist at runtime
-			const matchIdWithAttributes = item.matchId as unknown as {
-				attributes?: ProductAttribute[];
-			};
-			const attributes = matchIdWithAttributes?.attributes || defaultAttributes;
+			// Get attributes from allOrderItems or use defaults
+			const attributes = allOrderItems[i].attributes || defaultAttributes;
 
 			// Calculate smaller line height if we have many attributes
 			const attrLineHeight = attributes.length > 2 ? 3 : 4;
