@@ -8,6 +8,8 @@ export type IProductVariant = {
 	childSku: string;
 	price: number;
 	attributes: { name: string; value: string }[];
+	image?: string;
+	stock: number;
 };
 
 const ProductVariantSchema = new mongoose.Schema(
@@ -25,6 +27,7 @@ const ProductVariantSchema = new mongoose.Schema(
 				value: String,
 			},
 		],
+		image: { type: String },
 		stock: { type: Number, default: 0 },
 	},
 	{

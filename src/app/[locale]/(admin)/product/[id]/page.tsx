@@ -20,6 +20,7 @@ type DbVariant = {
 	childSku: string;
 	price: number;
 	stock: number;
+	image?: string;
 	attributes: { name: string; value: string }[];
 };
 
@@ -89,8 +90,17 @@ const ProductPage = async ({
 							name: attr.name,
 							value: attr.value,
 						})),
-						image:
-							dbProduct.images.length > 0
+						image: variant.image
+							? {
+									id: `variant-image-${variant._id.toString()}`,
+									url: variant.image,
+									altText: variant.attributes
+										.map((attr) => attr.value)
+										.join(" / "),
+									width: 800,
+									height: 800,
+								}
+							: dbProduct.images.length > 0
 								? {
 										id: `image-0`,
 										url: dbProduct.images[0],

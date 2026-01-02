@@ -31,6 +31,7 @@ interface ShopifyVariant {
 	availableForSale: boolean;
 	sku?: string;
 	selectedOptions: ShopifySelectedOption[];
+	image?: ShopifyImage;
 }
 
 interface ShopifyOption {
@@ -281,6 +282,7 @@ export async function GET() {
 							price: parseFloat(variant.price),
 							attributes: variantAttributes,
 							stock: variant.inventoryQuantity || 0,
+							image: variant.image?.url,
 						};
 
 						const existingVariant = await ProductVariantModel.findOne({

@@ -36,7 +36,7 @@ export const GET_PRODUCTS_QUERY = `
           createdAt
           updatedAt
           tags
-          images(first: 10) {
+          images(first: 250) {
             edges {
               node {
                 id
@@ -47,7 +47,7 @@ export const GET_PRODUCTS_QUERY = `
               }
             }
           }
-          variants(first: 10) {
+          variants(first: 250) {
             edges {
               node {
                 id
@@ -60,6 +60,13 @@ export const GET_PRODUCTS_QUERY = `
                 selectedOptions {
                   name
                   value
+                }
+                image {
+                  id
+                  url
+                  altText
+                  width
+                  height
                 }
               }
             }
@@ -113,7 +120,7 @@ export const GET_COLLECTIONS_QUERY = `
             width
             height
           }
-          products(first: 10) {
+          products(first: 250) {
             edges {
               node {
                 id
@@ -143,6 +150,7 @@ export const GET_PRODUCT_BY_ID_QUERY = `
       title
       handle
       description
+      descriptionHtml
       status
       vendor
       productType
@@ -151,7 +159,7 @@ export const GET_PRODUCT_BY_ID_QUERY = `
       tags
       totalInventory
       onlineStoreUrl
-      images(first: 20) {
+      images(first: 250) {
         edges {
           node {
             id
@@ -162,7 +170,7 @@ export const GET_PRODUCT_BY_ID_QUERY = `
           }
         }
       }
-      variants(first: 100) {
+      variants(first: 250) {
         edges {
           node {
             id
@@ -229,6 +237,7 @@ export const GET_PRODUCTS_BY_HANDLE_QUERY = `
           title
           handle
           description
+          descriptionHtml
           status
           vendor
           productType
@@ -237,7 +246,7 @@ export const GET_PRODUCTS_BY_HANDLE_QUERY = `
           tags
           totalInventory
           onlineStoreUrl
-          images(first: 20) {
+          images(first: 250) {
             edges {
               node {
                 id
@@ -248,7 +257,7 @@ export const GET_PRODUCTS_BY_HANDLE_QUERY = `
               }
             }
           }
-          variants(first: 100) {
+          variants(first: 250) {
             edges {
               node {
                 id
@@ -323,9 +332,10 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
             title
             handle
             description
+            descriptionHtml
             vendor
             productType
-            images(first: 5) {
+            images(first: 250) {
               edges {
                 node {
                   id
@@ -336,7 +346,7 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
                 }
               }
             }
-            variants(first: 5) {
+            variants(first: 250) {
               edges {
                 node {
                   id

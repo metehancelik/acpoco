@@ -14,7 +14,7 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
 import type { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
@@ -32,6 +32,54 @@ const ShopifyProductClient = ({
 	const [selectedVariant, setSelectedVariant] = useState<ShopifyVariant | null>(
 		initialVariant || product.variants.edges[0]?.node || null,
 	);
+	const [selectedIndex, setSelectedIndex] = useState(0);
+
+	// Get images to display - collect from product AND variants, then unique by URL
+	const uniqueImages = (() => {
+		const allImages = [
+			...product.images.edges.map((edge) => edge.node),
+			...product.variants.edges
+				.map((edge) => edge.node.image)
+				.filter((img): img is NonNullable<typeof img> => !!img),
+		];
+
+		// Filter by URL to remove duplicates
+		const seenUrls = new Set<string>();
+		return allImages.filter((img) => {
+			if (seenUrls.has(img.url)) return false;
+			seenUrls.add(img.url);
+			return true;
+		});
+	})();
+
+	// When an image is clicked, find if it belongs to a variant and select it
+	const handleTabChange = (index: number) => {
+		setSelectedIndex(index);
+		const clickedImage = uniqueImages[index];
+
+		if (clickedImage) {
+			const matchingVariant = product.variants.edges.find(
+				(edge) => edge.node.image?.url === clickedImage.url,
+			)?.node;
+
+			if (matchingVariant) {
+				setSelectedVariant(matchingVariant);
+			}
+		}
+	};
+
+	// When variant is changed (e.g. via dropdown), sync the gallery index
+	useEffect(() => {
+		if (selectedVariant?.image) {
+			const index = uniqueImages.findIndex(
+				(img) => img.url === selectedVariant.image?.url,
+			);
+			if (index !== -1) {
+				setSelectedIndex(index);
+			}
+		}
+	}, [selectedVariant, uniqueImages]);
+
 	const { data: session } = useSession();
 	const discountPercent = session?.user?.discountPercent || 0;
 	const showDiscount = discountPercent > 0;
@@ -44,23 +92,16 @@ const ShopifyProductClient = ({
 			)
 		: null;
 
-	// Get images to display (variant image or product images)
-	const imagesToShow = selectedVariant?.image
-		? [selectedVariant.image, ...product.images.edges.map((edge) => edge.node)]
-		: product.images.edges.map((edge) => edge.node);
-
-	// Remove duplicates
-	const uniqueImages = imagesToShow.filter(
-		(image, index, self) =>
-			index === self.findIndex((img) => img.id === image.id),
-	);
-
 	return (
 		<div className="bg-white w-full mt-8 lg:mt-12">
 			<div className="mx-auto px-4 py-8 md:px-0 sm:py-12 lg:max-w-6xl w-full">
 				<div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
 					{/* Image gallery */}
-					<TabGroup className="flex flex-col-reverse">
+					<TabGroup
+						selectedIndex={selectedIndex}
+						onChange={handleTabChange}
+						className="flex flex-col-reverse"
+					>
 						{/* Image selector */}
 						<div className="mx-auto mt-6 hidden w-full max-w-2xl sm:block lg:max-w-none">
 							<TabList className="grid grid-cols-4 gap-6">
