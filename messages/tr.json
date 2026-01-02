@@ -347,5 +347,17 @@
 		"october": "Ekim",
 		"november": "Kasım",
 		"december": "Aralık"
+	},
+	"DiscountRequest": {
+		"title": "İndirim Talebi Oluştur",
+		"selectedProductsInfo": "Seçili {count} ürün için indirim talebinde bulunuyorsunuz.",
+		"unknownProduct": "Bilinmeyen Ürün",
+		"quantity": "{count} adet",
+		"noteLabel": "Notunuz (Opsiyonel)",
+		"notePlaceholder": "Neden indirim istediğinizi buraya yazabilirsiniz...",
+		"sending": "Gönderiliyor...",
+		"sendRequest": "Talebi Gönder",
+		"requestSuccess": "İndirim talebiniz başarıyla iletildi.",
+		"requestError": "İndirim talebi gönderilirken bir hata oluştu."
 	}
 }

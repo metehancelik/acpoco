@@ -1,11 +1,13 @@
 "use client";
 
+import { HeartIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-import DiscountRequestModal from "@/components/cart/DiscountRequestModal";
+import DiscountRequestModal from "@/components/favorites/DiscountRequestModal";
 import FavoriteProductCard from "@/components/favorites/FavoriteProductCard";
 import Loading from "@/components/shared/Loading";
 import type { IProduct } from "@/models/Product";
@@ -60,58 +62,188 @@ export default function FavoritesPage() {
 			})) || [];
 
 	if (isLoading) {
-		return <Loading size={100} />;
+		return (
+			<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex items-center justify-center">
+				<Loading size={100} />
+			</div>
+		);
 	}
 
 	return (
-		<div className="mx-auto max-w-2xl px-4 lg:px-0 py-8 lg:py-16 lg:max-w-6xl min-h-screen">
-			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-				<h1 className="text-2xl font-bold">Favorilerim</h1>
+		<div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+			{/* Decorative Background Elements */}
+			<div className="fixed inset-0 overflow-hidden pointer-events-none">
+				<div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-sage-blue/10 to-purple-200/20 rounded-full blur-3xl" />
+				<div className="absolute top-1/2 -left-20 w-60 h-60 bg-gradient-to-br from-rose-100/30 to-pink-200/20 rounded-full blur-3xl" />
+				<div className="absolute bottom-20 right-1/4 w-40 h-40 bg-gradient-to-br from-teal-100/20 to-emerald-200/10 rounded-full blur-2xl" />
+			</div>
 
-				<div className="flex items-center gap-4">
-					<div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md border text-sm">
-						<input
-							type="checkbox"
-							checked={
-								favorites?.length > 0 &&
-								selectedItemsIds.length === favorites.length
-							}
-							onChange={(e) => handleSelectAll(e.target.checked)}
-							className="w-4 h-4 rounded border-gray-300 text-sage-blue focus:ring-sage-blue cursor-pointer"
-						/>
-						<span className="font-medium text-gray-700">Tümünü Seç</span>
+			<div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+				{/* Header Section */}
+				<div className="mb-10">
+					<div className="flex items-center gap-3 mb-2">
+						<div className="p-2.5 bg-gradient-to-br from-rose-400 to-rose-500 rounded-xl shadow-lg shadow-rose-200">
+							<HeartSolid className="w-6 h-6 text-white" />
+						</div>
+						<h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+							Favorilerim
+						</h1>
 					</div>
-
-					{selectedItemsIds.length > 0 && (
-						<button
-							onClick={() => setIsDiscountModalOpen(true)}
-							className="bg-sage-blue hover:bg-indigo-400 text-white px-6 py-2 rounded-md transition-colors font-medium shadow-sm flex items-center gap-2"
-						>
-							Seçili ({selectedItemsIds.length}) Ürün İçin İndirim İste
-						</button>
-					)}
+					<p className="text-gray-500 mt-2 max-w-lg">
+						Beğendiğiniz ürünleri buradan takip edebilir ve toplu indirim
+						talebinde bulunabilirsiniz.
+					</p>
 				</div>
-			</div>
 
-			<div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-8">
-				{favorites?.map((favorite: IProduct) => (
-					<FavoriteProductCard
-						product={favorite}
-						key={favorite._id}
-						isSelected={selectedItemsIds.includes(favorite._id)}
-						onSelectChange={(checked) =>
-							handleSelectItem(favorite._id, checked)
-						}
-					/>
-				))}
-			</div>
+				{/* Actions Bar */}
+				<div className="mb-8">
+					<div
+						className="
+						flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4
+						p-4 sm:p-5
+						bg-white/70 backdrop-blur-xl
+						rounded-2xl
+						border border-white/50
+						shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)]
+					"
+					>
+						{/* Select All Checkbox */}
+						<label className="flex items-center gap-3 cursor-pointer group">
+							<div className="relative">
+								<input
+									type="checkbox"
+									checked={
+										favorites?.length > 0 &&
+										selectedItemsIds.length === favorites.length
+									}
+									onChange={(e) => handleSelectAll(e.target.checked)}
+									className="peer sr-only"
+								/>
+								<div
+									className="
+									w-6 h-6 rounded-lg
+									border-2 border-gray-200
+									bg-white
+									flex items-center justify-center
+									transition-all duration-200
+									peer-checked:bg-gradient-to-br peer-checked:from-sage-blue peer-checked:to-indigo-500
+									peer-checked:border-transparent
+									group-hover:border-sage-blue/50
+								"
+								>
+									<svg
+										className={`w-3.5 h-3.5 text-white transition-all duration-200 ${
+											favorites?.length > 0 &&
+											selectedItemsIds.length === favorites.length
+												? "opacity-100 scale-100"
+												: "opacity-0 scale-50"
+										}`}
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										strokeWidth={3}
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="M5 13l4 4L19 7"
+										/>
+									</svg>
+								</div>
+							</div>
+							<span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors">
+								Tümünü Seç
+							</span>
+							{favorites?.length > 0 && (
+								<span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">
+									{favorites.length} ürün
+								</span>
+							)}
+						</label>
 
-			<DiscountRequestModal
-				isOpen={isDiscountModalOpen}
-				onClose={() => setIsDiscountModalOpen(false)}
-				selectedItems={selectedFavoriteItems}
-				onSuccess={() => setSelectedItemsIds([])}
-			/>
+						{/* Discount Request Button */}
+						<div
+							className={`
+							transition-all duration-300 ease-out
+							${
+								selectedItemsIds.length > 0
+									? "opacity-100 translate-x-0"
+									: "opacity-0 translate-x-4 pointer-events-none"
+							}
+						`}
+						>
+							<button
+								onClick={() => setIsDiscountModalOpen(true)}
+								className="
+									flex items-center gap-2
+									px-5 py-3
+									bg-gradient-to-r from-sage-blue to-indigo-500
+									text-white
+									rounded-xl
+									font-semibold text-sm
+									shadow-lg shadow-sage-blue/25
+									transition-all duration-200
+									hover:shadow-xl hover:shadow-sage-blue/30
+									hover:scale-[1.02]
+									active:scale-[0.98]
+								"
+							>
+								<SparklesIcon className="w-5 h-5" />
+								<span>
+									Seçili ({selectedItemsIds.length}) Ürün İçin İndirim İste
+								</span>
+							</button>
+						</div>
+					</div>
+				</div>
+
+				{/* Empty State */}
+				{favorites?.length === 0 && (
+					<div
+						className="
+						flex flex-col items-center justify-center
+						py-20
+						bg-white/50 backdrop-blur-sm
+						rounded-3xl
+						border border-gray-100
+					"
+					>
+						<div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-6">
+							<HeartIcon className="w-10 h-10 text-gray-400" />
+						</div>
+						<h3 className="text-xl font-semibold text-gray-700 mb-2">
+							Henüz favori ürününüz yok
+						</h3>
+						<p className="text-gray-500 text-center max-w-sm">
+							Beğendiğiniz ürünleri favorilere ekleyerek daha sonra kolayca
+							erişebilirsiniz.
+						</p>
+					</div>
+				)}
+
+				{/* Products Grid */}
+				{favorites?.length > 0 && (
+					<div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-5 xl:grid-cols-6 lg:gap-5">
+						{favorites?.map((favorite: IProduct) => (
+							<FavoriteProductCard
+								product={favorite}
+								key={favorite._id}
+								isSelected={selectedItemsIds.includes(favorite._id)}
+								onSelectChange={(checked) =>
+									handleSelectItem(favorite._id, checked)
+								}
+							/>
+						))}
+					</div>
+				)}
+
+				<DiscountRequestModal
+					isOpen={isDiscountModalOpen}
+					onClose={() => setIsDiscountModalOpen(false)}
+					selectedItems={selectedFavoriteItems}
+					onSuccess={() => setSelectedItemsIds([])}
+				/>
+			</div>
 		</div>
 	);
 }

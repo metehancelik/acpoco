@@ -347,5 +347,17 @@
 		"october": "Oktober",
 		"november": "November",
 		"december": "Dezember"
+	},
+	"DiscountRequest": {
+		"title": "Rabattanfrage erstellen",
+		"selectedProductsInfo": "Sie fordern einen Rabatt für {count} ausgewählte(s) Produkt(e) an.",
+		"unknownProduct": "Unbekanntes Produkt",
+		"quantity": "{count} Stk.",
+		"noteLabel": "Ihre Notiz (Optional)",
+		"notePlaceholder": "Sie können hier schreiben, warum Sie einen Rabatt anfordern...",
+		"sending": "Wird gesendet...",
+		"sendRequest": "Anfrage senden",
+		"requestSuccess": "Ihre Rabattanfrage wurde erfolgreich übermittelt.",
+		"requestError": "Beim Übermitteln der Rabattanfrage ist ein Fehler aufgetreten."
 	}
 }

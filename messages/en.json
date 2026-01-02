@@ -347,5 +347,17 @@
 		"october": "October",
 		"november": "November",
 		"december": "December"
+	},
+	"DiscountRequest": {
+		"title": "Create Discount Request",
+		"selectedProductsInfo": "You are requesting a discount for {count} selected product(s).",
+		"unknownProduct": "Unknown Product",
+		"quantity": "{count} pcs",
+		"noteLabel": "Your Note (Optional)",
+		"notePlaceholder": "You can write why you are requesting a discount here...",
+		"sending": "Sending...",
+		"sendRequest": "Send Request",
+		"requestSuccess": "Your discount request has been submitted successfully.",
+		"requestError": "An error occurred while submitting the discount request."
 	}
 }
