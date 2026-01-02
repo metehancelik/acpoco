@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { type ChangeEvent, type ReactNode, useTransition } from "react";
 
 import { type Locale, usePathname, useRouter } from "@/i18n/routing";
+import { setUserLocale } from "@/services/locale";
 
 type Props = {
 	children: ReactNode;
@@ -25,7 +26,8 @@ export default function LocaleSwitcherSelect({
 	function onSelectChange(event: ChangeEvent<HTMLSelectElement>) {
 		const nextLocale = event.target.value as Locale;
 
-		startTransition(() => {
+		startTransition(async () => {
+			await setUserLocale(nextLocale);
 			router.replace(
 				// @ts-expect-error -- TypeScript will validate that only known `params`
 				// are used in combination with a given `pathname`. Since the two will
