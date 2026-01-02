@@ -54,6 +54,7 @@ interface ShopifyProduct {
 	title: string;
 	handle: string;
 	description: string;
+	descriptionHtml: string;
 	status: string;
 	vendor: string;
 	productType: string;
@@ -220,6 +221,7 @@ export async function GET() {
 					title: shopifyProduct.title,
 					price: parseFloat(firstVariantPrice),
 					description: shopifyProduct.description || "no description",
+					descriptionHtml: shopifyProduct.descriptionHtml || "no description",
 					weight: {
 						value: 0,
 						unit: "kg",
@@ -234,6 +236,11 @@ export async function GET() {
 					attributes,
 					category: productCategory._id,
 				};
+				if (!shopifyProduct.descriptionHtml) {
+					console.warn(
+						`- descriptionHtml is missing for ${shopifyProduct.title}`,
+					);
+				}
 
 				const existingProduct = await Product.findOne({
 					parentSku: shopifyProduct.handle,

@@ -12,6 +12,7 @@ export interface IProduct extends Document {
 	title: string;
 	price: number;
 	description: string;
+	descriptionHtml: string;
 	weight: {
 		value: number;
 		unit: string;
@@ -34,6 +35,7 @@ const ProductSchema = new mongoose.Schema(
 		title: { type: String, required: true },
 		price: { type: Number, required: true },
 		description: { type: String, required: true },
+		descriptionHtml: { type: String, required: true },
 		weight: {
 			value: Number,
 			unit: String,

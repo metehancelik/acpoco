@@ -23,6 +23,7 @@ export interface TransformedProduct {
 	title: string;
 	price: number;
 	description: string;
+	descriptionHtml: string;
 	weight: {
 		value: number;
 		unit: string;
@@ -89,6 +90,7 @@ export interface ShopifyProduct {
 	title: string;
 	handle: string;
 	description: string;
+	descriptionHtml: string;
 	status: string;
 	vendor: string;
 	productType: string;
@@ -372,6 +374,7 @@ export function transformShopifyProduct(
 		title: product.title,
 		price: firstVariant ? parseFloat(firstVariant.price) : 0,
 		description: product.description || "",
+		descriptionHtml: product.descriptionHtml || "",
 		weight: {
 			value: 0, // Weight not available from current GraphQL query
 			unit: "g",

@@ -29,6 +29,7 @@ export const GET_PRODUCTS_QUERY = `
           title
           handle
           description
+          descriptionHtml
           status
           vendor
           productType
