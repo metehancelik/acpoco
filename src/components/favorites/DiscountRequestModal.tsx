@@ -20,7 +20,13 @@ export type UnifiedDiscountItem = {
 	title?: string; // Fallback title
 	price: number;
 	count: number;
-	productId?: string; // The product object or ID
+	productId?:
+		| string
+		| {
+				_id: string;
+				title?: string;
+				parentSku?: string;
+		  }; // The product object or ID
 	childSku?: string;
 	variantId?: string;
 };
@@ -49,7 +55,10 @@ const DiscountRequestModal: React.FC<DiscountRequestModalProps> = ({
 		setIsSubmitting(true);
 		try {
 			const items = selectedItems.map((item) => {
-				const prodId = item.productId?._id || item.productId || item._id;
+				const prodId =
+					(typeof item.productId === "object"
+						? item.productId?._id
+						: item.productId) || item._id;
 				const varId = item.variantId || (item.childSku ? item._id : undefined);
 
 				return {
@@ -88,8 +97,16 @@ const DiscountRequestModal: React.FC<DiscountRequestModalProps> = ({
 					<div className="max-h-40 overflow-y-auto mb-4 border rounded-md p-2">
 						{selectedItems.map((item) => {
 							const displayTitle =
-								item.title || item.productId?.title || t("unknownProduct");
-							const displaySku = item.childSku || item.productId?.parentSku;
+								item.title ||
+								(typeof item.productId === "object"
+									? item.productId?.title
+									: undefined) ||
+								t("unknownProduct");
+							const displaySku =
+								item.childSku ||
+								(typeof item.productId === "object"
+									? item.productId?.parentSku
+									: undefined);
 							return (
 								<div
 									key={item._id}
