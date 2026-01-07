@@ -13,7 +13,7 @@ import {
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import AddToFavoritesButton from "@/components/product-details/addToFavoritesButton";
 import ShopifyAttributeSelect from "@/components/product-details/ShopifyAttributeSelect";
@@ -34,6 +34,9 @@ const ShopifyProductClient = ({
 		initialVariant || product.variants.edges[0]?.node || null,
 	);
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	// Track if the image selection was manual (user clicked on an image)
+	// to prevent useEffect from overriding the selection
+	const isManualImageSelection = useRef(false);
 
 	// Get images to display - collect from product AND variants, then unique by URL
 	const uniqueImages = (() => {
@@ -53,24 +56,25 @@ const ShopifyProductClient = ({
 		});
 	})();
 
-	// When an image is clicked, find if it belongs to a variant and select it
+	// When an image is clicked, only change the displayed image
+	// Do NOT change the variant - variant only changes via dropdown selection
 	const handleTabChange = (index: number) => {
+		// Mark this as a manual image selection
+		isManualImageSelection.current = true;
 		setSelectedIndex(index);
-		const clickedImage = uniqueImages[index];
 
-		if (clickedImage) {
-			const matchingVariant = product.variants.edges.find(
-				(edge) => edge.node.image?.url === clickedImage.url,
-			)?.node;
-
-			if (matchingVariant) {
-				setSelectedVariant(matchingVariant);
-			}
-		}
+		// Reset the flag after a short delay to allow useEffect to run for dropdown changes
+		setTimeout(() => {
+			isManualImageSelection.current = false;
+		}, 100);
 	};
 
 	// When variant is changed (e.g. via dropdown), sync the gallery index
+	// Skip if the change was triggered by a manual image selection
 	useEffect(() => {
+		if (isManualImageSelection.current) {
+			return;
+		}
 		if (selectedVariant?.image) {
 			const index = uniqueImages.findIndex(
 				(img) => img.url === selectedVariant.image?.url,
@@ -86,7 +90,8 @@ const ShopifyProductClient = ({
 	const { finalPrice: discountedVariantPrice, discountPercent } =
 		getDiscountedPrice(
 			selectedVariant ? Number(selectedVariant.price) : 0,
-			(product as any).category?._id || (product as any).category,
+			(product as unknown as { category: { _id: string } }).category?._id ||
+				(product as unknown as { category: string }).category,
 			selectedVariant?.id,
 		);
 	const showDiscount = discountPercent > 0;
