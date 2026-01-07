@@ -3,10 +3,10 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import type React from "react";
 
+import { useDiscounts } from "@/hooks/useDiscounts";
 import type { IProduct } from "@/models/Product";
 import type { ShopifyVariant } from "@/utils/shopify";
 
@@ -34,17 +34,14 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 		product.parentSku ||
 		"N/A";
 
-	const { data: session } = useSession();
+	const { getDiscountedPrice } = useDiscounts();
 	const t = useTranslations("Common");
-	const discountPercent = session?.user?.discountPercent || 0;
+	const { finalPrice: discounted, discountPercent } = getDiscountedPrice(
+		product.price,
+		product.category?._id || (product.category as unknown as string),
+	);
 	const showDiscount = discountPercent > 0;
 	const basePrice = product.price;
-	const discounted = Number(
-		(
-			basePrice *
-			(1 - Math.min(100, Math.max(0, discountPercent)) / 100)
-		).toFixed(2),
-	);
 
 	return (
 		<div

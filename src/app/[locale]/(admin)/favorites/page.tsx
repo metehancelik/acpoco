@@ -58,7 +58,7 @@ export default function FavoritesPage() {
 				title: item.title,
 				price: item.price,
 				count: 1, // Default count for favorites
-				productId: item, // Pass the whole object as well
+				productId: item._id, // Pass product ID as string
 			})) || [];
 
 	if (isLoading) {

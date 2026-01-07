@@ -1,10 +1,13 @@
+import type mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { DiscountModel } from "@/models/Discount";
 import Order from "@/models/Order";
 import { ProductVariantModel } from "@/models/ProductVariant";
 import User from "@/models/User";
+import { calculateDiscountedPrice } from "@/utils/discountCalculator";
 
 export async function GET(
 	_request: Request,
@@ -63,6 +66,9 @@ export async function POST(
 		const productVariant = await ProductVariantModel.findOne({
 			productId: body.selectedAttributes.productId,
 			$and: attributeConditions,
+		}).populate({
+			path: "productId",
+			select: "category",
 		});
 
 		if (!productVariant) {
@@ -72,13 +78,41 @@ export async function POST(
 			);
 		}
 
+		// Fetch active discounts for this user and item
+		const activeDiscounts = await DiscountModel.find({
+			isActive: true,
+			$or: [
+				{ "scope.userId": user._id },
+				{
+					"scope.categoryId": (
+						productVariant.productId as unknown as {
+							category: mongoose.Types.ObjectId;
+						}
+					).category,
+				},
+				{ "scope.variantId": productVariant._id },
+				{ "scope.type": "category" },
+			],
+		});
+
 		for (const item of order.items) {
 			if (item.orderItemId === body.orderItemId) {
 				item.matchId = productVariant._id;
 				const basePrice = productVariant.price;
-				const discountPercent = user?.discountPercent || 0;
-				const discounted = (basePrice * (100 - discountPercent)) / 100;
-				item.matchedPrice = Math.max(0, Number(discounted.toFixed(2)));
+
+				const { finalPrice } = calculateDiscountedPrice(
+					basePrice,
+					user._id.toString(),
+					(
+						productVariant.productId as unknown as {
+							category: string | { toString(): string };
+						}
+					).category?.toString() || "",
+					productVariant._id.toString(),
+					activeDiscounts,
+				);
+
+				item.matchedPrice = finalPrice;
 			}
 		}
 		if (order.items.every((item: { matchId: string }) => item.matchId)) {

@@ -26,7 +26,6 @@ const UserSchema = new mongoose.Schema({
 	productPriceRate: { type: Number, default: 2 },
 	shippingPriceRate: { type: Number, default: 2 },
 	warehousePriceRate: { type: Number, default: 2 },
-	discountPercent: { type: Number, default: 0 },
 });
 
 UserSchema.pre("save", async function (next) {

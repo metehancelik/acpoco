@@ -1,7 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -20,13 +19,11 @@ interface IUser {
 	role: string;
 	balance: number;
 	stores: { storeName: string }[];
-	discountPercent?: number;
 }
 
 const UsersTable = () => {
 	const t = useTranslations("Dashboard");
 	const searchParams = useSearchParams();
-	const queryClient = useQueryClient();
 	const page = searchParams?.get("page") || "1";
 
 	const {
@@ -40,36 +37,6 @@ const UsersTable = () => {
 			return response.data;
 		},
 	});
-
-	const updateDiscountMutation = useMutation({
-		mutationFn: async ({
-			userId,
-			discountPercent,
-		}: {
-			userId: string;
-			discountPercent: number;
-		}) => {
-			const response = await httpClient.put(`users/${userId}/discount`, {
-				discountPercent,
-			});
-			return response.data;
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["users", page] });
-			toast.success(t("discountUpdated"));
-		},
-		onError: (error: unknown) => {
-			toast.error(
-				(error as AxiosError<{ message: string }>)?.response?.data?.message ||
-					t("discountUpdateError"),
-			);
-		},
-	});
-
-	const handleDiscountUpdate = async (userId: string, value: number) => {
-		const normalized = Math.max(0, Math.min(100, value));
-		updateDiscountMutation.mutate({ userId, discountPercent: normalized });
-	};
 
 	if (isLoading) {
 		return <Loading />;
@@ -115,19 +82,13 @@ const UsersTable = () => {
 									</th>
 									<th
 										scope="col"
-										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
+										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0 text-center"
 									>
 										{t("balance")}
 									</th>
 									<th
 										scope="col"
-										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
-									>
-										{t("discountPercent")}
-									</th>
-									<th
-										scope="col"
-										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0"
+										className="sticky bg-gray-50 top-0 py-3.5 pl-3 pr-4 sm:pr-0 text-center"
 									>
 										{t("detail")}
 									</th>
@@ -153,32 +114,6 @@ const UsersTable = () => {
 										<td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
 											{user.balance}
 										</td>
-										<td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
-											<div className="flex items-center gap-2 justify-center">
-												<input
-													type="number"
-													defaultValue={user.discountPercent || 0}
-													min={0}
-													max={100}
-													className="w-20 border rounded px-2 py-1 text-center"
-													disabled={updateDiscountMutation.isPending}
-													onBlur={async (e) => {
-														const value = Number(e.target.value || 0);
-														const normalized = Math.max(
-															0,
-															Math.min(100, value),
-														);
-														if (normalized !== (user.discountPercent || 0)) {
-															handleDiscountUpdate(user._id, normalized);
-														}
-													}}
-												/>
-												<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-													%{user.discountPercent || 0}
-												</span>
-											</div>
-										</td>
-
 										<td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-0">
 											<Link
 												href={`/users/${user._id}`}

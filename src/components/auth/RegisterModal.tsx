@@ -388,3 +388,4 @@ const RegisterModal: React.FC<RegisterModalProps> = ({
 };
 
 export default RegisterModal;
+

@@ -47,9 +47,10 @@ const AddToFavoritesButton = ({ product }: AddToFavoritesButtonProps) => {
 			queryClient.invalidateQueries({ queryKey: ["favorites"] });
 			AlertNotification(t("addedToFavorites"), "success");
 		},
-		onError: (error: any) => {
+		onError: (error) => {
+			const axiosError = error as { response?: { data?: { error?: string } } };
 			const message =
-				error.response?.data?.error || t("errorAddingToFavorites");
+				axiosError.response?.data?.error || t("errorAddingToFavorites");
 			AlertNotification(message, "error");
 			console.error(error);
 		},

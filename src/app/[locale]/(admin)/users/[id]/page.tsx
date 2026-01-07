@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+import ManualDiscountManagement from "@/components/dashboard/ManualDiscountManagement";
 import WalletLogsTable from "@/components/dashboard/WalletLogsTable";
 import UserBillingAddress from "@/components/users/UserBillingAddress";
 import UserDetailCard from "@/components/users/UserDetailCard";
@@ -89,16 +90,21 @@ const UserDetails = ({ params }: { params: { id: string } }) => {
 	}
 
 	return (
-		<div className="max-w-[1280px] mx-auto w-full">
-			<div className="flex space-x-8">
-				<UserDetailCard user={user || null} />
-				<UserBillingAddress billingAddress={user?.billingAddress} />
-			</div>
-			<div className="mt-8">
-				<WalletLogsTable
-					walletLogs={walletData?.logs || []}
-					totalPages={walletData?.totalPages || 0}
-				/>
+		<div className="max-w-[1280px] mx-auto w-full space-y-8">
+			<div className="flex flex-col lg:flex-row gap-8">
+				<div className="flex-1 space-y-8">
+					<div className="flex flex-col md:flex-row gap-8">
+						<UserDetailCard user={user || null} />
+						<UserBillingAddress billingAddress={user?.billingAddress} />
+					</div>
+					<WalletLogsTable
+						walletLogs={walletData?.logs || []}
+						totalPages={walletData?.totalPages || 0}
+					/>
+				</div>
+				<div className="w-full lg:w-80 shrink-0">
+					<ManualDiscountManagement userId={params.id} />
+				</div>
 			</div>
 		</div>
 	);
