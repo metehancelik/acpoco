@@ -351,3 +351,22 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 }
 
 //TODO cron job to refresh store https://ssapi.shipstation.com/stores/refreshstore?storeId=storeId
+export async function refreshStore(storeId: number): Promise<void> {
+	try {
+		const auth = getShipStationAuth();
+
+		await axios.post(
+			`https://ssapi.shipstation.com/stores/refreshstore?storeId=${storeId}`,
+			{},
+			{
+				headers: {
+					Authorization: getShipStationAuthHeader(auth),
+					"Content-Type": "application/json",
+				},
+			},
+		);
+	} catch (error) {
+		console.error(`Error refreshing store ${storeId}:`, error);
+		throw error;
+	}
+}
