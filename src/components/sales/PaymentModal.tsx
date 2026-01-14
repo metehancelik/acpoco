@@ -130,7 +130,8 @@ const PaymentModal: React.FC<Props> = ({ order, onClose, open }) => {
 							{t("totalPrice")}:
 							{(
 								order.items.reduce(
-									(acc, item) => acc + (item?.matchedPrice || 0) * item.quantity,
+									(acc, item) =>
+										acc + (item?.matchedPrice || 0) * item.quantity,
 									0,
 								) + (order.warehousePrice || 0)
 							).toLocaleString("en-US", {

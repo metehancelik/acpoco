@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
-import { User, Wallet } from "@/models/index";
+import { User } from "@/models/index";
 
 export async function GET(request: Request) {
 	const session = await getServerSession(authOptions);

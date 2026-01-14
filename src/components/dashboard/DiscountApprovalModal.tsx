@@ -112,7 +112,8 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 						{/* Request Info */}
 						<div className="bg-blue-50 p-3 rounded-md text-sm">
 							<p className="font-semibold text-blue-800">
-								{t("modalUser")} {request.userId?.name} {request.userId?.surname}
+								{t("modalUser")} {request.userId?.name}{" "}
+								{request.userId?.surname}
 							</p>
 							<p className="text-blue-700">
 								{t("modalMessage")} {request.message || t("noMessage")}
