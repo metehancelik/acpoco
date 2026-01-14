@@ -90,63 +90,75 @@ const DiscountRequestModal: React.FC<DiscountRequestModalProps> = ({
 				<DialogHeader>
 					<DialogTitle>{t("title")}</DialogTitle>
 				</DialogHeader>
-				<div className="py-4">
-					<p className="text-sm text-gray-500 mb-4">
-						{t("selectedProductsInfo", { count: selectedItems.length })}
-					</p>
-					<div className="max-h-40 overflow-y-auto mb-4 border rounded-md p-2">
-						{selectedItems.map((item) => {
-							const displayTitle =
-								item.title ||
-								(typeof item.productId === "object"
-									? item.productId?.title
-									: undefined) ||
-								t("unknownProduct");
-							const displaySku =
-								item.childSku ||
-								(typeof item.productId === "object"
-									? item.productId?.parentSku
-									: undefined);
-							return (
-								<div
-									key={item._id}
-									className="text-xs py-1 border-b last:border-0 flex justify-between"
-								>
-									<span>
-										{displayTitle} {displaySku ? `(${displaySku})` : ""}
-									</span>
-									<span className="font-semibold">
-										{t("quantity", { count: item.count || 1 })}
-									</span>
-								</div>
-							);
-						})}
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						handleSubmit();
+					}}
+				>
+					<div className="py-4">
+						<p className="text-sm text-gray-500 mb-4">
+							{t("selectedProductsInfo", { count: selectedItems.length })}
+						</p>
+						<div className="max-h-40 overflow-y-auto mb-4 border rounded-md p-2">
+							{selectedItems.map((item) => {
+								const displayTitle =
+									item.title ||
+									(typeof item.productId === "object"
+										? item.productId?.title
+										: undefined) ||
+									t("unknownProduct");
+								const displaySku =
+									item.childSku ||
+									(typeof item.productId === "object"
+										? item.productId?.parentSku
+										: undefined);
+								return (
+									<div
+										key={item._id}
+										className="text-xs py-1 border-b last:border-0 flex justify-between"
+									>
+										<span>
+											{displayTitle} {displaySku ? `(${displaySku})` : ""}
+										</span>
+										<span className="font-semibold">
+											{t("quantity", { count: item.count || 1 })}
+										</span>
+									</div>
+								);
+							})}
+						</div>
+						<div className="flex flex-col gap-2">
+							<label htmlFor="message" className="text-sm font-medium">
+								{t("noteLabel")}
+							</label>
+							<textarea
+								id="message"
+								className="w-full min-h-[100px] p-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-sage-blue"
+								placeholder={t("notePlaceholder")}
+								value={message}
+								onChange={(e) => setMessage(e.target.value)}
+							/>
+						</div>
 					</div>
-					<div className="flex flex-col gap-2">
-						<label htmlFor="message" className="text-sm font-medium">
-							{t("noteLabel")}
-						</label>
-						<textarea
-							id="message"
-							className="w-full min-h-[100px] p-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-sage-blue"
-							placeholder={t("notePlaceholder")}
-							value={message}
-							onChange={(e) => setMessage(e.target.value)}
-						/>
-					</div>
-				</div>
-				<DialogFooter>
-					<Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-						{tCommon("cancel")}
-					</Button>
-					<Button
-						onClick={handleSubmit}
-						disabled={isSubmitting}
-						className="bg-sage-blue hover:bg-indigo-400"
-					>
-						{isSubmitting ? t("sending") : t("sendRequest")}
-					</Button>
-				</DialogFooter>
+					<DialogFooter>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={onClose}
+							disabled={isSubmitting}
+						>
+							{tCommon("cancel")}
+						</Button>
+						<Button
+							type="submit"
+							disabled={isSubmitting}
+							className="bg-sage-blue hover:bg-indigo-400"
+						>
+							{isSubmitting ? t("sending") : t("sendRequest")}
+						</Button>
+					</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

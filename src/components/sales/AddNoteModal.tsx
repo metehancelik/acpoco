@@ -112,34 +112,35 @@ const AddNoteModal: React.FC<AddNoteModalProps> = ({
 									{t("orderNote")}
 								</DialogTitle>
 
-								<div className="py-8 px-8">
-									<textarea
-										className="w-full h-40 rounded-lg border border-gray-300 resize-none text-sm px-2"
-										value={note}
-										disabled={session.data?.user?.role === "ADMIN"}
-										placeholder={t("enterOrderNote")}
-										onChange={handleNoteChange}
-									/>
-								</div>
-								<div className="flex justify-end px-8 space-x-2">
-									<button
-										type="button"
-										className="inline-flex justify-center rounded-md border border-transparent bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-										onClick={() => setIsModalOpen(false)}
-									>
-										{t("cancel")}
-									</button>
-									<button
-										type="button"
-										disabled={updateNoteMutation.isPending}
-										className="inline-flex justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-secondary focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-										onClick={handleAddNote}
-									>
-										{updateNoteMutation.isPending
-											? t("updating")
-											: t("confirm")}
-									</button>
-								</div>
+								<form onSubmit={handleAddNote}>
+									<div className="py-8 px-8">
+										<textarea
+											className="w-full h-40 rounded-lg border border-gray-300 resize-none text-sm px-2"
+											value={note}
+											disabled={session.data?.user?.role === "ADMIN"}
+											placeholder={t("enterOrderNote")}
+											onChange={handleNoteChange}
+										/>
+									</div>
+									<div className="flex justify-end px-8 space-x-2">
+										<button
+											type="button"
+											className="inline-flex justify-center rounded-md border border-transparent bg-danger px-4 py-2 text-sm font-medium text-white hover:bg-orange-500 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+											onClick={() => setIsModalOpen(false)}
+										>
+											{t("cancel")}
+										</button>
+										<button
+											type="submit"
+											disabled={updateNoteMutation.isPending}
+											className="inline-flex justify-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-secondary focus:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+										>
+											{updateNoteMutation.isPending
+												? t("updating")
+												: t("confirm")}
+										</button>
+									</div>
+								</form>
 							</DialogPanel>
 						</TransitionChild>
 					</div>

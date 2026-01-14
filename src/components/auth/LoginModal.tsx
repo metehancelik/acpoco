@@ -146,6 +146,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
 													type="email"
 													value={email}
 													onChange={(e) => setEmail(e.target.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															const form = e.currentTarget.closest("form");
+															form?.requestSubmit();
+														}
+													}}
 													required
 													autoComplete="email"
 													placeholder="you@example.com"
@@ -171,6 +178,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
 													type={showPassword ? "text" : "password"}
 													value={password}
 													onChange={(e) => setPassword(e.target.value)}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															const form = e.currentTarget.closest("form");
+															form?.requestSubmit();
+														}
+													}}
 													required
 													autoComplete="current-password"
 													placeholder="••••••••"

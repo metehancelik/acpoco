@@ -78,71 +78,78 @@ const PaymentModal: React.FC<Props> = ({ order, onClose, open }) => {
 				<DialogHeader>
 					<DialogTitle>{t("makePayment")}</DialogTitle>
 				</DialogHeader>
-				<DialogDescription>
-					<p>{t("productsToPayFor")}</p>
-				</DialogDescription>
-				<div className="flex flex-col gap-2 h-[400px] overflow-y-auto font-semibold">
-					<div className="flex gap-2 items-center w-full justify-between">
-						<p className="w-full text-center">{t("productPhoto")}</p>
-						<p className="w-full text-center">{t("productSku")}</p>
-						<p className="w-full text-center">{t("quantity")}</p>
-						<p className="w-full text-center">{t("price")}</p>
-					</div>
-					{order.items.map((item) => (
-						<div
-							key={item.lineItemKey}
-							className="flex gap-2 items-center w-full justify-between"
-						>
-							<div className="w-full flex justify-center">
-								<Image
-									src={normalizeImageSrc(item?.imageUrl || "")}
-									alt={item.name}
-									width={100}
-									height={100}
-									className="rounded-md"
-								/>
-							</div>
-							<p className="w-full text-center">{item.sku}</p>
-							<p className="w-full text-center">{item.quantity}</p>
-							<p className="w-full text-center">
-								${(item?.matchedPrice || 0) * item.quantity}
-							</p>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						handlePayment();
+					}}
+				>
+					<DialogDescription>
+						<p>{t("productsToPayFor")}</p>
+					</DialogDescription>
+					<div className="flex flex-col gap-2 h-[400px] overflow-y-auto font-semibold">
+						<div className="flex gap-2 items-center w-full justify-between">
+							<p className="w-full text-center">{t("productPhoto")}</p>
+							<p className="w-full text-center">{t("productSku")}</p>
+							<p className="w-full text-center">{t("quantity")}</p>
+							<p className="w-full text-center">{t("price")}</p>
 						</div>
-					))}
-					<div className="flex gap-2 items-center w-full justify-between mt-4">
-						<p className="w-full text-center">{t("warehousePrice")}</p>
-						<p className="w-full text-center"></p>
-						<p className="w-full text-center"></p>
-						<p className="w-full text-center">${order.warehousePrice}</p>
+						{order.items.map((item) => (
+							<div
+								key={item.lineItemKey}
+								className="flex gap-2 items-center w-full justify-between"
+							>
+								<div className="w-full flex justify-center">
+									<Image
+										src={normalizeImageSrc(item?.imageUrl || "")}
+										alt={item.name}
+										width={100}
+										height={100}
+										className="rounded-md"
+									/>
+								</div>
+								<p className="w-full text-center">{item.sku}</p>
+								<p className="w-full text-center">{item.quantity}</p>
+								<p className="w-full text-center">
+									${(item?.matchedPrice || 0) * item.quantity}
+								</p>
+							</div>
+						))}
+						<div className="flex gap-2 items-center w-full justify-between mt-4">
+							<p className="w-full text-center">{t("warehousePrice")}</p>
+							<p className="w-full text-center"></p>
+							<p className="w-full text-center"></p>
+							<p className="w-full text-center">${order.warehousePrice}</p>
+						</div>
 					</div>
-				</div>
-				<div className="w-full flex justify-between items-center">
-					<p className="text-lg font-bold">
-						{t("currentBalance")}: ${wallet?.data?.balance?.toFixed(2)}
-					</p>
-					<p className="text-lg text-sage-blue font-bold">
-						{t("totalPrice")}:
-						{(
-							order.items.reduce(
-								(acc, item) => acc + (item?.matchedPrice || 0) * item.quantity,
-								0,
-							) + (order.warehousePrice || 0)
-						).toLocaleString("en-US", {
-							style: "currency",
-							currency: "USD",
-						})}
-					</p>
-				</div>
-				<div className="flex justify-end gap-2">
-					<Button variant="destructive" onClick={onClose}>
-						{tCommon("cancel")}
-					</Button>
-					<Button onClick={handlePayment} disabled={paymentMutation.isPending}>
-						{paymentMutation.isPending
-							? t("processingPayment")
-							: t("makePayment")}
-					</Button>
-				</div>
+					<div className="w-full flex justify-between items-center py-4">
+						<p className="text-lg font-bold">
+							{t("currentBalance")}: ${wallet?.data?.balance?.toFixed(2)}
+						</p>
+						<p className="text-lg text-sage-blue font-bold">
+							{t("totalPrice")}:
+							{(
+								order.items.reduce(
+									(acc, item) => acc + (item?.matchedPrice || 0) * item.quantity,
+									0,
+								) + (order.warehousePrice || 0)
+							).toLocaleString("en-US", {
+								style: "currency",
+								currency: "USD",
+							})}
+						</p>
+					</div>
+					<div className="flex justify-end gap-2">
+						<Button type="button" variant="destructive" onClick={onClose}>
+							{tCommon("cancel")}
+						</Button>
+						<Button type="submit" disabled={paymentMutation.isPending}>
+							{paymentMutation.isPending
+								? t("processingPayment")
+								: t("makePayment")}
+						</Button>
+					</div>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);
