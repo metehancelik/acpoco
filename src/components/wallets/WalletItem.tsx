@@ -85,7 +85,7 @@ const WalletItem: React.FC<WalletItemProps> = ({ item }) => {
 	return (
 		<div className="flex w-full items-center bg-lime-50 rounded-md border border-lime-100 py-2 text-text-primary">
 			<div className="w-1/6 text-center">{item.requestedBy.name}</div>
-			<div className="w-1/6 text-center">${item.requestedAmount}</div>
+			<div className="w-1/6 text-center">€{item.requestedAmount}</div>
 			<div className="w-1/6 text-center flex items-center justify-center space-x-2">
 				<p> {refactorStatus(item.status)}</p>
 				{item.status === "PENDING" && (

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
-import { User } from "@/models/index";
+import { User, Wallet } from "@/models/index";
 
 export async function GET(request: Request) {
 	const session = await getServerSession(authOptions);
@@ -12,10 +12,38 @@ export async function GET(request: Request) {
 	}
 	const { searchParams } = new URL(request.url);
 	const page = parseInt(searchParams.get("page") || "1", 10);
-	const users = await User.find()
-		.skip((page - 1) * 20)
-		.limit(20)
-		.populate("stores");
+
+	const users = await User.aggregate([
+		{ $skip: (page - 1) * 20 },
+		{ $limit: 20 },
+		{
+			$lookup: {
+				from: "stores",
+				localField: "stores",
+				foreignField: "_id",
+				as: "stores",
+			},
+		},
+		{
+			$lookup: {
+				from: "wallets",
+				localField: "_id",
+				foreignField: "userId",
+				as: "wallet",
+			},
+		},
+		{
+			$addFields: {
+				balance: { $ifNull: [{ $arrayElemAt: ["$wallet.balance", 0] }, 0] },
+			},
+		},
+		{
+			$project: {
+				wallet: 0,
+				password: 0,
+			},
+		},
+	]);
 
 	return NextResponse.json(users);
 }
