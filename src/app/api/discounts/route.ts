@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 		await dbConnect();
 
 		const body = await req.json();
-		const { percentage, scopeType, userId, categoryId, variantId, expiresAt } =
+		const { percentage, scopeType, userId, categoryId, productId, expiresAt } =
 			body;
 
 		if (!percentage) {
@@ -26,14 +26,14 @@ export async function POST(req: Request) {
 		}
 
 		const scope: {
-			type: "user" | "category" | "variant";
+			type: "user" | "category" | "product";
 			userId?: string;
 			categoryId?: string;
-			variantId?: string;
+			productId?: string;
 		} = { type: scopeType };
 		if (scopeType === "user") scope.userId = userId;
 		if (scopeType === "category") scope.categoryId = categoryId;
-		if (scopeType === "variant") scope.variantId = variantId;
+		if (scopeType === "product") scope.productId = productId;
 
 		const discount = await DiscountModel.create({
 			percentage,

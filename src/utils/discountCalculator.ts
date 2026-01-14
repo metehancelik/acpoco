@@ -7,13 +7,13 @@ export interface DiscountResult {
 }
 
 /**
- * Calculate the discounted price for a product variant.
- * Priority: variant > category > user (highest specificity wins)
+ * Calculate the discounted price for a product.
+ * Priority: product > category > user (highest specificity wins)
  *
  * @param basePrice - Original price of the product
  * @param userId - ID of the user
  * @param categoryId - ID of the product category
- * @param variantId - ID of the product variant
+ * @param productId - ID of the product
  * @param activeDiscounts - Array of active discounts to consider
  * @returns Object containing final price, discount percent, and applied discount
  */
@@ -21,7 +21,7 @@ export function calculateDiscountedPrice(
 	basePrice: number,
 	userId: string,
 	categoryId: string,
-	variantId: string,
+	productId: string,
 	activeDiscounts: IDiscount[],
 ): DiscountResult {
 	if (!activeDiscounts || activeDiscounts.length === 0) {
@@ -44,8 +44,8 @@ export function calculateDiscountedPrice(
 		const scope = discount.scope as IDiscountScope;
 
 		switch (scope.type) {
-			case "variant":
-				return scope.variantId?.toString() === variantId;
+			case "product":
+				return scope.productId?.toString() === productId;
 			case "category":
 				return scope.categoryId?.toString() === categoryId;
 			case "user":
@@ -63,10 +63,10 @@ export function calculateDiscountedPrice(
 		};
 	}
 
-	// Priority order: variant > category > user
+	// Priority order: product > category > user
 	// Within same priority, pick highest percentage
 	const priorityOrder: Record<IDiscountScope["type"], number> = {
-		variant: 3,
+		product: 3,
 		category: 2,
 		user: 1,
 	};
@@ -109,12 +109,12 @@ export function filterActiveDiscounts(
 		if (discount.expiresAt && new Date(discount.expiresAt) < now) return false;
 
 		// Include user-level discounts for this user
-		// Also include all category and variant discounts (they'll be filtered per-item)
+		// Also include all category and product discounts (they'll be filtered per-item)
 		const scope = discount.scope as IDiscountScope;
 		if (scope.type === "user") {
 			return scope.userId?.toString() === userId;
 		}
 
-		return true; // category and variant discounts are filtered per-item
+		return true; // category and product discounts are filtered per-item
 	});
 }

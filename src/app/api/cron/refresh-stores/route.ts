@@ -28,7 +28,12 @@ export async function GET(req: NextRequest) {
 		totalStations: 0,
 		successful: 0,
 		failed: 0,
-		details: [] as Array<{ storeId: number; storeName: string; success: boolean; error?: string }>,
+		details: [] as Array<{
+			storeId: number;
+			storeName: string;
+			success: boolean;
+			error?: string;
+		}>,
 	};
 
 	try {
@@ -68,7 +73,6 @@ export async function GET(req: NextRequest) {
 			success: true,
 			summary,
 		});
-
 	} catch (error) {
 		console.error("Cron ShipStation store refresh fatal error:", error);
 		await new LogModel({

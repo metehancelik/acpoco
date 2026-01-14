@@ -22,7 +22,7 @@ export function useDiscounts() {
 	const getDiscountedPrice = (
 		basePrice: number,
 		categoryId?: string,
-		variantId?: string,
+		productId?: string,
 	) => {
 		if (!session || !data) return { finalPrice: basePrice, discountPercent: 0 };
 
@@ -30,7 +30,7 @@ export function useDiscounts() {
 			basePrice,
 			session.user.id,
 			categoryId || "",
-			variantId || "",
+			productId || "",
 			data,
 		);
 

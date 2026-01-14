@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronRight, Folder, Tag, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 
@@ -28,6 +29,7 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 	request,
 	onSuccess,
 }) => {
+	const t = useTranslations("DiscountAdmin");
 	const [percentage, setPercentage] = useState<number>(10);
 	const [adminNotes, setAdminNotes] = useState("");
 	const [activeScope, setActiveScope] = useState<
@@ -60,12 +62,12 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 				variantId: activeScope === "variant" ? selectedVariantId : undefined,
 			});
 
-			toast.success("İndirim talebi onaylandı ve indirim tanımlandı.");
+			toast.success(t("approveSuccess"));
 			onSuccess();
 			onClose();
 		} catch (error) {
 			console.error("Error approving request:", error);
-			toast.error("Talep onaylanırken bir hata oluştu.");
+			toast.error(t("approveError"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -80,12 +82,12 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 				adminNotes,
 			});
 
-			toast.success("İndirim talebi reddedildi.");
+			toast.success(t("rejectSuccess"));
 			onSuccess();
 			onClose();
 		} catch (error) {
 			console.error("Error rejecting request:", error);
-			toast.error("Talep reddedilirken bir hata oluştu.");
+			toast.error(t("rejectError"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -97,237 +99,249 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
-					<DialogTitle>İndirim Talebini Yönet</DialogTitle>
+					<DialogTitle>{t("modalTitle")}</DialogTitle>
 				</DialogHeader>
 
-				<div className="py-4 space-y-6">
-					{/* Request Info */}
-					<div className="bg-blue-50 p-3 rounded-md text-sm">
-						<p className="font-semibold text-blue-800">
-							Kullanıcı: {request.userId?.name} {request.userId?.surname}
-						</p>
-						<p className="text-blue-700">
-							Talep Mesajı: {request.message || "Yok"}
-						</p>
-					</div>
-
-					{/* Percentage Input */}
-					<div className="flex flex-col gap-2">
-						<label
-							htmlFor="discount-percentage"
-							className="text-sm font-medium"
-						>
-							İndirim Oranı (%)
-						</label>
-						<input
-							id="discount-percentage"
-							type="number"
-							min="1"
-							max="100"
-							value={percentage}
-							onChange={(e) => setPercentage(Number(e.target.value))}
-							className="w-full p-2 border rounded-md"
-						/>
-					</div>
-
-					{/* Scope Accordion */}
-					<div className="space-y-2">
-						<label htmlFor="scope-accordion" className="text-sm font-medium">
-							İndirim Kapsamı
-						</label>
-
-						{/* User Level */}
-						<div
-							id="scope-accordion"
-							className={`border rounded-md overflow-hidden ${activeScope === "user" ? "ring-1 ring-sage-blue" : ""}`}
-						>
-							<button
-								onClick={() => setActiveScope("user")}
-								className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-							>
-								<div className="flex items-center gap-2">
-									<User
-										size={18}
-										className={
-											activeScope === "user"
-												? "text-sage-blue"
-												: "text-gray-400"
-										}
-									/>
-									<span
-										className={`text-sm ${activeScope === "user" ? "font-bold text-sage-blue" : "font-medium"}`}
-									>
-										Kullanıcı Bazlı İndirim
-									</span>
-								</div>
-								{activeScope === "user" ? (
-									<ChevronDown size={18} />
-								) : (
-									<ChevronRight size={18} />
-								)}
-							</button>
-							{activeScope === "user" && (
-								<div className="p-3 text-xs text-gray-600 border-t bg-white">
-									Bu indirim kullanıcının sepetteki <b>TÜM</b> ürünlerine
-									uygulanacaktır.
-								</div>
-							)}
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						handleApprove();
+					}}
+				>
+					<div className="py-4 space-y-6">
+						{/* Request Info */}
+						<div className="bg-blue-50 p-3 rounded-md text-sm">
+							<p className="font-semibold text-blue-800">
+								{t("modalUser")} {request.userId?.name} {request.userId?.surname}
+							</p>
+							<p className="text-blue-700">
+								{t("modalMessage")} {request.message || t("noMessage")}
+							</p>
 						</div>
 
-						{/* Category Level */}
-						<div
-							className={`border rounded-md overflow-hidden ${activeScope === "category" ? "ring-1 ring-sage-blue" : ""}`}
-						>
-							<button
-								onClick={() => setActiveScope("category")}
-								className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+						{/* Percentage Input */}
+						<div className="flex flex-col gap-2">
+							<label
+								htmlFor="discount-percentage"
+								className="text-sm font-medium"
 							>
-								<div className="flex items-center gap-2">
-									<Folder
-										size={18}
-										className={
-											activeScope === "category"
-												? "text-sage-blue"
-												: "text-gray-400"
-										}
-									/>
-									<span
-										className={`text-sm ${activeScope === "category" ? "font-bold text-sage-blue" : "font-medium"}`}
-									>
-										Kategori Bazlı İndirim
-									</span>
-								</div>
-								{activeScope === "category" ? (
-									<ChevronDown size={18} />
-								) : (
-									<ChevronRight size={18} />
-								)}
-							</button>
-							{activeScope === "category" && (
-								<div className="p-3 space-y-3 border-t bg-white">
-									<p className="text-xs text-gray-600">
-										Bu indirim seçili kategorideki tüm ürünlere uygulanacaktır.
-									</p>
-									<select
-										value={selectedCategoryId}
-										onChange={(e) => setSelectedCategoryId(e.target.value)}
-										className="w-full p-2 border rounded-md text-sm"
-									>
-										<option value="">Kategori Seçin</option>
-										{/* Unique categories from request items */}
-										{Array.from(
-											new Set(
-												(request.items || [])
-													.map((item) => {
-														const cat = item.productId?.category;
-														return typeof cat === "string" ? cat : cat?._id;
-													})
-													.filter(Boolean) as string[],
-											),
-										).map((catId: string) => {
-											return (
-												<option key={catId} value={catId}>
-													Bu Talepteki Kategori ({catId})
-												</option>
-											);
+								{t("percentageLabel")}
+							</label>
+							<input
+								id="discount-percentage"
+								type="number"
+								min="1"
+								max="100"
+								value={percentage}
+								onChange={(e) => setPercentage(Number(e.target.value))}
+								className="w-full p-2 border rounded-md"
+							/>
+						</div>
+
+						{/* Scope Accordion */}
+						<div className="space-y-2">
+							<label htmlFor="scope-accordion" className="text-sm font-medium">
+								{t("scopeLabel")}
+							</label>
+
+							{/* User Level */}
+							<div
+								id="scope-accordion"
+								className={`border rounded-md overflow-hidden ${activeScope === "user" ? "ring-1 ring-sage-blue" : ""}`}
+							>
+								<button
+									type="button"
+									onClick={() => setActiveScope("user")}
+									className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+								>
+									<div className="flex items-center gap-2">
+										<User
+											size={18}
+											className={
+												activeScope === "user"
+													? "text-sage-blue"
+													: "text-gray-400"
+											}
+										/>
+										<span
+											className={`text-sm ${activeScope === "user" ? "font-bold text-sage-blue" : "font-medium"}`}
+										>
+											{t("scopeUser")}
+										</span>
+									</div>
+									{activeScope === "user" ? (
+										<ChevronDown size={18} />
+									) : (
+										<ChevronRight size={18} />
+									)}
+								</button>
+								{activeScope === "user" && (
+									<div className="p-3 text-xs text-gray-600 border-t bg-white">
+										{t.rich("scopeUserDescription", {
+											b: (chunks) => <b>{chunks}</b>,
 										})}
-									</select>
-								</div>
-							)}
-						</div>
-
-						{/* Variant Level */}
-						<div
-							className={`border rounded-md overflow-hidden ${activeScope === "variant" ? "ring-1 ring-sage-blue" : ""}`}
-						>
-							<button
-								onClick={() => setActiveScope("variant")}
-								className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
-							>
-								<div className="flex items-center gap-2">
-									<Tag
-										size={18}
-										className={
-											activeScope === "variant"
-												? "text-sage-blue"
-												: "text-gray-400"
-										}
-									/>
-									<span
-										className={`text-sm ${activeScope === "variant" ? "font-bold text-sage-blue" : "font-medium"}`}
-									>
-										Varyant Bazlı İndirim
-									</span>
-								</div>
-								{activeScope === "variant" ? (
-									<ChevronDown size={18} />
-								) : (
-									<ChevronRight size={18} />
+									</div>
 								)}
-							</button>
-							{activeScope === "variant" && (
-								<div className="p-3 space-y-3 border-t bg-white">
-									<p className="text-xs text-gray-600">
-										Bu indirim sadece seçili ürün varyantına uygulanacaktır.
-									</p>
-									<select
-										value={selectedVariantId}
-										onChange={(e) => setSelectedVariantId(e.target.value)}
-										className="w-full p-2 border rounded-md text-sm"
-									>
-										<option value="">Varyant Seçin</option>
-										{request.items.map((item, idx: number) => {
-											const varId = item.variantId?._id || "";
-											const displaySku =
-												item.variantId?.childSku || "Varyant Bilinmiyor";
-											return (
-												<option key={varId || `item-${idx}`} value={varId}>
-													{item.productId?.title} - {displaySku}
-												</option>
-											);
-										})}
-									</select>
-								</div>
-							)}
+							</div>
+
+							{/* Category Level */}
+							<div
+								className={`border rounded-md overflow-hidden ${activeScope === "category" ? "ring-1 ring-sage-blue" : ""}`}
+							>
+								<button
+									type="button"
+									onClick={() => setActiveScope("category")}
+									className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+								>
+									<div className="flex items-center gap-2">
+										<Folder
+											size={18}
+											className={
+												activeScope === "category"
+													? "text-sage-blue"
+													: "text-gray-400"
+											}
+										/>
+										<span
+											className={`text-sm ${activeScope === "category" ? "font-bold text-sage-blue" : "font-medium"}`}
+										>
+											{t("scopeCategory")}
+										</span>
+									</div>
+									{activeScope === "category" ? (
+										<ChevronDown size={18} />
+									) : (
+										<ChevronRight size={18} />
+									)}
+								</button>
+								{activeScope === "category" && (
+									<div className="p-3 space-y-3 border-t bg-white">
+										<p className="text-xs text-gray-600">
+											{t("scopeCategoryDescription")}
+										</p>
+										<select
+											value={selectedCategoryId}
+											onChange={(e) => setSelectedCategoryId(e.target.value)}
+											className="w-full p-2 border rounded-md text-sm"
+										>
+											<option value="">{t("selectCategory")}</option>
+											{/* Unique categories from request items */}
+											{Array.from(
+												new Set(
+													(request.items || [])
+														.map((item) => {
+															const cat = item.productId?.category;
+															return typeof cat === "string" ? cat : cat?._id;
+														})
+														.filter(Boolean) as string[],
+												),
+											).map((catId: string) => {
+												return (
+													<option key={catId} value={catId}>
+														{t("categoryInRequest", { id: catId })}
+													</option>
+												);
+											})}
+										</select>
+									</div>
+								)}
+							</div>
+
+							{/* Variant Level */}
+							<div
+								className={`border rounded-md overflow-hidden ${activeScope === "variant" ? "ring-1 ring-sage-blue" : ""}`}
+							>
+								<button
+									type="button"
+									onClick={() => setActiveScope("variant")}
+									className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+								>
+									<div className="flex items-center gap-2">
+										<Tag
+											size={18}
+											className={
+												activeScope === "variant"
+													? "text-sage-blue"
+													: "text-gray-400"
+											}
+										/>
+										<span
+											className={`text-sm ${activeScope === "variant" ? "font-bold text-sage-blue" : "font-medium"}`}
+										>
+											{t("scopeVariant")}
+										</span>
+									</div>
+									{activeScope === "variant" ? (
+										<ChevronDown size={18} />
+									) : (
+										<ChevronRight size={18} />
+									)}
+								</button>
+								{activeScope === "variant" && (
+									<div className="p-3 space-y-3 border-t bg-white">
+										<p className="text-xs text-gray-600">
+											{t("scopeVariantDescription")}
+										</p>
+										<select
+											value={selectedVariantId}
+											onChange={(e) => setSelectedVariantId(e.target.value)}
+											className="w-full p-2 border rounded-md text-sm"
+										>
+											<option value="">{t("selectVariant")}</option>
+											{request.items.map((item, idx: number) => {
+												const varId = item.variantId?._id || "";
+												const displaySku =
+													item.variantId?.childSku || t("noMessage"); // Reusing noMessage for Unknown
+												return (
+													<option key={varId || `item-${idx}`} value={varId}>
+														{item.productId?.title} - {displaySku}
+													</option>
+												);
+											})}
+										</select>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* Admin Notes */}
+						<div className="flex flex-col gap-2">
+							<label htmlFor="admin-notes" className="text-sm font-medium">
+								{t("adminNotesLabel")}
+							</label>
+							<textarea
+								id="admin-notes"
+								value={adminNotes}
+								onChange={(e) => setAdminNotes(e.target.value)}
+								className="w-full min-h-[80px] p-2 border rounded-md text-sm"
+								placeholder={t("adminNotesPlaceholder")}
+							/>
 						</div>
 					</div>
 
-					{/* Admin Notes */}
-					<div className="flex flex-col gap-2">
-						<label htmlFor="admin-notes" className="text-sm font-medium">
-							Yönetici Notu
-						</label>
-						<textarea
-							id="admin-notes"
-							value={adminNotes}
-							onChange={(e) => setAdminNotes(e.target.value)}
-							className="w-full min-h-[80px] p-2 border rounded-md text-sm"
-							placeholder="Onay veya ret sebebi..."
-						/>
-					</div>
-				</div>
-
-				<DialogFooter className="gap-2 sm:gap-0">
-					<Button
-						variant="outline"
-						onClick={handleReject}
-						disabled={isSubmitting}
-						className="text-red-600 hover:text-red-700 hover:bg-red-50"
-					>
-						Reddet
-					</Button>
-					<Button
-						onClick={handleApprove}
-						disabled={
-							isSubmitting ||
-							(activeScope === "category" && !selectedCategoryId) ||
-							(activeScope === "variant" && !selectedVariantId)
-						}
-						className="bg-sage-blue hover:bg-indigo-400"
-					>
-						{isSubmitting ? "İşleniyor..." : "Onayla ve Tanımla"}
-					</Button>
-				</DialogFooter>
+					<DialogFooter className="gap-2 sm:gap-0">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={handleReject}
+							disabled={isSubmitting}
+							className="text-red-600 hover:text-red-700 hover:bg-red-50"
+						>
+							{t("reject")}
+						</Button>
+						<Button
+							type="submit"
+							disabled={
+								isSubmitting ||
+								(activeScope === "category" && !selectedCategoryId) ||
+								(activeScope === "variant" && !selectedVariantId)
+							}
+							className="bg-sage-blue hover:bg-indigo-400"
+						>
+							{isSubmitting ? t("processing") : t("approve")}
+						</Button>
+					</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

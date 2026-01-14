@@ -5,30 +5,43 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Folder,
-	Tag,
+	Package,
 	Trash2,
 	User,
 	X,
 } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import type { IDiscount } from "@/models/Discount";
+import type { ICategory } from "@/models/Product";
 import httpClient from "@/utils/httpClient";
 
 interface IDiscountPopulated extends Omit<IDiscount, "scope"> {
 	scope: {
-		type: "user" | "category" | "variant";
+		type: "user" | "category" | "product";
 		userId?: string;
 		categoryId?: string;
-		variantId?: string;
+		productId?: string;
 	};
 }
 
 interface ManualDiscountManagementProps {
 	userId: string;
+}
+
+interface ProductSearchResult {
+	_id: string;
+	title: string;
+	parentSku: string;
+	images: string[];
+	category: {
+		_id: string;
+		name: string;
+	};
 }
 
 const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
@@ -37,15 +50,16 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 	const queryClient = useQueryClient();
 	const [percentage, setPercentage] = useState<number>(10);
 	const [activeScope, setActiveScope] = useState<
-		"user" | "category" | "variant"
+		"user" | "category" | "product"
 	>("user");
 	const [selectedCategoryId, setSelectedCategoryId] = useState("");
-	const [selectedVariantId, setSelectedVariantId] = useState("");
+	const [selectedProductId, setSelectedProductId] = useState("");
+	const [selectedProductName, setSelectedProductName] = useState("");
 	const [productQuery, setProductQuery] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	// Fetch Categories
-	const { data: categories } = useQuery({
+	// Fetch Categories - same as main page
+	const { data: categories } = useQuery<ICategory[]>({
 		queryKey: ["categories"],
 		queryFn: async () => {
 			const res = await httpClient.get("/categories");
@@ -53,11 +67,14 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 		},
 	});
 
-	// Fetch Products for Variant Search
-	const { data: productSearchData } = useQuery({
+	// Fetch Products for Product Search - same as main page
+	const { data: productSearchData } = useQuery<{
+		products: ProductSearchResult[];
+		total: number;
+	}>({
 		queryKey: ["productSearch", productQuery],
 		queryFn: async () => {
-			if (productQuery.length < 2) return { products: [] };
+			if (productQuery.length < 2) return { products: [], total: 0 };
 			const res = await httpClient.get(
 				`/products?query=${productQuery}&limit=10`,
 			);
@@ -80,8 +97,8 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 			toast.error("Lütfen bir kategori seçin.");
 			return;
 		}
-		if (activeScope === "variant" && !selectedVariantId) {
-			toast.error("Lütfen bir varyant seçin.");
+		if (activeScope === "product" && !selectedProductId) {
+			toast.error("Lütfen bir ürün seçin.");
 			return;
 		}
 
@@ -92,7 +109,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 				scopeType: activeScope,
 				userId,
 				categoryId: activeScope === "category" ? selectedCategoryId : undefined,
-				variantId: activeScope === "variant" ? selectedVariantId : undefined,
+				productId: activeScope === "product" ? selectedProductId : undefined,
 			});
 
 			toast.success("İndirim başarıyla tanımlandı.");
@@ -101,6 +118,9 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 			});
 			// Reset form
 			setPercentage(10);
+			setSelectedProductId("");
+			setSelectedProductName("");
+			setProductQuery("");
 		} catch (error) {
 			console.error("Error creating discount:", error);
 			toast.error("İndirim tanımlanırken bir hata oluştu.");
@@ -111,8 +131,6 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 
 	const handleDeactivateDiscount = async (discountId: string) => {
 		try {
-			// We should have a way to deactivate, currently I'll just delete or update isActive
-			// Let's assume we can DELETE it for now or implement a PATCH
 			await httpClient.delete(`/discounts/${discountId}`);
 			toast.success("İndirim kaldırıldı.");
 			queryClient.invalidateQueries({
@@ -122,6 +140,12 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 			console.error("Error deleting discount:", error);
 			toast.error("İndirim kaldırılırken bir hata oluştu.");
 		}
+	};
+
+	const handleSelectProduct = (product: ProductSearchResult) => {
+		setSelectedProductId(product._id);
+		setSelectedProductName(product.title);
+		setProductQuery("");
 	};
 
 	return (
@@ -156,10 +180,10 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 												(Kat: {discount.scope.categoryId})
 											</span>
 										)}
-										{discount.scope.variantId && (
+										{discount.scope.productId && (
 											<span className="text-gray-500 ml-1">
 												{" "}
-												(Var: {discount.scope.variantId})
+												(Ürün: {discount.scope.productId})
 											</span>
 										)}
 									</div>
@@ -290,54 +314,71 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									className="w-full p-2.5 border rounded-md text-sm bg-white"
 								>
 									<option value="">Kategori Seçin</option>
-									{(categories || []).map(
-										(cat: { _id: string; name: string }) => (
-											<option key={cat._id} value={cat._id}>
-												{cat.name}
-											</option>
-										),
-									)}
+									{(categories || []).map((cat) => (
+										<option key={cat._id} value={cat._id}>
+											{cat.name}
+										</option>
+									))}
 								</select>
 							</div>
 						)}
 					</div>
 
-					{/* Variant Scope */}
+					{/* Product Scope */}
 					<div
-						className={`border rounded-lg overflow-hidden transition-all ${activeScope === "variant" ? "ring-2 ring-sage-blue border-transparent" : "hover:border-gray-300"}`}
+						className={`border rounded-lg overflow-hidden transition-all ${activeScope === "product" ? "ring-2 ring-sage-blue border-transparent" : "hover:border-gray-300"}`}
 					>
 						<button
-							onClick={() => setActiveScope("variant")}
-							className={`w-full flex items-center justify-between p-4 transition-colors ${activeScope === "variant" ? "bg-blue-50/50" : "bg-white"}`}
+							onClick={() => setActiveScope("product")}
+							className={`w-full flex items-center justify-between p-4 transition-colors ${activeScope === "product" ? "bg-blue-50/50" : "bg-white"}`}
 						>
 							<div className="flex items-center gap-3 text-left">
-								<Tag
+								<Package
 									size={20}
 									className={
-										activeScope === "variant"
+										activeScope === "product"
 											? "text-sage-blue"
 											: "text-gray-400"
 									}
 								/>
 								<div>
 									<span
-										className={`block text-sm ${activeScope === "variant" ? "font-bold text-sage-blue" : "font-semibold text-gray-700"}`}
+										className={`block text-sm ${activeScope === "product" ? "font-bold text-sage-blue" : "font-semibold text-gray-700"}`}
 									>
-										Ürün/Varyant Bazlı
+										Ürün Bazlı
 									</span>
 									<span className="text-xs text-gray-500">
-										Sadece belirli bir ürün varyantına uygulanır.
+										Sadece seçilen ürüne uygulanır.
 									</span>
 								</div>
 							</div>
-							{activeScope === "variant" ? (
+							{activeScope === "product" ? (
 								<ChevronDown size={20} className="text-sage-blue" />
 							) : (
 								<ChevronRight size={20} className="text-gray-400" />
 							)}
 						</button>
-						{activeScope === "variant" && (
+						{activeScope === "product" && (
 							<div className="p-4 border-t bg-gray-50/30 space-y-4">
+								{/* Selected Product Display */}
+								{selectedProductId && (
+									<div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+										<span className="text-sm font-medium text-green-800">
+											{selectedProductName}
+										</span>
+										<button
+											onClick={() => {
+												setSelectedProductId("");
+												setSelectedProductName("");
+											}}
+											className="text-green-600 hover:text-green-800"
+										>
+											<X size={16} />
+										</button>
+									</div>
+								)}
+
+								{/* Search Input */}
 								<div className="relative">
 									<input
 										type="text"
@@ -356,40 +397,62 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									)}
 								</div>
 
+								{/* Product Search Results */}
 								{productSearchData?.products &&
 									productSearchData.products.length > 0 && (
 										<div className="max-h-60 overflow-y-auto border rounded-md bg-white">
-											{productSearchData.products.map(
-												(product: { _id: string; title: string }) => (
-													<div
-														key={product._id}
-														className="p-2 border-b last:border-0"
-													>
-														<p className="text-xs font-bold text-gray-500 mb-1">
+											{productSearchData.products.map((product) => (
+												<button
+													key={product._id}
+													onClick={() => handleSelectProduct(product)}
+													className={`w-full p-3 border-b last:border-0 hover:bg-gray-50 transition-colors text-left flex items-center gap-3 ${
+														selectedProductId === product._id
+															? "bg-blue-50"
+															: ""
+													}`}
+												>
+													{/* Product Image */}
+													<div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-gray-100">
+														{product.images?.[0] ? (
+															<Image
+																src={product.images[0]}
+																alt={product.title}
+																fill
+																className="object-cover"
+															/>
+														) : (
+															<div className="w-full h-full flex items-center justify-center text-gray-400">
+																<Package size={20} />
+															</div>
+														)}
+													</div>
+
+													{/* Product Info */}
+													<div className="flex-1 min-w-0">
+														<p className="text-sm font-medium text-gray-900 truncate">
 															{product.title}
 														</p>
-														<div className="space-y-1">
-															{/* We need to fetch variants for the product, but the search API might not include them in detail */}
-															{/* For now let's show a placeholder or handle it differently if variants aren't in search results */}
-															<div className="text-xs text-red-500 italic">
-																Varyant seçimi için SKU giriniz veya
-																geliştirilmelidir.
-															</div>
-														</div>
+														<p className="text-xs text-gray-500">
+															SKU: {product.parentSku}
+															{product.category?.name && (
+																<span className="ml-2">
+																	• {product.category.name}
+																</span>
+															)}
+														</p>
 													</div>
-												),
-											)}
+												</button>
+											))}
 										</div>
 									)}
 
-								{/* Manual Variant ID input for now if search is not enough */}
-								<input
-									type="text"
-									placeholder="Varyant ID (Manuel)"
-									value={selectedVariantId}
-									onChange={(e) => setSelectedVariantId(e.target.value)}
-									className="w-full p-2.5 border rounded-md text-sm bg-white"
-								/>
+								{/* No Results */}
+								{productQuery.length >= 2 &&
+									productSearchData?.products?.length === 0 && (
+										<p className="text-sm text-gray-500 text-center py-4">
+											Ürün bulunamadı.
+										</p>
+									)}
 							</div>
 						)}
 					</div>

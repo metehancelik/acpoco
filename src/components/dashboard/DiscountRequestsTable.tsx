@@ -2,7 +2,8 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { de, enUS, tr } from "date-fns/locale";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import type { IDiscountRequestPopulated } from "@/models/DiscountRequest";
@@ -13,6 +14,11 @@ import { Button } from "../ui/button";
 import DiscountApprovalModal from "./DiscountApprovalModal";
 
 const DiscountRequestsTable = () => {
+	const t = useTranslations("DiscountAdmin");
+	const locale = useLocale();
+
+	const dateLocale = locale === "tr" ? tr : locale === "de" ? de : enUS;
+
 	const queryClient = useQueryClient();
 	const [selectedRequest, setSelectedRequest] =
 		useState<IDiscountRequestPopulated | null>(null);
@@ -39,18 +45,18 @@ const DiscountRequestsTable = () => {
 				<table className="w-full text-sm text-left">
 					<thead className="bg-gray-50 text-gray-700 uppercase text-xs">
 						<tr>
-							<th className="px-6 py-4 font-semibold">Kullanıcı</th>
-							<th className="px-6 py-4 font-semibold">Ürünler</th>
-							<th className="px-6 py-4 font-semibold">Tarih</th>
-							<th className="px-6 py-4 font-semibold">Durum</th>
-							<th className="px-6 py-4 font-semibold">İşlem</th>
+							<th className="px-6 py-4 font-semibold">{t("tableUser")}</th>
+							<th className="px-6 py-4 font-semibold">{t("tableProducts")}</th>
+							<th className="px-6 py-4 font-semibold">{t("tableDate")}</th>
+							<th className="px-6 py-4 font-semibold">{t("tableStatus")}</th>
+							<th className="px-6 py-4 font-semibold">{t("tableAction")}</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y">
 						{requests?.length === 0 && (
 							<tr>
 								<td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-									Henüz indirim talebi bulunmuyor.
+									{t("noRequests")}
 								</td>
 							</tr>
 						)}
@@ -82,7 +88,7 @@ const DiscountRequestsTable = () => {
 								</td>
 								<td className="px-6 py-4 text-gray-500">
 									{format(new Date(request.createdAt), "d MMMM yyyy HH:mm", {
-										locale: tr,
+										locale: dateLocale,
 									})}
 								</td>
 								<td className="px-6 py-4">
@@ -96,10 +102,10 @@ const DiscountRequestsTable = () => {
 										}`}
 									>
 										{request.status === "pending"
-											? "Bekliyor"
+											? t("statusPending")
 											: request.status === "approved"
-												? "Onaylandı"
-												: "Reddedildi"}
+												? t("statusApproved")
+												: t("statusRejected")}
 									</span>
 								</td>
 								<td className="px-6 py-4">
@@ -109,11 +115,11 @@ const DiscountRequestsTable = () => {
 											onClick={() => handleManage(request)}
 											className="bg-sage-blue hover:bg-indigo-400 text-xs"
 										>
-											Yönet
+											{t("manage")}
 										</Button>
 									) : (
 										<span className="text-xs text-gray-400 italic">
-											Tamamlandı
+											{t("completed")}
 										</span>
 									)}
 								</td>

@@ -1,10 +1,10 @@
 import mongoose, { type Document, model, models } from "mongoose";
 
 export interface IDiscountScope {
-	type: "user" | "category" | "variant";
+	type: "user" | "category" | "product";
 	userId?: mongoose.Types.ObjectId;
 	categoryId?: mongoose.Types.ObjectId;
-	variantId?: mongoose.Types.ObjectId;
+	productId?: mongoose.Types.ObjectId;
 }
 
 export interface IDiscount extends Document {
@@ -23,7 +23,7 @@ const DiscountScopeSchema = new mongoose.Schema(
 	{
 		type: {
 			type: String,
-			enum: ["user", "category", "variant"],
+			enum: ["user", "category", "product"],
 			required: true,
 		},
 		userId: {
@@ -34,9 +34,9 @@ const DiscountScopeSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Category",
 		},
-		variantId: {
+		productId: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "ProductVariant",
+			ref: "Product",
 		},
 	},
 	{ _id: false },
@@ -80,7 +80,7 @@ DiscountSchema.index({ isActive: 1 });
 DiscountSchema.index({ "scope.type": 1 });
 DiscountSchema.index({ "scope.userId": 1 });
 DiscountSchema.index({ "scope.categoryId": 1 });
-DiscountSchema.index({ "scope.variantId": 1 });
+DiscountSchema.index({ "scope.productId": 1 });
 DiscountSchema.index({ expiresAt: 1 });
 
 export const DiscountModel =
