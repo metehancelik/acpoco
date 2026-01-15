@@ -216,14 +216,14 @@ export default function Sidebar() {
 
 			{/* Static sidebar for desktop */}
 			<div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-20 bg-white shadow-md">
-				<div className="flex grow gap-y-5 cursor-default w-full max-w-6xl mx-auto">
-					<div className="flex items-center gap-x-2 p-2">
+				<div className="flex grow gap-y-5 cursor-default w-full max-w-6xl mx-auto h-full">
+					<div className="flex items-center gap-x-2 h-full">
 						<Link href="/">
 							<Image
 								alt="ACPOCO"
-								src="https://cdn.shopify.com/s/files/1/0613/8478/5997/files/acpoco_logo.png?v=1751975004"
-								width={80}
-								height={80}
+								src="https://shop.acpoco.de/cdn/shop/files/beyaz-zemin.png?v=1761649851&width=200"
+								width={150}
+								height={105}
 							/>
 						</Link>
 					</div>

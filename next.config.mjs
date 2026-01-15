@@ -37,6 +37,9 @@ const nextConfig = {
 			{
 				hostname: "lh3.googleusercontent.com",
 			},
+			{
+				hostname: "shop.acpoco.de",
+			},
 		],
 	},
 	transpilePackages: ["swagger-ui-react"],
