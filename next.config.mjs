@@ -40,6 +40,9 @@ const nextConfig = {
 			{
 				hostname: "shop.acpoco.de",
 			},
+			{
+				hostname: "i.ebayimg.com",
+			},
 		],
 	},
 	transpilePackages: ["swagger-ui-react"],
