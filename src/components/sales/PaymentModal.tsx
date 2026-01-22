@@ -121,6 +121,17 @@ const PaymentModal: React.FC<Props> = ({ order, onClose, open }) => {
 							<p className="w-full text-center"></p>
 							<p className="w-full text-center">${order.warehousePrice}</p>
 						</div>
+						{order.shippingAmount != null &&
+							Number(order.shippingAmount) > 0 && (
+								<div className="flex gap-2 items-center w-full justify-between">
+									<p className="w-full text-center">{t("shippingCost")}</p>
+									<p className="w-full text-center"></p>
+									<p className="w-full text-center"></p>
+									<p className="w-full text-center">
+										${Number(order.shippingAmount).toFixed(2)}
+									</p>
+								</div>
+							)}
 					</div>
 					<div className="w-full flex justify-between items-center py-4">
 						<p className="text-lg font-bold">

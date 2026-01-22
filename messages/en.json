@@ -227,6 +227,7 @@
 		"notes": "Notes",
 		"address": "Address",
 		"shipping": "Shipping",
+		"shippingCost": "Shipping Cost",
 		"fulfillment": "Fulfillment",
 		"price": "Price",
 		"image": "Image",

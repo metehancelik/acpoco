@@ -579,35 +579,35 @@ const SellerOrdersTable: React.FC<Props> = ({
 													item.matchId as { productId?: { title?: string } }
 												)?.productId?.title;
 												return (
-												<div
-													key={item.orderItemId}
-													className="mb-1 last:mb-0 flex flex-col justify-center items-center gap-1"
-												>
-													<p className="text-[10px] font-mono text-slate-600 truncate">
-														{item.sku}
-													</p>
-													{item.matchId ? (
-														<div className="flex flex-col items-center gap-0.5 text-center max-w-[140px]">
-															<span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-																✓ Matched
-															</span>
-															{matchTitle && (
-																<span
-																	className="text-[10px] text-slate-600 truncate w-full"
-																	title={matchTitle}
-																>
-																	{matchTitle}
+													<div
+														key={item.orderItemId}
+														className="mb-1 last:mb-0 flex flex-col justify-center items-center gap-1"
+													>
+														<p className="text-[10px] font-mono text-slate-600 truncate">
+															{item.sku}
+														</p>
+														{item.matchId ? (
+															<div className="flex flex-col items-center gap-0.5 text-center max-w-[140px]">
+																<span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+																	✓ Matched
 																</span>
-															)}
-														</div>
-													) : (
-														<MatchCard
-															orderId={order._id}
-															orderItem={item}
-															orderStatus={order.status}
-														/>
-													)}
-												</div>
+																{matchTitle && (
+																	<span
+																		className="text-[10px] text-slate-600 truncate w-full"
+																		title={matchTitle}
+																	>
+																		{matchTitle}
+																	</span>
+																)}
+															</div>
+														) : (
+															<MatchCard
+																orderId={order._id}
+																orderItem={item}
+																orderStatus={order.status}
+															/>
+														)}
+													</div>
 												);
 											})}
 										</div>
@@ -853,16 +853,28 @@ const SellerOrdersTable: React.FC<Props> = ({
 									{/* Price */}
 									<td className="px-2 py-1.5 text-center">
 										{order?.items.some((item) => item.matchId) ? (
-											<span className="text-emerald-600 font-bold text-base">
-												$
-												{order.items
-													.reduce((acc, item) => {
-														const price = item?.matchedPrice || 0;
-														const quantity = item.quantity || 0;
-														return acc + price * quantity;
-													}, 0)
-													.toFixed(2)}
-											</span>
+											<div className="flex flex-col items-center gap-0.5">
+												<span className="text-emerald-600 font-bold text-base">
+													$
+													{order.items
+														.reduce((acc, item) => {
+															const price = item?.matchedPrice || 0;
+															const quantity = item.quantity || 0;
+															return acc + price * quantity;
+														}, 0)
+														.toFixed(2)}
+												</span>
+												{order.shippingAmount != null &&
+													Number(order.shippingAmount) > 0 && (
+														<span
+															className="text-[10px] text-slate-500"
+															title={t("shippingCost")}
+														>
+															{t("shippingCost")}: $
+															{Number(order.shippingAmount).toFixed(2)}
+														</span>
+													)}
+											</div>
 										) : (
 											<span className="text-slate-300 text-sm">—</span>
 										)}

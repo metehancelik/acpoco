@@ -227,6 +227,7 @@
 		"notes": "Notizen",
 		"address": "Adresse",
 		"shipping": "Versand",
+		"shippingCost": "Versandkosten",
 		"fulfillment": "Erfüllung",
 		"price": "Preis",
 		"image": "Bild",

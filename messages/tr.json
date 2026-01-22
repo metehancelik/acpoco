@@ -227,6 +227,7 @@
 		"notes": "Notlar",
 		"address": "Adres",
 		"shipping": "Kargo",
+		"shippingCost": "Kargo Ücreti",
 		"fulfillment": "Teslimat",
 		"price": "Ücret",
 		"image": "Görsel",
