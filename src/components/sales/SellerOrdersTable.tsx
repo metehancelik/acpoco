@@ -574,7 +574,11 @@ const SellerOrdersTable: React.FC<Props> = ({
 														matchId?: IProduct;
 													}
 												>
-											).map((item) => (
+											).map((item) => {
+												const matchTitle = (
+													item.matchId as { productId?: { title?: string } }
+												)?.productId?.title;
+												return (
 												<div
 													key={item.orderItemId}
 													className="mb-1 last:mb-0 flex flex-col justify-center items-center gap-1"
@@ -583,9 +587,19 @@ const SellerOrdersTable: React.FC<Props> = ({
 														{item.sku}
 													</p>
 													{item.matchId ? (
-														<span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-															✓ Matched
-														</span>
+														<div className="flex flex-col items-center gap-0.5 text-center max-w-[140px]">
+															<span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+																✓ Matched
+															</span>
+															{matchTitle && (
+																<span
+																	className="text-[10px] text-slate-600 truncate w-full"
+																	title={matchTitle}
+																>
+																	{matchTitle}
+																</span>
+															)}
+														</div>
 													) : (
 														<MatchCard
 															orderId={order._id}
@@ -594,7 +608,8 @@ const SellerOrdersTable: React.FC<Props> = ({
 														/>
 													)}
 												</div>
-											))}
+												);
+											})}
 										</div>
 									</td>
 									{/* <td className="relative whitespace-nowrap py-1 pl-3 pr-4 text-center text-sm font-medium sm:pr-6">
