@@ -168,25 +168,28 @@ const FilterForm = () => {
 								<option className="text-sm" value="">
 									{t("all")}
 								</option>
+								{/* Normal users see: eşleşme bekliyor, ödeme bekliyor */}
 								{session.data?.user?.role !== "ADMIN" && (
-									<option className="text-sm" value="waitingMatch">
-										{t("waitingMatch")}
-									</option>
+									<>
+										<option className="text-sm" value="waitingMatch">
+											{t("waitingMatch")}
+										</option>
+										<option className="text-sm" value="waitingPayment">
+											{t("waitingPayment")}
+										</option>
+									</>
 								)}
-								{session.data?.user?.role !== "ADMIN" && (
-									<option className="text-sm" value="waitingPayment">
-										{t("waitingPayment")}
-									</option>
+								{/* Admin users see: hazırlanıyor, kargoya verildi */}
+								{session.data?.user?.role === "ADMIN" && (
+									<>
+										<option className="text-sm" value="waitingProduction">
+											{t("processing")}
+										</option>
+										<option className="text-sm" value="shipped">
+											{t("shipped")}
+										</option>
+									</>
 								)}
-								<option className="text-sm" value="waitingProduction">
-									{t("waitingProduction")}
-								</option>
-								<option className="text-sm" value="processing">
-									{t("processing")}
-								</option>
-								<option className="text-sm" value="shipped">
-									{t("shipped")}
-								</option>
 							</select>
 						</div>
 					)}

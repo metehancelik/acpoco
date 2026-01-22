@@ -403,9 +403,6 @@ const SellerOrdersTable: React.FC<Props> = ({ data, totalPages }) => {
 										<SelectItem value="waitingProduction">
 											{t("waitingProductionStatus")}
 										</SelectItem>
-										<SelectItem value="processing">
-											{t("processingStatus")}
-										</SelectItem>
 										<SelectItem value="shipped">
 											{t("shippedStatus")}
 										</SelectItem>
