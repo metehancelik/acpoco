@@ -1,11 +1,16 @@
 import axios from "axios";
 
 import dbConnect from "@/lib/db";
+import { DiscountModel, type IDiscount } from "@/models/Discount";
 import Order from "@/models/Order";
 import Product, { type IProduct } from "@/models/Product";
+import { ProductVariantModel } from "@/models/ProductVariant";
 import Store, { type IStore } from "@/models/Store";
 import User from "@/models/User";
+import Wallet from "@/models/Wallet";
+import WalletLog from "@/models/WalletLog";
 import Warehouse from "@/models/Warehouse";
+import { calculateDiscountedPrice } from "@/utils/discountCalculator";
 
 import { getAmazonCustomizationFromOptions } from "./amazon-customization";
 import type { ShipStationOrder } from "./types";
@@ -96,16 +101,160 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			country: shipStationOrder.shipTo.country,
 		});
 
-		const user = await User.findOne({
-			stores: { $in: [shipStationOrder.advancedOptions.storeId.storeId] },
+		// Find the store to get the user
+		const store = await Store.findOne({
+			storeId: shipStationOrder.advancedOptions.storeId.storeId,
 		});
+
+		const user = store ? await User.findById(store.userId) : null;
 		let warehousePrice = 0;
 
 		if (warehouse) {
 			warehousePrice = warehouse.price + (user?.warehousePriceRate ?? 0);
 		}
 
-		const orderData: ShipStationOrder = {
+		// Fetch all product variants with their products for SKU matching
+		const allVariants = await ProductVariantModel.find({}).populate({
+			path: "productId",
+			select: "category",
+		});
+
+		// Build a SKU -> Variant map for fast lookup
+		const skuToVariantMap = new Map<
+			string,
+			{
+				_id: string;
+				price: number;
+				productId: { _id: string; category?: string };
+			}
+		>();
+		for (const variant of allVariants) {
+			if (variant.childSku) {
+				skuToVariantMap.set(variant.childSku, {
+					_id: variant._id.toString(),
+					price: variant.price,
+					productId: variant.productId as unknown as {
+						_id: string;
+						category?: string;
+					},
+				});
+			}
+		}
+
+		// Fetch active discounts for this user (if user exists)
+		let activeDiscounts: IDiscount[] = [];
+		if (user) {
+			activeDiscounts = (await DiscountModel.find({
+				isActive: true,
+			})) as unknown as IDiscount[];
+		}
+
+		// Process items with auto-matching
+		const processedItems = await Promise.all(
+			shipStationOrder.items
+				.filter((item) => item.adjustment === false)
+				.map(async (item) => {
+					const { amazonCustomizationData, amazonCustomizationOptions } =
+						await getAmazonCustomizationFromOptions(item.options);
+
+					// Try to auto-match by SKU
+					let matchId = null;
+					let matchedPrice = null;
+
+					if (item.sku) {
+						const matchedVariant = skuToVariantMap.get(item.sku);
+						if (matchedVariant && user) {
+							matchId = matchedVariant._id;
+							const basePrice = matchedVariant.price;
+
+							// Calculate discounted price
+							const categoryId =
+								matchedVariant.productId?.category?.toString() || "";
+							const { finalPrice } = calculateDiscountedPrice(
+								basePrice,
+								user._id.toString(),
+								categoryId,
+								matchedVariant._id.toString(),
+								activeDiscounts,
+							);
+
+							matchedPrice = finalPrice;
+						}
+					}
+
+					return {
+						orderItemId: item.orderItemId,
+						lineItemKey: item.lineItemKey,
+						sku: item.sku,
+						name: item.name,
+						imageUrl: item.imageUrl,
+						designUrl: null,
+						quantity: item.quantity,
+						unitPrice: item.unitPrice,
+						taxAmount: item.taxAmount,
+						weight: item.weight,
+						shippingAmount: item.shippingAmount,
+						options: item.options,
+						amazonCustomizationData: amazonCustomizationData || null,
+						amazonCustomizationOptions,
+						productId: item.productId,
+						adjustment: item.adjustment,
+						warehouseLocation: item.warehouseLocation,
+						upc: item.upc,
+						createDate: item.createDate,
+						modifyDate: item.modifyDate,
+						matchId,
+						matchedPrice,
+					};
+				}),
+		);
+
+		// Check if all items are matched
+		const allItemsMatched = processedItems.every(
+			(item) => item.matchId !== null,
+		);
+
+		// Determine initial status
+		let orderStatus: "waitingMatch" | "waitingPayment" | "waitingProduction" =
+			"waitingMatch";
+		let isPayed = false;
+
+		if (allItemsMatched) {
+			orderStatus = "waitingPayment";
+
+			// Try auto-payment if user exists and has sufficient balance
+			if (user) {
+				const userWallet = await Wallet.findOne({ userId: user._id });
+				if (userWallet) {
+					const totalPrice = processedItems.reduce((acc, item) => {
+						return acc + (item.matchedPrice || 0) * item.quantity;
+					}, 0);
+
+					if (totalPrice > 0 && totalPrice <= userWallet.balance) {
+						// Auto-pay: deduct balance
+						await Wallet.updateOne(
+							{ userId: user._id },
+							{ $inc: { balance: -totalPrice } },
+						);
+
+						await WalletLog.create({
+							userId: user._id,
+							type: "WITHDRAW",
+							info: "autoOrderPayment",
+							changedBy: user._id,
+							changeAmount: totalPrice,
+							currentBalance: userWallet.balance,
+							finalBalance: userWallet.balance - totalPrice,
+						});
+
+						orderStatus = "waitingProduction";
+						isPayed = true;
+					}
+				}
+			}
+		}
+
+		const orderData: any = {
 			orderId: shipStationOrder.orderId,
 			orderNumber: shipStationOrder.orderNumber,
 			orderKey: shipStationOrder.orderKey,
@@ -128,39 +277,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			holdUntilDate: shipStationOrder.modifyDate,
 			shipTo: shipStationOrder.shipTo,
 			billTo: shipStationOrder.billTo,
-			items: await Promise.all(
-				shipStationOrder.items
-					.filter((item) => item.adjustment === false)
-					.map(async (item) => {
-						const { amazonCustomizationData, amazonCustomizationOptions } =
-							await getAmazonCustomizationFromOptions(item.options);
-
-						return {
-							orderItemId: item.orderItemId,
-							lineItemKey: item.lineItemKey,
-							sku: item.sku,
-							name: item.name,
-							imageUrl: item.imageUrl,
-							designUrl: null,
-							quantity: item.quantity,
-							unitPrice: item.unitPrice,
-							taxAmount: item.taxAmount,
-							weight: item.weight,
-							shippingAmount: item.shippingAmount,
-							options: item.options,
-							amazonCustomizationData: amazonCustomizationData || null,
-							amazonCustomizationOptions,
-							productId: item.productId,
-							adjustment: item.adjustment,
-							warehouseLocation: item.warehouseLocation,
-							upc: item.upc,
-							createDate: item.createDate,
-							modifyDate: item.modifyDate,
-							matchId: null,
-							matchedPrice: null,
-						};
-					}),
-			),
+			items: processedItems,
 			paymentDate: shipStationOrder.paymentDate,
 			shipByDate: shipStationOrder.shipByDate,
 			orderStatus: shipStationOrder.orderStatus,
@@ -193,7 +310,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 				mergedOrSplit: shipStationOrder.advancedOptions.mergedOrSplit,
 				mergedIds: shipStationOrder.advancedOptions.mergedIds,
 				parentId: shipStationOrder.advancedOptions.parentId,
-				storeId: shipStationOrder.advancedOptions.storeId,
+				storeId: shipStationOrder.advancedOptions.storeId.storeId,
 				customField1: shipStationOrder.advancedOptions.customField1,
 				customField2: shipStationOrder.advancedOptions.customField2,
 				customField3: shipStationOrder.advancedOptions.customField3,
@@ -211,13 +328,13 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			externallyFulfilledById: shipStationOrder.externallyFulfilledById,
 			externallyFulfilledByName: shipStationOrder.externallyFulfilledByName,
 			labelMessages: shipStationOrder.labelMessages,
-			isPayed: false,
+			isPayed,
 			warehouse: shipStationOrder.shipTo.country, //order çekilirken warehouse değeri set ediliyor
 			warehousePrice: warehousePrice,
 			warehouseTrackingNumber: shipStationOrder.warehouseTrackingNumber || "",
 			warehouseShippingService: shipStationOrder.warehouseShippingService || "",
 			storeId: shipStationOrder.advancedOptions.storeId.storeId,
-			status: "waitingMatch",
+			status: orderStatus,
 		};
 
 		try {

@@ -1,19 +1,30 @@
 "use client";
 
 import axios from "axios";
-import { format } from "date-fns";
-import { tr } from "date-fns/locale/tr";
+import { format, parse } from "date-fns";
+import { tr } from "date-fns/locale";
+import {
+	Calendar,
+	ChevronDown,
+	Filter,
+	MapPin,
+	Package,
+	Search,
+	Store,
+	X,
+} from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import React, { useEffect } from "react";
-import DatePicker, { registerLocale, setDefaultLocale } from "react-datepicker";
+import { useEffect, useRef, useState } from "react";
+import { DateRange, type Range, type RangeKeyDict } from "react-date-range";
 import { Controller, useForm } from "react-hook-form";
 
-//KİŞİNİN BİRDEN FAZLA MAĞAZASI OLABİLİR (MAĞAZA SEÇİMİ)
-//MÜŞTERİ İSMİ İLE ARAMA YAPILABİLİR
-//TARİH ARALIĞI İLE ARAMA YAPILABİLİR
-//SİPARİŞİN DURUMU İLE ARAMA YAPILABİLİR (ÖDEME BEKLİYOR, ÜRETİM BEKLİYOR, ÜRETİLDİ,KARGOYA VERİLDİ)
-//RESET FİLTER BUTONU OLABİLİR
+import { cn } from "@/lib/utils";
+
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+
 export const COUNTRIES = [
 	{ code: "AU", name: "Australia - AU" },
 	{ code: "AT", name: "Austria - AT" },
@@ -62,16 +73,16 @@ export const COUNTRIES = [
 	{ code: "US", name: "United States - US" },
 	{ code: "VN", name: "Vietnam - VN" },
 ];
+
 const WAREHOUSES = [
 	{ code: "DE", name: "Almanya - DE" },
 	{ code: "GB", name: "İngiltere - GB" },
 	{ code: "US", name: "Amerika - US" },
 	{ code: "CA", name: "Kanada - CA" },
 ];
+
 type Inputs = {
 	storeId: string;
-	orderDateStart: Date | null;
-	orderDateEnd: Date | null;
 	status: string;
 	orderId: string;
 	warehouse: string;
@@ -81,57 +92,109 @@ type Inputs = {
 const FilterForm = () => {
 	const t = useTranslations("Orders");
 	const session = useSession();
-	const [stores, setStores] = React.useState([]);
-	const {
-		register,
-		handleSubmit,
-		control,
-		// formState: { errors },
-	} = useForm({
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	// Parse dates from URL
+	const getInitialDateRange = (): Range[] => {
+		const startDateStr = searchParams?.get("orderDateStart");
+		const endDateStr = searchParams?.get("orderDateEnd");
+
+		if (startDateStr || endDateStr) {
+			return [
+				{
+					startDate: startDateStr
+						? parse(startDateStr, "yyyy-MM-dd", new Date())
+						: undefined,
+					endDate: endDateStr
+						? parse(endDateStr, "yyyy-MM-dd", new Date())
+						: undefined,
+					key: "selection",
+				},
+			];
+		}
+		return [{ startDate: undefined, endDate: undefined, key: "selection" }];
+	};
+
+	const [stores, setStores] = useState<
+		{ storeId: string; storeName: string }[]
+	>([]);
+	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+	const [dateRange, setDateRange] = useState<Range[]>(getInitialDateRange);
+	const calendarRef = useRef<HTMLDivElement>(null);
+
+	const { handleSubmit, control, reset } = useForm<Inputs>({
 		defaultValues: {
-			storeId: "",
-			status: "",
-			country: "",
-			warehouse: "",
-			orderId: "",
-			orderDateStart: null as Date | null,
-			orderDateEnd: null as Date | null,
+			storeId: searchParams?.get("storeId") || "",
+			status: searchParams?.get("status") || "",
+			country: searchParams?.get("country") || "",
+			warehouse: searchParams?.get("warehouse") || "",
+			orderId: searchParams?.get("orderId") || "",
 		},
 	});
-	const searchParams = new URLSearchParams();
-	setDefaultLocale("tr");
-	registerLocale("tr", tr);
+
+	// Sync form with URL params when they change
+	useEffect(() => {
+		reset({
+			storeId: searchParams?.get("storeId") || "",
+			status: searchParams?.get("status") || "",
+			country: searchParams?.get("country") || "",
+			warehouse: searchParams?.get("warehouse") || "",
+			orderId: searchParams?.get("orderId") || "",
+		});
+		setDateRange(getInitialDateRange());
+	}, [searchParams, reset, getInitialDateRange]);
+
+	// Close calendar when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				calendarRef.current &&
+				!calendarRef.current.contains(event.target as Node)
+			) {
+				setIsCalendarOpen(false);
+			}
+		};
+
+		if (isCalendarOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isCalendarOpen]);
 
 	const onSubmit = (data: Inputs) => {
-		const formattedStartDate = data.orderDateStart
-			? format(data.orderDateStart, "yyyy-MM-dd")
-			: null;
-		data.orderDateStart = formattedStartDate as unknown as Date | null;
-		const formattedEndDate = data.orderDateEnd
-			? format(data.orderDateEnd, "yyyy-MM-dd")
-			: null;
-		data.orderDateEnd = formattedEndDate as unknown as Date | null;
+		const searchParams = new URLSearchParams();
 
 		if (data.storeId) searchParams.append("storeId", data.storeId);
-		// if (data.customerUsername)
-		//   searchParams.append("customerUsername", data.customerUsername);
-		if (data.orderDateStart)
-			searchParams.append("orderDateStart", formattedStartDate!);
-		if (data.orderDateEnd)
-			searchParams.append("orderDateEnd", formattedEndDate!);
+		if (dateRange[0]?.startDate) {
+			searchParams.append(
+				"orderDateStart",
+				format(dateRange[0].startDate, "yyyy-MM-dd"),
+			);
+		}
+		if (dateRange[0]?.endDate) {
+			searchParams.append(
+				"orderDateEnd",
+				format(dateRange[0].endDate, "yyyy-MM-dd"),
+			);
+		}
 		if (data.status) searchParams.append("status", data.status);
 		if (data.orderId) searchParams.append("orderId", data.orderId);
 		if (data.warehouse) searchParams.append("warehouse", data.warehouse);
 		if (data.country) searchParams.append("country", data.country);
 
 		const queryString = searchParams.toString();
-		window.history.replaceState(null, "", `?${queryString}`); // Update the URL with the query string
+		router.push(`${pathname}?${queryString}`);
 	};
 
 	useEffect(() => {
 		const getStores = async () => {
 			try {
-				const res = await axios.get(`/api/stores/mystores`);
+				const res = await axios.get("/api/stores/mystores");
 				setStores(res.data.stores);
 			} catch (error: unknown) {
 				console.error(error);
@@ -140,254 +203,266 @@ const FilterForm = () => {
 		getStores();
 	}, []);
 
-	return (
-		<div className="col-span-12 w-full">
-			<form
-				onSubmit={handleSubmit(onSubmit)}
-				className="grid grid-cols-8 gap-2 items-center w-full"
-			>
-				<Controller
-					control={control}
-					name="status"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="orderStatus"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("orderStatus")}
-							</label>
+	const handleDateChange = (item: RangeKeyDict) => {
+		setDateRange([item.selection]);
+	};
 
+	const formatDateDisplay = () => {
+		const { startDate, endDate } = dateRange[0];
+		if (!startDate) return null;
+
+		if (endDate && startDate.getTime() !== endDate.getTime()) {
+			return `${format(startDate, "dd MMM", { locale: tr })} - ${format(endDate, "dd MMM", { locale: tr })}`;
+		}
+		return format(startDate, "dd MMM yyyy", { locale: tr });
+	};
+
+	const clearDates = () => {
+		setDateRange([
+			{
+				startDate: undefined,
+				endDate: undefined,
+				key: "selection",
+			},
+		]);
+	};
+
+	const setPresetRange = (days: number) => {
+		const end = new Date();
+		const start = new Date();
+		start.setDate(end.getDate() - days);
+		setDateRange([
+			{
+				startDate: start,
+				endDate: end,
+				key: "selection",
+			},
+		]);
+	};
+
+	return (
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="relative flex items-center gap-1"
+		>
+			{/* Glassmorphism container */}
+			<div className="flex items-center gap-1 bg-white/90 backdrop-blur-xl rounded-xl p-1 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+				{/* Status */}
+				<div className="group relative">
+					<div className="absolute inset-0 bg-linear-to-r from-violet-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+					<Controller
+						control={control}
+						name="status"
+						render={({ field }) => (
 							<select
 								{...field}
-								id="status"
-								value={field.value}
-								defaultValue=""
-								className="w-full text-sm rounded-md border border-primary py-2 pl-3 pr-10 text-gray-900"
+								className="relative h-8 text-[10px] font-semibold rounded-lg bg-slate-50/80 border border-slate-200/50 pl-2 pr-6 text-slate-700 focus:ring-1 focus:ring-violet-500/30 focus:border-violet-400 appearance-none cursor-pointer hover:bg-white hover:shadow-sm transition-all duration-150"
 							>
-								<option className="text-sm" value="">
-									{t("all")}
-								</option>
-								{/* Normal users see: eşleşme bekliyor, ödeme bekliyor */}
+								<option value="">📊 {t("all")}</option>
 								{session.data?.user?.role !== "ADMIN" && (
 									<>
-										<option className="text-sm" value="waitingMatch">
-											{t("waitingMatch")}
-										</option>
-										<option className="text-sm" value="waitingPayment">
-											{t("waitingPayment")}
+										<option value="waitingMatch">🔍 {t("waitingMatch")}</option>
+										<option value="waitingPayment">
+											💳 {t("waitingPayment")}
 										</option>
 									</>
 								)}
-								{/* Admin users see: hazırlanıyor, kargoya verildi */}
 								{session.data?.user?.role === "ADMIN" && (
 									<>
-										<option className="text-sm" value="waitingProduction">
-											{t("processing")}
+										<option value="waitingProduction">
+											⚙️ {t("processing")}
 										</option>
-										<option className="text-sm" value="shipped">
-											{t("shipped")}
-										</option>
+										<option value="shipped">🚚 {t("shipped")}</option>
 									</>
 								)}
 							</select>
-						</div>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="storeId"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="store"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("store")}
-							</label>
+						)}
+					/>
+					<ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-slate-400 pointer-events-none" />
+				</div>
 
+				{/* Store */}
+				<div className="group relative">
+					<div className="absolute inset-0 bg-linear-to-r from-blue-500/20 to-cyan-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+					<Store className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-blue-500 z-10" />
+					<Controller
+						control={control}
+						name="storeId"
+						render={({ field }) => (
 							<select
 								{...field}
-								id="storeId"
-								value={field.value}
-								defaultValue="My Store"
-								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+								className="relative h-8 text-[10px] font-semibold rounded-lg bg-slate-50/80 border border-slate-200/50 pl-7 pr-6 text-slate-700 focus:ring-1 focus:ring-blue-500/30 focus:border-blue-400 appearance-none cursor-pointer hover:bg-white hover:shadow-sm transition-all duration-150"
 							>
-								<option className="text-sm" value="">
-									{t("all")}
-								</option>
-								{stores.map((store: { storeId: string; storeName: string }) => (
+								<option value="">{t("store")}</option>
+								{stores.map((store) => (
 									<option key={store.storeId} value={store.storeId}>
 										{store.storeName}
 									</option>
 								))}
 							</select>
-						</div>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="country"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="country"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("country")}
-							</label>
+						)}
+					/>
+					<ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-slate-400 pointer-events-none" />
+				</div>
 
+				{/* Country */}
+				<div className="group relative">
+					<div className="absolute inset-0 bg-linear-to-r from-emerald-500/20 to-green-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+					<MapPin className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-emerald-500 z-10" />
+					<Controller
+						control={control}
+						name="country"
+						render={({ field }) => (
 							<select
 								{...field}
-								id="country"
-								value={field.value}
-								defaultValue=""
-								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+								className="relative h-8 text-[10px] font-semibold rounded-lg bg-slate-50/80 border border-slate-200/50 pl-7 pr-6 text-slate-700 focus:ring-1 focus:ring-emerald-500/30 focus:border-emerald-400 appearance-none cursor-pointer hover:bg-white hover:shadow-sm transition-all duration-150"
 							>
-								<option className="text-sm" value="">
-									{t("all")}
-								</option>
-								{COUNTRIES.map((country: { code: string; name: string }) => (
+								<option value="">{t("country")}</option>
+								{COUNTRIES.map((country) => (
 									<option key={country.code} value={country.code}>
 										{country.name}
 									</option>
 								))}
 							</select>
-						</div>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="warehouse"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="warehouse"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("warehouse")}
-							</label>
+						)}
+					/>
+					<ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-slate-400 pointer-events-none" />
+				</div>
 
+				{/* Warehouse */}
+				<div className="group relative">
+					<div className="absolute inset-0 bg-linear-to-r from-amber-500/20 to-orange-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+					<Package className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-amber-500 z-10" />
+					<Controller
+						control={control}
+						name="warehouse"
+						render={({ field }) => (
 							<select
 								{...field}
-								id="warehouse"
-								value={field.value}
-								defaultValue=""
-								className=" w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
+								className="relative h-8 text-[10px] font-semibold rounded-lg bg-slate-50/80 border border-slate-200/50 pl-7 pr-6 text-slate-700 focus:ring-1 focus:ring-amber-500/30 focus:border-amber-400 appearance-none cursor-pointer hover:bg-white hover:shadow-sm transition-all duration-150"
 							>
-								<option className="text-sm" value="">
-									{t("all")}
-								</option>
-								{WAREHOUSES.map((warehouse: { code: string; name: string }) => (
+								<option value="">{t("warehouse")}</option>
+								{WAREHOUSES.map((warehouse) => (
 									<option key={warehouse.code} value={warehouse.code}>
 										{warehouse.name}
 									</option>
 								))}
 							</select>
-						</div>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="orderId"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="orderId"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("orderNo")}
-							</label>
+						)}
+					/>
+					<ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 text-slate-400 pointer-events-none" />
+				</div>
 
+				{/* Order Search */}
+				<div className="group relative">
+					<div className="absolute inset-0 bg-linear-to-r from-pink-500/20 to-rose-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+					<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-pink-500 z-10" />
+					<Controller
+						control={control}
+						name="orderId"
+						render={({ field }) => (
 							<input
 								{...field}
-								placeholder={t("enterOrderNo")}
-								className="w-full rounded-md border border-primary py-2 px-2 text-sm text-gray-900 h-9"
+								placeholder={`# ${t("orderNo")}`}
+								className="relative h-8 w-24 text-[10px] font-semibold rounded-lg bg-slate-50/80 border border-slate-200/50 pl-7 pr-2 text-slate-700 placeholder:text-slate-400 focus:ring-1 focus:ring-pink-500/30 focus:border-pink-400 hover:bg-white hover:shadow-sm transition-all duration-150"
 							/>
-						</div>
-					)}
-				/>
+						)}
+					/>
+				</div>
 
-				{/* <Controller
-          control={control}
-          name="customerUsername"
-          render={({ field }) => (
-            <div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="customerUsername"
-                className=" text-sm font-medium leading-6 text-gray-900"
-              >
-                Müşteri İsmi
-              </label>
+				{/* Date Picker */}
+				<div className="relative z-[9999]" ref={calendarRef}>
+					<button
+						type="button"
+						onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+						className={cn(
+							"h-8 px-3 flex items-center gap-1.5 rounded-xl font-semibold text-[10px] transition-all duration-200",
+							"bg-linear-to-r from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/25",
+							"hover:shadow-lg hover:shadow-indigo-500/30 hover:scale-[1.02] active:scale-[0.98]",
+							dateRange[0].startDate && "ring-2 ring-white/50",
+						)}
+					>
+						<Calendar className="h-3.5 w-3.5" />
+						<span>{formatDateDisplay() || t("selectDateRange")}</span>
+						{dateRange[0].startDate && (
+							<X
+								className="h-3 w-3 text-white/70 hover:text-white hover:rotate-90 transition-transform"
+								onClick={(e) => {
+									e.stopPropagation();
+									clearDates();
+								}}
+							/>
+						)}
+					</button>
 
-              <input
-                {...field}
-                placeholder="Müşteri adı giriniz"
-                className="w-full rounded-md border border-primary py-2 px-2 text-sm text-gray-900 h-9"
-              />
-            </div>
-          )}
-        /> */}
-				<Controller
-					control={control}
-					{...register("orderDateStart")}
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="startDate"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("startDate")}
-							</label>
-							<DatePicker
-								className="rounded-md text-sm text-text-primary pl-2 w-full pr-0 py-1.5"
-								id="orderDateStart"
-								selected={field.value}
-								onChange={(date) => field.onChange(date)}
-								maxDate={new Date()}
-								placeholderText={t("startDatePlaceholder")}
-								monthsShown={1}
+					{isCalendarOpen && (
+						<div className="absolute top-full right-0 mt-1 bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-100 overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200">
+							{/* Header */}
+							<div className="px-4 py-2.5 bg-linear-to-r from-indigo-500 via-violet-500 to-purple-500 flex items-center justify-between">
+								<div className="flex gap-1">
+									{[
+										{ days: 7, label: t("lastWeek") },
+										{ days: 30, label: t("lastMonth") },
+										{ days: 90, label: t("last3Months") },
+									].map(({ days, label }) => (
+										<button
+											key={days}
+											type="button"
+											className="h-6 px-2.5 text-[9px] font-semibold text-white/90 bg-white/10 hover:bg-white/20 rounded-md transition-colors"
+											onClick={() => setPresetRange(days)}
+										>
+											{label}
+										</button>
+									))}
+								</div>
+								<button
+									type="button"
+									className="text-white/70 hover:text-white text-[9px] font-medium px-2 py-1 rounded transition-colors"
+									onClick={clearDates}
+								>
+									{t("clear")}
+								</button>
+							</div>
+
+							<DateRange
+								onChange={handleDateChange}
+								moveRangeOnFirstSelection={false}
+								ranges={dateRange}
+								months={2}
+								direction="horizontal"
 								locale={tr}
-								dateFormat="dd/MM/yyyy"
-							/>
-						</div>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="orderDateEnd"
-					render={({ field }) => (
-						<div className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1">
-							<label
-								htmlFor="endDate"
-								className=" text-sm font-medium leading-6 text-gray-900"
-							>
-								{t("endDate")}
-							</label>
-
-							<DatePicker
-								className="rounded-md text-sm border-primary text-text-primary pl-2 w-full pr-0 py-1.5"
-								id="orderDateEnd"
-								selected={field.value}
-								onChange={(date) => field.onChange(date)}
 								maxDate={new Date()}
-								placeholderText={t("endDatePlaceholder")}
-								monthsShown={1}
-								locale={tr}
-								dateFormat="dd/MM/yyyy"
+								rangeColors={["#8b5cf6"]}
+								color="#8b5cf6"
+								showDateDisplay={false}
+								className="font-sans!"
 							/>
+
+							<div className="px-4 py-2 bg-slate-50 flex justify-end border-t">
+								<button
+									type="button"
+									className="h-7 px-4 bg-linear-to-r from-indigo-500 to-violet-500 text-white font-semibold text-[10px] rounded-lg shadow-md shadow-indigo-500/20 hover:shadow-lg transition-all"
+									onClick={() => setIsCalendarOpen(false)}
+								>
+									✓ {t("apply")}
+								</button>
+							</div>
 						</div>
 					)}
-				/>
+				</div>
+			</div>
 
-				<button
-					type="submit"
-					className="col-span-6 sm:col-span-2 lg:col-span-2 xl:col-span-1 mt-6 items-center gap-x-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-primary/90  focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary"
-				>
-					{t("filter")}
-				</button>
-			</form>
-		</div>
+			{/* Filter Button */}
+			<button
+				type="submit"
+				className="group relative h-8 flex items-center justify-center gap-1.5 rounded-xl px-4 text-[10px] font-bold text-white overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+			>
+				<div className="absolute inset-0 bg-linear-to-r from-emerald-500 to-teal-500" />
+				<div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-500" />
+				<Filter className="relative h-3.5 w-3.5 group-hover:rotate-12 transition-transform duration-200" />
+				<span className="relative">{t("filter")}</span>
+			</button>
+		</form>
 	);
 };
 
