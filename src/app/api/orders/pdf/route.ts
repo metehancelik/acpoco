@@ -119,12 +119,6 @@ export async function GET(request: Request) {
 		// Generate PDF
 		const pdfBuffer = await generateOrdersPDF(orders);
 
-		// Update order statuses to 'processing'
-		await Order.updateMany(
-			{ _id: { $in: orders.map((order) => order._id) } },
-			{ $set: { status: "processing" } },
-		);
-
 		// Return PDF as response
 		return new Response(pdfBuffer, {
 			headers: {
@@ -187,12 +181,6 @@ export async function POST(request: Request) {
 
 		// Generate PDF
 		const pdfBuffer = await generateOrdersPDF(orders);
-
-		// Update order statuses to 'processing'
-		await Order.updateMany(
-			{ _id: { $in: orderIds } },
-			{ $set: { status: "processing" } },
-		);
 
 		// Return PDF as response
 		return new Response(pdfBuffer, {

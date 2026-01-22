@@ -67,14 +67,26 @@ export async function generateOrdersPDF(
 		const pageWidth = pdf.internal.pageSize.getWidth();
 		const pageHeight = pdf.internal.pageSize.getHeight();
 
+		// Color palette
+		const colors = {
+			primary: [41, 128, 185], // Blue
+			secondary: [52, 73, 94], // Dark gray-blue
+			accent: [46, 204, 113], // Green
+			background: [236, 240, 241], // Light gray
+			border: [189, 195, 199], // Medium gray
+			text: [44, 62, 80], // Dark text
+			textLight: [127, 140, 141], // Light text
+			headerBg: [52, 152, 219], // Header blue
+		};
+
 		// Define card dimensions and layout - 6 items per page (2 columns x 3 rows)
 		const cardsPerRow = 2;
 		const cardsPerColumn = 3;
 		const cardsPerPage = cardsPerRow * cardsPerColumn;
-		const cardWidth = pageWidth / cardsPerRow - 10; // 5mm margins on each side
-		const cardHeight = pageHeight / cardsPerColumn - 2; // 5mm margins on top/bottom
-		const marginX = 5;
-		const marginY = 1;
+		const cardWidth = pageWidth / cardsPerRow - 12; // Better margins
+		const cardHeight = pageHeight / cardsPerColumn - 4;
+		const marginX = 6;
+		const marginY = 2;
 
 		// Extract order items from all orders
 		const allOrderItems: OrderItemForPDF[] = [];
@@ -170,39 +182,51 @@ export async function generateOrdersPDF(
 			}
 
 			// Calculate card position
-			const x = marginX + colIndex * (cardWidth + 5);
-			const y = marginY + rowIndex * (cardHeight + 5);
+			const x = marginX + colIndex * (cardWidth + 6);
+			const y = marginY + rowIndex * (cardHeight + 4);
 
-			// Draw card border
-			pdf.setDrawColor(0);
-			pdf.setLineWidth(0.5);
+			// Draw card border with rounded effect (simulated with lighter color)
+			pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+			pdf.setLineWidth(0.3);
 			pdf.rect(x, y, cardWidth, cardHeight);
 
 			// Extract item data
 			const { item, orderNumber, advancedOptions, orderDate, order } =
 				allOrderItems[i];
 
-			// Set font for header
-			pdf.setFont("Noto Sans", "bold");
-			pdf.setFontSize(10);
+			// Draw header background
+			const headerHeight = 10;
+			pdf.setFillColor(
+				colors.headerBg[0],
+				colors.headerBg[1],
+				colors.headerBg[2],
+			);
+			pdf.rect(x, y, cardWidth, headerHeight, "F");
 
-			// Draw header with customer name, order number and date
-			const dateFormatted = format(orderDate, "dd.MM.yyyy HH:mm:ss");
+			// Draw header text
+			pdf.setTextColor(255, 255, 255);
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(9);
+			const dateFormatted = format(orderDate, "dd.MM.yyyy HH:mm");
 			const storeName = advancedOptions?.storeId?.storeName || "Unknown Store";
 			const header = `${storeName} - ${orderNumber}`;
-			pdf.text(header, x + 3, y + 6);
-			pdf.text(dateFormatted, x + cardWidth - 3, y + 6, { align: "right" });
+			pdf.text(header, x + 4, y + 6.5);
+			pdf.setFontSize(7);
+			pdf.text(dateFormatted, x + cardWidth - 4, y + 6.5, { align: "right" });
 
-			// Draw dividing line below header
-			pdf.line(x, y + 9, x + cardWidth, y + 9);
+			// Reset text color
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
 
 			// Calculate image area
-			const imageSize = cardHeight * 0.35;
-			const imageX = x + 3;
-			const imageY = y + 12;
+			const imageSize = cardHeight * 0.32;
+			const imageX = x + 4;
+			const imageY = y + headerHeight + 3;
 
-			// Draw image or placeholder
+			// Draw image border
+			pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+			pdf.setLineWidth(0.2);
 			pdf.rect(imageX, imageY, imageSize, imageSize);
+
 			const imageDataUrl = images[i];
 			const matchImage = allOrderItems[i].matchImage;
 
@@ -247,37 +271,64 @@ export async function generateOrdersPDF(
 					});
 				}
 			} else {
-				// Draw placeholder for image
-				pdf.setFontSize(8);
+				// Draw placeholder for image with background
+				pdf.setFillColor(
+					colors.background[0],
+					colors.background[1],
+					colors.background[2],
+				);
+				pdf.rect(imageX, imageY, imageSize, imageSize, "F");
+				pdf.setTextColor(
+					colors.textLight[0],
+					colors.textLight[1],
+					colors.textLight[2],
+				);
+				pdf.setFontSize(7);
 				pdf.text("No Image", imageX + imageSize / 2, imageY + imageSize / 2, {
 					align: "center",
 				});
+				pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
 			}
 
-			// Set font for product details
-			pdf.setFont("Noto Sans", "bold");
-			pdf.setFontSize(9);
+			// Product details section
+			const detailsX = imageX + imageSize + 4;
+			let detailsY = imageY + 3;
+			const lineHeight = 4.5;
 
-			// Product details
-			const detailsX = imageX + imageSize + 5;
-			let detailsY = imageY + 5;
-			const lineHeight = 5;
-
-			// Product name and details
+			// Product name with better styling
 			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(8.5);
+			pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
 			const productName = item.name || "Unknown Product";
 			const displayName =
-				productName.length > 30
-					? `${productName.substring(0, 30)}...`
+				productName.length > 28
+					? `${productName.substring(0, 28)}...`
 					: productName;
 			pdf.text(displayName, detailsX, detailsY);
-			detailsY += lineHeight;
+			detailsY += lineHeight + 1;
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+			pdf.setFontSize(7.5);
 
-			pdf.setFont("Noto Sans", "bold");
+			// Fixed label width to prevent overlapping
+			const labelWidth = 20; // Fixed width for labels in mm
+			const valueStartX = detailsX + labelWidth; // Value starts after label area
+
+			// Options with better formatting
 			if (item.options?.length && order.advancedOptions.source === "etsy") {
 				item.options.forEach((option: { name: string; value: string }) => {
 					if (option.name && option.value) {
-						pdf.text(`${option.name}: ${option.value}`, detailsX, detailsY);
+						pdf.setTextColor(
+							colors.textLight[0],
+							colors.textLight[1],
+							colors.textLight[2],
+						);
+						pdf.text(`${option.name}:`, detailsX, detailsY);
+						pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+						const value =
+							option.value.length > 18
+								? `${option.value.substring(0, 18)}...`
+								: option.value;
+						pdf.text(value, valueStartX, detailsY);
 						detailsY += lineHeight;
 					}
 				});
@@ -289,32 +340,65 @@ export async function generateOrdersPDF(
 				item.amazonCustomizationOptions.forEach(
 					(option: { label: string; option: string; priceDelta: number }) => {
 						if (option.label && option.option) {
-							pdf.text(
-								`${option.label}: ${option.option} `,
-								detailsX,
-								detailsY,
+							pdf.setTextColor(
+								colors.textLight[0],
+								colors.textLight[1],
+								colors.textLight[2],
 							);
+							pdf.text(`${option.label}:`, detailsX, detailsY);
+							pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+							const value =
+								option.option.length > 18
+									? `${option.option.substring(0, 18)}...`
+									: option.option;
+							pdf.text(value, valueStartX, detailsY);
 							detailsY += lineHeight;
 						}
 					},
 				);
 			}
 
-			pdf.text(`SKU: ${item.sku || "N/A"}`, detailsX, detailsY);
+			// SKU and Price with labels
+			pdf.setTextColor(
+				colors.textLight[0],
+				colors.textLight[1],
+				colors.textLight[2],
+			);
+			pdf.text("SKU:", detailsX, detailsY);
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+			pdf.text(item.sku || "N/A", valueStartX, detailsY);
 			detailsY += lineHeight;
 
-			pdf.text(`Price: ${item.unitPrice || "N/A"}`, detailsX, detailsY);
-			detailsY += lineHeight;
+			pdf.setTextColor(
+				colors.textLight[0],
+				colors.textLight[1],
+				colors.textLight[2],
+			);
+			pdf.text("Price:", detailsX, detailsY);
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+			pdf.text(`${item.unitPrice || "N/A"}`, valueStartX, detailsY);
+			detailsY += lineHeight + 1;
 
-			// Handle personalization with the same logic as customer notes
+			// Handle personalization with better styling
 			const personalization =
 				item.options?.find((opt) => opt.name === "Personalization")?.value ===
 				"Not requested on this item."
 					? "N/A"
 					: item.options?.find((opt) => opt.name === "Personalization")
 							?.value || "N/A";
+
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(7);
+			pdf.setTextColor(
+				colors.secondary[0],
+				colors.secondary[1],
+				colors.secondary[2],
+			);
 			pdf.text("Personalization:", detailsX, detailsY);
-			detailsY += lineHeight;
+			detailsY += lineHeight - 0.5;
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(7);
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
 
 			// Process personalization - handle both explicit newlines and long single lines
 			let personalizationLines = personalization.split("\n");
@@ -322,13 +406,13 @@ export async function generateOrdersPDF(
 			// If there's only one line and it's long, split it into multiple lines
 			if (
 				personalizationLines.length === 1 &&
-				personalizationLines[0].length > 36
+				personalizationLines[0].length > 32
 			) {
 				const longLine = personalizationLines[0];
 				personalizationLines = [];
 
-				for (let i = 0; i < longLine.length; i += 36) {
-					personalizationLines.push(longLine.substring(i, i + 36));
+				for (let i = 0; i < longLine.length; i += 32) {
+					personalizationLines.push(longLine.substring(i, i + 32));
 				}
 			}
 
@@ -341,11 +425,11 @@ export async function generateOrdersPDF(
 			) {
 				// Truncate long lines that might still be too long
 				const line =
-					personalizationLines[i].length > 36
-						? `${personalizationLines[i].substring(0, 34)}...`
+					personalizationLines[i].length > 32
+						? `${personalizationLines[i].substring(0, 30)}...`
 						: personalizationLines[i];
 				pdf.text(`  ${line}`, detailsX, detailsY);
-				detailsY += lineHeight;
+				detailsY += lineHeight - 0.5;
 			}
 
 			// Show indicator if more lines were truncated
@@ -354,40 +438,56 @@ export async function generateOrdersPDF(
 				detailsY += lineHeight;
 			}
 
-			pdf.setFont("Noto Sans", "bold");
-			pdf.text(`Adet: ${item.quantity || 1}`, detailsX, detailsY);
-			detailsY += lineHeight;
+			detailsY += 1;
 
+			// Quantity with badge style
+			pdf.setFillColor(colors.accent[0], colors.accent[1], colors.accent[2]);
+			pdf.rect(detailsX - 1, detailsY - 3, 15, 5, "F");
+			pdf.setTextColor(255, 255, 255);
 			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(7);
+			pdf.text(`Qty: ${item.quantity || 1}`, detailsX + 1, detailsY);
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+			detailsY += lineHeight + 2;
 
-			// Handle multiline customer notes
+			// Customer notes section
 			const customerNote = order.customerNotes || "N/A";
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(7);
+			pdf.setTextColor(
+				colors.secondary[0],
+				colors.secondary[1],
+				colors.secondary[2],
+			);
 			pdf.text("Musteri Notu:", detailsX, detailsY);
-			detailsY += lineHeight;
+			detailsY += lineHeight - 0.5;
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(7);
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
 
 			// Process customer note - handle both explicit newlines and long single lines
 			let noteLines = customerNote.split("\n");
 
 			// If there's only one line and it's long, split it into multiple lines
-			if (noteLines.length === 1 && noteLines[0].length > 36) {
+			if (noteLines.length === 1 && noteLines[0].length > 32) {
 				const longLine = noteLines[0];
 				noteLines = [];
 
-				for (let i = 0; i < longLine.length; i += 36) {
-					noteLines.push(longLine.substring(i, i + 36));
+				for (let i = 0; i < longLine.length; i += 32) {
+					noteLines.push(longLine.substring(i, i + 32));
 				}
 			}
 
-			const maxNoteLines = 3; // Limit to avoid overflow
+			const maxNoteLines = 2; // Limit to avoid overflow
 
 			for (let i = 0; i < Math.min(noteLines.length, maxNoteLines); i++) {
 				// Truncate long lines that might still be too long
 				const line =
-					noteLines[i].length > 36
-						? `${noteLines[i].substring(0, 34)}...`
+					noteLines[i].length > 32
+						? `${noteLines[i].substring(0, 30)}...`
 						: noteLines[i];
 				pdf.text(`  ${line}`, detailsX, detailsY);
-				detailsY += lineHeight;
+				detailsY += lineHeight - 0.5;
 			}
 
 			// Show indicator if more lines were truncated
@@ -396,23 +496,40 @@ export async function generateOrdersPDF(
 				detailsY += lineHeight;
 			}
 
-			// Draw dividing line before the bottom section
-			const bottomSectionY = y + cardHeight - 25;
-			pdf.line(x, bottomSectionY, x + cardWidth, bottomSectionY);
+			// Draw dividing line before the bottom section with better styling
+			const bottomSectionY = y + cardHeight - 22;
+			pdf.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+			pdf.setLineWidth(0.3);
+			pdf.line(x + 2, bottomSectionY, x + cardWidth - 2, bottomSectionY);
 
-			// Draw country code / region marker in the bottom
-			pdf.setFont("Noto Sans", "bold");
-			pdf.setFontSize(16);
+			// Draw country code / region marker in the bottom with badge style
 			const warehouse = order.warehouse || "DE";
-			pdf.text(warehouse, x + 20, bottomSectionY + 12, {
+			const badgeSize = 12;
+			const badgeX = x + 5;
+			const badgeY = bottomSectionY + 3;
+
+			// Draw badge background
+			pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+			pdf.rect(badgeX, badgeY, badgeSize, badgeSize, "F");
+
+			// Draw badge text
+			pdf.setTextColor(255, 255, 255);
+			pdf.setFont("Noto Sans", "bold");
+			pdf.setFontSize(10);
+			pdf.text(warehouse, badgeX + badgeSize / 2, badgeY + badgeSize / 2 + 2, {
 				align: "center",
 			});
 
 			// Add additional order details on the right side of the bottom section
-			pdf.setFontSize(8);
+			pdf.setFontSize(7);
 			pdf.setFont("Noto Sans", "bold");
-			const standardX = x + 40;
-			let standardY = bottomSectionY + 5;
+			pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+			const standardX = x + badgeX + badgeSize + 3;
+			let standardY = bottomSectionY + 4;
+
+			// Fixed label width for attributes to prevent overlapping
+			const attrLabelWidth = 15; // Fixed width for attribute labels in mm
+			const attrValueStartX = standardX + attrLabelWidth; // Value starts after label area
 
 			// Default attributes if none are available
 			const defaultAttributes: ProductAttribute[] = [
@@ -425,20 +542,29 @@ export async function generateOrdersPDF(
 			const attributes = allOrderItems[i].attributes || defaultAttributes;
 
 			// Calculate smaller line height if we have many attributes
-			const attrLineHeight = attributes.length > 2 ? 3 : 4;
+			const attrLineHeight = attributes.length > 2 ? 3.5 : 4;
 
-			for (let i = 0; i < attributes.length; i++) {
-				const attrName = attributes[i].name || "";
-				const attrValue = attributes[i].value || "";
+			for (let j = 0; j < attributes.length; j++) {
+				const attrName = attributes[j].name || "";
+				const attrValue = attributes[j].value || "";
 
-				// Limit the length of attribute text to prevent overflow
-				const displayText = `${attrName}: ${attrValue}`;
-				const truncatedText =
-					displayText.length > 30
-						? `${displayText.substring(0, 27)}...`
-						: displayText;
+				// Better formatting with label and value separation
+				pdf.setTextColor(
+					colors.textLight[0],
+					colors.textLight[1],
+					colors.textLight[2],
+				);
+				pdf.text(`${attrName}:`, standardX, standardY);
+				pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
 
-				pdf.text(truncatedText, standardX, standardY);
+				// Limit the length of attribute value to prevent overflow
+				const maxValueLength = 18;
+				const displayValue =
+					attrValue.length > maxValueLength
+						? `${attrValue.substring(0, maxValueLength - 3)}...`
+						: attrValue;
+
+				pdf.text(displayValue, attrValueStartX, standardY);
 				standardY += attrLineHeight;
 			}
 		}
