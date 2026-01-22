@@ -122,6 +122,7 @@ const FilterForm = () => {
 	>([]);
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [dateRange, setDateRange] = useState<Range[]>(getInitialDateRange);
+	const dateRangeRef = useRef<Range[]>(getInitialDateRange());
 	const calendarRef = useRef<HTMLDivElement>(null);
 
 	const { handleSubmit, control, reset } = useForm<Inputs>({
@@ -143,8 +144,10 @@ const FilterForm = () => {
 			warehouse: searchParams?.get("warehouse") || "",
 			orderId: searchParams?.get("orderId") || "",
 		});
-		setDateRange(getInitialDateRange());
-	}, [searchParams, reset, getInitialDateRange]);
+		const newDateRange = getInitialDateRange();
+		setDateRange(newDateRange);
+		dateRangeRef.current = newDateRange;
+	}, [searchParams, reset]);
 
 	// Close calendar when clicking outside
 	useEffect(() => {
@@ -168,18 +171,19 @@ const FilterForm = () => {
 
 	const onSubmit = (data: Inputs) => {
 		const searchParams = new URLSearchParams();
+		const currentDateRange = dateRangeRef.current;
 
 		if (data.storeId) searchParams.append("storeId", data.storeId);
-		if (dateRange[0]?.startDate) {
+		if (currentDateRange[0]?.startDate) {
 			searchParams.append(
 				"orderDateStart",
-				format(dateRange[0].startDate, "yyyy-MM-dd"),
+				format(currentDateRange[0].startDate, "yyyy-MM-dd"),
 			);
 		}
-		if (dateRange[0]?.endDate) {
+		if (currentDateRange[0]?.endDate) {
 			searchParams.append(
 				"orderDateEnd",
-				format(dateRange[0].endDate, "yyyy-MM-dd"),
+				format(currentDateRange[0].endDate, "yyyy-MM-dd"),
 			);
 		}
 		if (data.status) searchParams.append("status", data.status);
@@ -204,7 +208,9 @@ const FilterForm = () => {
 	}, []);
 
 	const handleDateChange = (item: RangeKeyDict) => {
-		setDateRange([item.selection]);
+		const newRange = [item.selection];
+		setDateRange(newRange);
+		dateRangeRef.current = newRange;
 	};
 
 	const formatDateDisplay = () => {
@@ -218,26 +224,30 @@ const FilterForm = () => {
 	};
 
 	const clearDates = () => {
-		setDateRange([
+		const newRange = [
 			{
 				startDate: undefined,
 				endDate: undefined,
 				key: "selection",
 			},
-		]);
+		];
+		setDateRange(newRange);
+		dateRangeRef.current = newRange;
 	};
 
 	const setPresetRange = (days: number) => {
 		const end = new Date();
 		const start = new Date();
 		start.setDate(end.getDate() - days);
-		setDateRange([
+		const newRange = [
 			{
 				startDate: start,
 				endDate: end,
 				key: "selection",
 			},
-		]);
+		];
+		setDateRange(newRange);
+		dateRangeRef.current = newRange;
 	};
 
 	return (
@@ -371,7 +381,7 @@ const FilterForm = () => {
 				</div>
 
 				{/* Date Picker */}
-				<div className="relative z-[9999]" ref={calendarRef}>
+				<div className="relative" ref={calendarRef}>
 					<button
 						type="button"
 						onClick={() => setIsCalendarOpen(!isCalendarOpen)}
