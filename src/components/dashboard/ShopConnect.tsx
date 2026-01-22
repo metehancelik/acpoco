@@ -100,58 +100,66 @@ const ShopConnect = () => {
 
 	return (
 		<form
-			className="flex gap-2 lg:gap-4 items-center"
+			className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
 			onSubmit={handleSubmit(onSubmit)}
 		>
-			<Controller
-				name="shopId"
-				control={control}
-				rules={{ required: true }}
-				render={({ field }) => (
-					<Select
-						disabled={isLoading}
-						onValueChange={field.onChange}
-						value={field.value}
-					>
-						<SelectTrigger>
-							<SelectValue placeholder={t("selectStore")} />
-						</SelectTrigger>
-						<SelectContent>
-							{shops?.stores?.map((shop: Shop) => (
-								<SelectItem key={shop._id} value={shop._id}>
-									{shop.storeName} - ({shop.marketplaceName})
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				)}
-			/>
+			<div className="flex-1 min-w-0">
+				<Controller
+					name="shopId"
+					control={control}
+					rules={{ required: true }}
+					render={({ field }) => (
+						<Select
+							disabled={isLoading}
+							onValueChange={field.onChange}
+							value={field.value}
+						>
+							<SelectTrigger className="w-full h-11 bg-slate-50/50 border-slate-200 hover:bg-slate-50 transition-colors">
+								<SelectValue placeholder={t("selectStore")} />
+							</SelectTrigger>
+							<SelectContent>
+								{shops?.stores?.map((shop: Shop) => (
+									<SelectItem key={shop._id} value={shop._id}>
+										{shop.storeName} - ({shop.marketplaceName})
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					)}
+				/>
+			</div>
 
-			<Controller
-				name="userId"
-				control={control}
-				rules={{ required: true }}
-				render={({ field }) => (
-					<Select
-						disabled={isLoading}
-						onValueChange={field.onChange}
-						value={field.value}
-					>
-						<SelectTrigger>
-							<SelectValue placeholder={t("selectUser")} />
-						</SelectTrigger>
-						<SelectContent>
-							{users?.map((user) => (
-								<SelectItem key={user._id} value={user._id}>
-									{user.name} ({user.email})
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				)}
-			/>
+			<div className="flex-1 min-w-0">
+				<Controller
+					name="userId"
+					control={control}
+					rules={{ required: true }}
+					render={({ field }) => (
+						<Select
+							disabled={isLoading}
+							onValueChange={field.onChange}
+							value={field.value}
+						>
+							<SelectTrigger className="w-full h-11 bg-slate-50/50 border-slate-200 hover:bg-slate-50 transition-colors">
+								<SelectValue placeholder={t("selectUser")} />
+							</SelectTrigger>
+							<SelectContent>
+								{users?.map((user) => (
+									<SelectItem key={user._id} value={user._id}>
+										{user.name} ({user.email})
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					)}
+				/>
+			</div>
 
-			<Button type="submit" disabled={isLoading}>
+			<Button
+				type="submit"
+				disabled={isLoading}
+				className="h-11 px-6 shadow-sm"
+			>
 				{tCommon("submit")}
 			</Button>
 		</form>

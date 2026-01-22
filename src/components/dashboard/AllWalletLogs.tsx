@@ -72,40 +72,86 @@ const AllWalletLogs = () => {
 	}, [searchParams, t]);
 
 	return (
-		<div className="flex flex-col w-full mt-12 h-[40vh] relative overflow-y-auto">
-			<h2 className="text-2xl font-bold mb-4">{t("walletTransactions")}</h2>
-			<div className="w-full flex text-center rounded-t-md border-b border-b-primary bg-gray-50 py-2 mb-2 text-text-primary font-bold text-sm sticky top-0">
-				<p className="w-full">{t("nameSurname")}</p>
-				<p className="w-full">{t("amount")}</p>
-				<p className="w-full">{t("oldBalance")}</p>
-				<p className="w-full">{t("newBalance")}</p>
-				<p className="w-full">{t("date")}</p>
-				<p className="w-full">{t("approvedBy")}</p>
-				<p className="w-full">{t("info")}</p>
+		<div className="flex flex-col w-full">
+			<div className="overflow-x-auto">
+				<div className="max-h-[45vh] overflow-y-auto">
+					<table className="min-w-full">
+						<thead className="bg-slate-50/80 sticky top-0 z-10">
+							<tr>
+								<th className="py-4 pl-6 pr-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("nameSurname")}
+								</th>
+								<th className="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("amount")}
+								</th>
+								<th className="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("oldBalance")}
+								</th>
+								<th className="px-3 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("newBalance")}
+								</th>
+								<th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("date")}
+								</th>
+								<th className="px-3 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("approvedBy")}
+								</th>
+								<th className="py-4 pl-3 pr-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+									{t("info")}
+								</th>
+							</tr>
+						</thead>
+						<tbody className="divide-y divide-gray-100 bg-white">
+							{walletLogs?.map((log) => (
+								<tr
+									key={log._id}
+									className="hover:bg-slate-50/50 transition-colors"
+								>
+									<td className="whitespace-nowrap py-4 pl-6 pr-3 text-sm font-medium text-gray-900">
+										{log.userId.name} {log.userId.surname}
+									</td>
+									<td className="whitespace-nowrap px-3 py-4 text-center text-sm">
+										<span
+											className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+												log.changeAmount >= 0
+													? "bg-emerald-50 text-emerald-700"
+													: "bg-red-50 text-red-700"
+											}`}
+										>
+											{log.changeAmount >= 0 ? "+" : ""}
+											{log.changeAmount}
+										</span>
+									</td>
+									<td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
+										€{log.currentBalance}
+									</td>
+									<td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-900">
+										€{log.finalBalance}
+									</td>
+									<td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
+										{formatDateLocalized(log.createdAt)}
+									</td>
+									<td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
+										{log.changedBy.name} {log.changedBy.surname}
+									</td>
+									<td className="whitespace-nowrap py-4 pl-3 pr-6 text-sm">
+										{log.info ? (
+											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+												{tWallets(log.info)}
+											</span>
+										) : (
+											<span className="text-gray-400">-</span>
+										)}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
-			<div className="flex flex-col space-y-2">
-				{walletLogs?.map((log) => (
-					<div
-						key={log._id}
-						className="w-full flex items-center text-center bg-white rounded-md border border-gray-200 py-2"
-					>
-						<p className="w-full">
-							{log.userId.name} {log.userId.surname}
-						</p>
-						<p className="w-full">{log.changeAmount}</p>
-						<p className="w-full">{log.currentBalance}</p>
-						<p className="w-full">{log.finalBalance}</p>
-						<p className="w-full">{formatDateLocalized(log.createdAt)}</p>
-						<p className="w-full">
-							{log.changedBy.name} {log.changedBy.surname}
-						</p>
-
-						<p className="w-full">{log.info ? tWallets(log.info) : "-"}</p>
-					</div>
-				))}
+			<div className="p-4 border-t bg-slate-50/50">
+				<Pagination totalPages={totalPages} />
 			</div>
-
-			<Pagination totalPages={totalPages} />
 		</div>
 	);
 };

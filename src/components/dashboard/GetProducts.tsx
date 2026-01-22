@@ -33,8 +33,7 @@ const GetProducts = () => {
 		<Button
 			onClick={() => syncProducts()}
 			disabled={isPending}
-			className="gap-2 min-w-[160px]"
-			variant="outline"
+			className="gap-2 min-w-[180px] h-11 px-6 bg-sage-orange hover:bg-sage-orange/90 text-white shadow-sm"
 		>
 			{isPending ? (
 				<Loader2 className="h-4 w-4 animate-spin" />

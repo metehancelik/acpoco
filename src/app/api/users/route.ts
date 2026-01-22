@@ -14,6 +14,7 @@ export async function GET(request: Request) {
 	const page = parseInt(searchParams.get("page") || "1", 10);
 
 	const users = await User.aggregate([
+		{ $match: { role: { $ne: "ADMIN" } } },
 		{ $skip: (page - 1) * 20 },
 		{ $limit: 20 },
 		{
