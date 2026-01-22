@@ -19,6 +19,7 @@ const ProductFilter = () => {
 		e.preventDefault();
 		const params = new URLSearchParams(searchParams?.toString());
 		params.set("query", query);
+		params.delete("page");
 		router.push(`?${params.toString()}`);
 	};
 	const handleAllProducts = (e: React.SyntheticEvent) => {

@@ -22,6 +22,8 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 	const hasCategoryParam = Object.hasOwn(searchParams, "category");
 	const category = hasCategoryParam ? rawCategory : DEFAULT_CATEGORY;
 
+	const query = searchParams.query;
+
 	const getProducts = async (): Promise<{
 		products: IProduct[];
 		pagination: {
@@ -36,9 +38,18 @@ const AllProducts = async ({ params: { locale }, searchParams }: Props) => {
 		try {
 			await dbConnect();
 
-			const filter: { category?: string } = {};
+			// biome-ignore lint/suspicious/noExplicitAny: complex mongoose filter
+			const filter: Record<string, any> = {};
 			if (category) {
 				filter.category = category;
+			}
+
+			if (query) {
+				const regex = new RegExp(query, "i");
+				filter.$or = [
+					{ title: { $regex: regex } },
+					{ parentSku: { $regex: regex } },
+				];
 			}
 
 			const totalItems = await Product.countDocuments(filter);
