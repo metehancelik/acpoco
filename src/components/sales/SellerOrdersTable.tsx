@@ -42,6 +42,9 @@ type Props = {
 		_id: string;
 		warehouse: string;
 		labelUrl: string;
+		warehousePrice?: number;
+		warehouseTrackingNumber?: string;
+		warehouseShippingService?: string;
 	})[];
 	totalPages: number;
 	selectedOrderIds: string[];
@@ -101,7 +104,13 @@ const SellerOrdersTable: React.FC<Props> = ({
 	const [paymentModalOpen, setPaymentModalOpen] = React.useState(false);
 	const [isWarehouseModalOpen, setIsWarehouseModalOpen] = React.useState(false);
 	const [selectedOrder, setSelectedOrder] = React.useState<
-		(OrderWithPopulatedItems & { _id: string }) | null
+		| (OrderWithPopulatedItems & {
+				_id: string;
+				warehousePrice?: number;
+				warehouseTrackingNumber?: string;
+				warehouseShippingService?: string;
+		  })
+		| null
 	>(null);
 
 	const openNoteModal = (order: OrderWithPopulatedItems & { _id: string }) => {
@@ -864,16 +873,24 @@ const SellerOrdersTable: React.FC<Props> = ({
 														}, 0)
 														.toFixed(2)}
 												</span>
-												{order.shippingAmount != null &&
-													Number(order.shippingAmount) > 0 && (
-														<span
-															className="text-[10px] text-slate-500"
-															title={t("shippingCost")}
-														>
-															{t("shippingCost")}: $
-															{Number(order.shippingAmount).toFixed(2)}
-														</span>
-													)}
+												{session.data?.user?.role === "ADMIN" && (
+													<>
+														{order.warehousePrice != null &&
+															Number(order.warehousePrice) > 0 && (
+																<span className="text-[10px] text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+																	{t("warehouseCost")}: $
+																	{Number(order.warehousePrice).toFixed(2)}
+																</span>
+															)}
+														{order.shippingAmount != null &&
+															Number(order.shippingAmount) > 0 && (
+																<span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+																	{t("shippingCost")}: $
+																	{Number(order.shippingAmount).toFixed(2)}
+																</span>
+															)}
+													</>
+												)}
 											</div>
 										) : (
 											<span className="text-slate-300 text-sm">—</span>

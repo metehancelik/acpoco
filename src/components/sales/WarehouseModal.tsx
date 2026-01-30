@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type React from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import type { OrderWithPopulatedItems } from "@/lib/shipstation/types";
@@ -16,12 +17,20 @@ import { Label } from "../ui/label";
 interface Props {
 	isWarehouseModalOpen: boolean;
 	setIsWarehouseModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	order: OrderWithPopulatedItems & { _id: string };
+	order: OrderWithPopulatedItems & {
+		_id: string;
+		warehouseTrackingNumber?: string;
+		warehouseShippingService?: string;
+		warehousePrice?: number;
+		shippingAmount?: number;
+	};
 }
 
 type FormValues = {
 	trackingNumber: string;
 	shippingService: string;
+	warehousePrice: string;
+	shippingAmount: string;
 };
 
 const WarehouseModal: React.FC<Props> = ({
@@ -33,17 +42,33 @@ const WarehouseModal: React.FC<Props> = ({
 	const tCommon = useTranslations("Common");
 	const form = useForm<FormValues>({
 		defaultValues: {
-			trackingNumber: "",
-			shippingService: "",
+			trackingNumber: order?.warehouseTrackingNumber || "",
+			shippingService: order?.warehouseShippingService || "",
+			warehousePrice: order?.warehousePrice?.toString() || "",
+			shippingAmount: order?.shippingAmount?.toString() || "",
 		},
 	});
 
 	const queryClient = useQueryClient();
 
+	// Reset form when order changes
+	useEffect(() => {
+		if (order) {
+			form.reset({
+				trackingNumber: order.warehouseTrackingNumber || "",
+				shippingService: order.warehouseShippingService || "",
+				warehousePrice: order.warehousePrice?.toString() || "",
+				shippingAmount: order.shippingAmount?.toString() || "",
+			});
+		}
+	}, [order, form]);
+
 	const updateOrder = async (data: FormValues) => {
 		await httpClient.patch(`/orders/shipping/${order._id}`, {
 			trackingNumber: data.trackingNumber,
 			shippingService: data.shippingService,
+			warehousePrice: data.warehousePrice ? Number(data.warehousePrice) : null,
+			shippingAmount: data.shippingAmount ? Number(data.shippingAmount) : null,
 		});
 	};
 
@@ -102,6 +127,30 @@ const WarehouseModal: React.FC<Props> = ({
 								{form.formState.errors.shippingService.message}
 							</span>
 						)}
+					</div>
+
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="warehousePrice">{t("warehouseCost")}</Label>
+						<Input
+							id="warehousePrice"
+							type="number"
+							step="0.01"
+							min="0"
+							placeholder={t("enterWarehouseCost")}
+							{...form.register("warehousePrice")}
+						/>
+					</div>
+
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="shippingAmount">{t("shippingCost")}</Label>
+						<Input
+							id="shippingAmount"
+							type="number"
+							step="0.01"
+							min="0"
+							placeholder={t("enterShippingCost")}
+							{...form.register("shippingAmount")}
+						/>
 					</div>
 
 					<div className="flex justify-end gap-2 pt-4">

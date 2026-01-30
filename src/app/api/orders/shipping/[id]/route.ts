@@ -17,15 +17,26 @@ export async function PATCH(
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const { trackingNumber, shippingService } = await req.json();
+	const { trackingNumber, shippingService, warehousePrice, shippingAmount } =
+		await req.json();
 
 	const order = await Order.findById(params.id);
 	if (!order) {
 		return NextResponse.json({ error: "Order not found" }, { status: 404 });
 	}
 
-	order.warehouseTrackingNumber = trackingNumber;
-	order.warehouseShippingService = shippingService;
+	if (trackingNumber !== undefined) {
+		order.warehouseTrackingNumber = trackingNumber;
+	}
+	if (shippingService !== undefined) {
+		order.warehouseShippingService = shippingService;
+	}
+	if (warehousePrice !== undefined) {
+		order.warehousePrice = warehousePrice;
+	}
+	if (shippingAmount !== undefined) {
+		order.shippingAmount = shippingAmount;
+	}
 	await order.save();
 
 	return NextResponse.json(order);
