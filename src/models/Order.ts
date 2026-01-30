@@ -82,7 +82,6 @@ const OrderSchema = new mongoose.Schema({
 	orderStatus: String,
 	warehouse: {
 		type: String,
-		enum: ["GB", "US", "DE", "shipEntegra", "seller"],
 	},
 	warehousePrice: Number,
 	warehouseTrackingNumber: String,

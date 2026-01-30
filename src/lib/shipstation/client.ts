@@ -1,7 +1,9 @@
 import axios from "axios";
 
 import dbConnect from "@/lib/db";
+import { adjustInventoryBySku } from "@/lib/shopify";
 import { DiscountModel, type IDiscount } from "@/models/Discount";
+import { LogModel } from "@/models/Logs";
 import Order from "@/models/Order";
 import Product, { type IProduct } from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
@@ -102,6 +104,193 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 }
 
 /**
+ * Processes auto-matching and auto-payment for existing orders.
+ * Called when an existing order is in waitingMatch or waitingPayment status.
+ */
+async function processOrderAutoMatchAndPayment(
+	// biome-ignore lint/suspicious/noExplicitAny: mongoose document
+	existingOrder: any,
+	resolvedStoreId?: number,
+) {
+	try {
+		// Find the store to get the user
+		const store =
+			resolvedStoreId != null
+				? await Store.findOne({ storeId: resolvedStoreId })
+				: existingOrder.storeId
+					? await Store.findOne({ storeId: existingOrder.storeId })
+					: await Store.findOne({
+							storeId: existingOrder.advancedOptions?.storeId,
+						});
+
+		if (!store) return;
+
+		const user = await User.findById(store.userId);
+		if (!user) return;
+
+		// Fetch all product variants for SKU matching
+		const allVariants = await ProductVariantModel.find({}).populate({
+			path: "productId",
+			select: "category",
+		});
+
+		// Build a SKU -> Variant map for fast lookup
+		const skuToVariantMap = new Map<
+			string,
+			{
+				_id: string;
+				price: number;
+				childSku: string;
+				productId: { _id: string; category?: string };
+			}
+		>();
+		for (const variant of allVariants) {
+			if (variant.childSku) {
+				skuToVariantMap.set(variant.childSku, {
+					_id: variant._id.toString(),
+					price: variant.price,
+					childSku: variant.childSku,
+					productId: variant.productId as unknown as {
+						_id: string;
+						category?: string;
+					},
+				});
+			}
+		}
+
+		// Fetch active discounts for this user
+		const activeDiscounts = (await DiscountModel.find({
+			isActive: true,
+		})) as unknown as IDiscount[];
+
+		let needsUpdate = false;
+		let allItemsMatched = true;
+
+		// Process items - try to match unmatched items
+		for (const item of existingOrder.items) {
+			if (!item.matchId && item.sku) {
+				const matchedVariant = skuToVariantMap.get(item.sku);
+				if (matchedVariant) {
+					item.matchId = matchedVariant._id;
+					const basePrice = matchedVariant.price;
+
+					// Calculate discounted price
+					const categoryId =
+						matchedVariant.productId?.category?.toString() || "";
+					const { finalPrice } = calculateDiscountedPrice(
+						basePrice,
+						user._id.toString(),
+						categoryId,
+						matchedVariant._id.toString(),
+						activeDiscounts,
+					);
+
+					item.matchedPrice = finalPrice;
+					needsUpdate = true;
+				}
+			}
+
+			if (!item.matchId) {
+				allItemsMatched = false;
+			}
+		}
+
+		// Update status based on matching
+		if (existingOrder.status === "waitingMatch" && allItemsMatched) {
+			existingOrder.status = "waitingPayment";
+			needsUpdate = true;
+		}
+
+		// Try auto-payment if all items are matched and order is waiting for payment
+		if (
+			allItemsMatched &&
+			(existingOrder.status === "waitingPayment" ||
+				existingOrder.status === "waitingMatch") &&
+			!existingOrder.isPayed
+		) {
+			const userWallet = await Wallet.findOne({ userId: user._id });
+			if (userWallet) {
+				const totalPrice = existingOrder.items.reduce(
+					// biome-ignore lint/suspicious/noExplicitAny: mongoose item
+					(acc: number, item: any) => {
+						return acc + (item.matchedPrice || 0) * (item.quantity || 0);
+					},
+					0,
+				);
+
+				if (totalPrice > 0 && totalPrice <= userWallet.balance) {
+					// Auto-pay: deduct balance
+					await Wallet.updateOne(
+						{ userId: user._id },
+						{ $inc: { balance: -totalPrice } },
+					);
+
+					await WalletLog.create({
+						userId: user._id,
+						type: "WITHDRAW",
+						info: "autoOrderPayment",
+						changedBy: user._id,
+						changeAmount: totalPrice,
+						currentBalance: userWallet.balance,
+						finalBalance: userWallet.balance - totalPrice,
+					});
+
+					existingOrder.status = "waitingProduction";
+					existingOrder.isPayed = true;
+					needsUpdate = true;
+
+					// Adjust Shopify inventory for matched variants
+					try {
+						const inventoryResults = await Promise.all(
+							// biome-ignore lint/suspicious/noExplicitAny: mongoose item
+							existingOrder.items.map(async (item: any) => {
+								const childSku = item.sku;
+								const quantity = item.quantity || 0;
+								if (!childSku || !quantity || !item.matchId) return null;
+								const res = await adjustInventoryBySku(childSku, -quantity);
+								return { sku: childSku, quantity, ...res };
+							}),
+						);
+						const failures = (inventoryResults || []).filter(
+							(r) => r && r.ok === false,
+						);
+						if (failures.length > 0) {
+							await LogModel.create({
+								message:
+									"Shopify inventory adjust failed for some items (auto-payment existing order)",
+								level: "warn",
+								meta: { orderId: existingOrder.orderId, failures },
+							});
+						}
+					} catch (err) {
+						await LogModel.create({
+							message:
+								"Shopify inventory adjust error (auto-payment existing order)",
+							level: "error",
+							meta: {
+								orderId: existingOrder.orderId,
+								error: (err as Error).message,
+							},
+						});
+					}
+				}
+			}
+		}
+
+		// Save changes if needed
+		if (needsUpdate) {
+			await existingOrder.save();
+		}
+	} catch (error) {
+		console.error(
+			"Error processing auto-match and payment for existing order:",
+			error,
+		);
+		// Don't throw - we don't want to break the sync for existing orders
+	}
+}
+
+/**
  * Syncs a ShipStation order to the DB. Resolves and persists storeId (see docs/SHIPSTATION_ORDER_SYNC.md).
  * Backfills storeId on existing orders via Order.updateOne so it persists.
  */
@@ -139,6 +328,15 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 					},
 				);
 			}
+
+			// Process auto-matching and auto-payment for existing orders in waitingMatch or waitingPayment status
+			if (
+				existing.status === "waitingMatch" ||
+				existing.status === "waitingPayment"
+			) {
+				await processOrderAutoMatchAndPayment(existing, resolvedStoreId);
+			}
+
 			return existing;
 		}
 
@@ -306,6 +504,42 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 
 						orderStatus = "waitingProduction";
 						isPayed = true;
+
+						// Adjust Shopify inventory for matched variants (same as manual payment)
+						try {
+							const inventoryResults = await Promise.all(
+								processedItems.map(async (item) => {
+									const matchedVariant = item.matchId
+										? skuToVariantMap.get(item.sku || "")
+										: null;
+									const childSku = item.sku;
+									const quantity = item.quantity || 0;
+									if (!childSku || !quantity || !matchedVariant) return null;
+									const res = await adjustInventoryBySku(childSku, -quantity);
+									return { sku: childSku, quantity, ...res };
+								}),
+							);
+							const failures = (inventoryResults || []).filter(
+								(r) => r && r.ok === false,
+							);
+							if (failures.length > 0) {
+								await LogModel.create({
+									message:
+										"Shopify inventory adjust failed for some items (auto-payment)",
+									level: "warn",
+									meta: { orderId: shipStationOrder.orderId, failures },
+								});
+							}
+						} catch (err) {
+							await LogModel.create({
+								message: "Shopify inventory adjust error (auto-payment)",
+								level: "error",
+								meta: {
+									orderId: shipStationOrder.orderId,
+									error: (err as Error).message,
+								},
+							});
+						}
 					}
 				}
 			}
