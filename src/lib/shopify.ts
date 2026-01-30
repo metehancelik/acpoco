@@ -386,13 +386,13 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
 `;
 
 // Inventory helpers
+// Only request id - name requires read_locations or read_markets_home scope
 const GET_LOCATIONS_QUERY = `
   query getLocations {
     locations(first: 1) {
       edges {
         node {
           id
-          name
         }
       }
     }

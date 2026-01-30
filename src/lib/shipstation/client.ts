@@ -35,6 +35,10 @@ function getShipStationAuthHeader(auth: ShipStationAuth): string {
 	return `Basic ${Buffer.from(`${auth.apiKey}:${auth.apiSecret}`).toString("base64")}`;
 }
 
+/**
+ * Fetches ShipStation orders for the user's stores.
+ * StoreId: we set order.storeId = storeId for every order (see docs/SHIPSTATION_ORDER_SYNC.md).
+ */
 export async function fetchShipStationOrders(userId?: string): Promise<{
 	orders: ShipStationOrder[];
 	products: Pick<IProduct, "parentSku" | "_id">[];
@@ -49,35 +53,44 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 
 		const products = await Product.find({}, { _id: 1, sku: 1 });
 
-		const orders = [];
+		const orders: ShipStationOrder[] = [];
+
+		const pageSize = 500;
+		const sortParams = "sortBy=CreateDate&sortDir=DESC"; // newest first so latest order is on page 1
 
 		for (const storeId of storeIds) {
-			const response = await axios(
-				`https://ssapi.shipstation.com/orders?storeId=${storeId}`,
-				{
+			const baseUrl = `https://ssapi.shipstation.com/orders?storeId=${storeId}&pageSize=${pageSize}&${sortParams}`;
+			const response = await axios(baseUrl, {
+				method: "GET",
+				headers: {
+					Authorization: getShipStationAuthHeader(auth),
+					"Content-Type": "application/json",
+				},
+			});
+			const data = response.data as {
+				orders?: ShipStationOrder[];
+				pages?: number;
+			};
+			const batch = data.orders ?? [];
+			for (const o of batch) {
+				// Required: set storeId from fetch context (API often omits/invalid for eBay/Amazon)
+				(o as { storeId?: number }).storeId = storeId;
+				orders.push(o);
+			}
+			const pages = Number(data.pages ?? 1);
+			for (let i = 2; i <= pages; i++) {
+				const pageResp = await axios(`${baseUrl}&page=${i}`, {
 					method: "GET",
 					headers: {
 						Authorization: getShipStationAuthHeader(auth),
 						"Content-Type": "application/json",
 					},
-				},
-			);
-			const data = response.data;
-			const pages: number = data.pages;
-			orders.push(...data.orders);
-			for (let i = 2; i <= pages; i++) {
-				const response = await axios(
-					`https://ssapi.shipstation.com/orders?storeId=${storeId}&page=${i}`,
-					{
-						method: "GET",
-						headers: {
-							Authorization: getShipStationAuthHeader(auth),
-							"Content-Type": "application/json",
-						},
-					},
-				);
-				const data = response.data;
-				orders.push(...data.orders);
+				});
+				const pageData = pageResp.data as { orders?: ShipStationOrder[] };
+				for (const o of pageData.orders ?? []) {
+					(o as { storeId?: number }).storeId = storeId;
+					orders.push(o);
+				}
 			}
 		}
 
@@ -88,23 +101,67 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 	}
 }
 
+/**
+ * Syncs a ShipStation order to the DB. Resolves and persists storeId (see docs/SHIPSTATION_ORDER_SYNC.md).
+ * Backfills storeId on existing orders via Order.updateOne so it persists.
+ */
 export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 	try {
 		await dbConnect();
 
+		// Resolve storeId: prefer value set during fetch, else API (advancedOptions.storeId number or .storeId)
+		const fromApi =
+			typeof shipStationOrder.advancedOptions?.storeId === "number"
+				? shipStationOrder.advancedOptions.storeId
+				: shipStationOrder.advancedOptions?.storeId?.storeId;
+		const raw = (shipStationOrder as { storeId?: number }).storeId ?? fromApi;
+		const resolvedStoreId =
+			typeof raw === "number" && Number.isFinite(raw) && raw > 0
+				? raw
+				: undefined;
+
 		const existing = await Order.findOne({ orderId: shipStationOrder.orderId });
 		if (existing) {
+			// Backfill storeId when missing (use updateOne so it persists; save() can drop new schema fields)
+			const needsStoreId =
+				resolvedStoreId != null &&
+				(existing.storeId == null ||
+					existing.storeId === "" ||
+					!Number.isFinite(Number(existing.storeId)));
+			if (needsStoreId) {
+				await Order.updateOne(
+					{ orderId: shipStationOrder.orderId },
+					{
+						$set: {
+							storeId: resolvedStoreId,
+							"advancedOptions.storeId": resolvedStoreId,
+						},
+					},
+				);
+			}
 			return existing;
 		}
+
+		// Normalize item weight: ShipStation may send { value, units, WeightUnits } but schema expects Number
+		const normalizeItemWeight = (w: unknown): number | undefined => {
+			if (w == null) return undefined;
+			if (typeof w === "number" && Number.isFinite(w)) return w;
+			if (typeof w === "object" && "value" in (w as object)) {
+				const v = (w as { value?: unknown }).value;
+				if (typeof v === "number" && Number.isFinite(v)) return v;
+			}
+			return undefined;
+		};
 
 		const warehouse = await Warehouse.findOne({
 			country: shipStationOrder.shipTo.country,
 		});
 
 		// Find the store to get the user
-		const store = await Store.findOne({
-			storeId: shipStationOrder.advancedOptions.storeId.storeId,
-		});
+		const store =
+			resolvedStoreId != null
+				? await Store.findOne({ storeId: resolvedStoreId })
+				: null;
 
 		const user = store ? await User.findById(store.userId) : null;
 		let warehousePrice = 0;
@@ -192,7 +249,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 						quantity: item.quantity,
 						unitPrice: item.unitPrice,
 						taxAmount: item.taxAmount,
-						weight: item.weight,
+						weight: normalizeItemWeight(item.weight),
 						shippingAmount: item.shippingAmount,
 						options: item.options,
 						amazonCustomizationData: amazonCustomizationData || null,
@@ -261,7 +318,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			orderDate: shipStationOrder.orderDate,
 			createDate: shipStationOrder.createDate,
 			modifyDate: shipStationOrder.modifyDate,
-			customerEmail: shipStationOrder.customerEmail,
+			customerEmail: shipStationOrder.customerEmail ?? "",
 			requestedShippingService: shipStationOrder.requestedShippingService,
 			weight: shipStationOrder.weight,
 			orderTotal: shipStationOrder.orderTotal,
@@ -303,24 +360,24 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 				nonDelivery: shipStationOrder.internationalOptions.nonDelivery,
 			},
 			advancedOptions: {
-				warehouseId: shipStationOrder.advancedOptions.warehouseId,
-				nonMachinable: shipStationOrder.advancedOptions.nonMachinable,
-				saturdayDelivery: shipStationOrder.advancedOptions.saturdayDelivery,
-				containsAlcohol: shipStationOrder.advancedOptions.containsAlcohol,
-				mergedOrSplit: shipStationOrder.advancedOptions.mergedOrSplit,
-				mergedIds: shipStationOrder.advancedOptions.mergedIds,
-				parentId: shipStationOrder.advancedOptions.parentId,
-				storeId: shipStationOrder.advancedOptions.storeId.storeId,
-				customField1: shipStationOrder.advancedOptions.customField1,
-				customField2: shipStationOrder.advancedOptions.customField2,
-				customField3: shipStationOrder.advancedOptions.customField3,
-				source: shipStationOrder.advancedOptions.source,
-				billToParty: shipStationOrder.advancedOptions.billToParty,
-				billToAccount: shipStationOrder.advancedOptions.billToAccount,
-				billToPostalCode: shipStationOrder.advancedOptions.billToPostalCode,
-				billToCountryCode: shipStationOrder.advancedOptions.billToCountryCode,
+				warehouseId: shipStationOrder.advancedOptions?.warehouseId,
+				nonMachinable: shipStationOrder.advancedOptions?.nonMachinable,
+				saturdayDelivery: shipStationOrder.advancedOptions?.saturdayDelivery,
+				containsAlcohol: shipStationOrder.advancedOptions?.containsAlcohol,
+				mergedOrSplit: shipStationOrder.advancedOptions?.mergedOrSplit,
+				mergedIds: shipStationOrder.advancedOptions?.mergedIds ?? [],
+				parentId: shipStationOrder.advancedOptions?.parentId,
+				storeId: resolvedStoreId,
+				customField1: shipStationOrder.advancedOptions?.customField1,
+				customField2: shipStationOrder.advancedOptions?.customField2,
+				customField3: shipStationOrder.advancedOptions?.customField3,
+				source: shipStationOrder.advancedOptions?.source,
+				billToParty: shipStationOrder.advancedOptions?.billToParty,
+				billToAccount: shipStationOrder.advancedOptions?.billToAccount,
+				billToPostalCode: shipStationOrder.advancedOptions?.billToPostalCode,
+				billToCountryCode: shipStationOrder.advancedOptions?.billToCountryCode,
 				billToMyOtherAccount:
-					shipStationOrder.advancedOptions.billToMyOtherAccount,
+					shipStationOrder.advancedOptions?.billToMyOtherAccount,
 			},
 			tagIds: shipStationOrder.tagIds,
 			externallyFulfilled: shipStationOrder.externallyFulfilled,
@@ -333,7 +390,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			warehousePrice: warehousePrice,
 			warehouseTrackingNumber: shipStationOrder.warehouseTrackingNumber || "",
 			warehouseShippingService: shipStationOrder.warehouseShippingService || "",
-			storeId: shipStationOrder.advancedOptions.storeId.storeId,
+			storeId: resolvedStoreId,
 			status: orderStatus,
 		};
 
@@ -401,6 +458,9 @@ export async function fetchNewOrders(url: string): Promise<void> {
 	}
 }
 
+/**
+ * Fetches orders modified/created since a date (cron). Sets order.storeId per store (see docs/SHIPSTATION_ORDER_SYNC.md).
+ */
 export async function fetchShipStationOrdersModifiedSince(options: {
 	userId?: string;
 	modifiedSince: Date;
@@ -413,11 +473,13 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 		options.userId ? { userId: options.userId } : {},
 	);
 	const storeIds = stores.map((store) => store.storeId);
-	const orders: ShipStationOrder[] = [];
 
 	const sinceIso = options.modifiedSince.toISOString();
 	const modifyDateStart = encodeURIComponent(sinceIso);
 	const createDateStart = encodeURIComponent(sinceIso);
+
+	// Dedupe by orderId so we can fetch both modifyDate and createDate without duplicates
+	const orderMap = new Map<number, ShipStationOrder>();
 
 	for (const storeId of storeIds) {
 		const commonParams = `storeId=${storeId}&pageSize=500&sortBy=ModifyDate&sortDir=DESC`;
@@ -437,7 +499,10 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 				pages?: number;
 			};
 			const batch = firstData.orders || [];
-			orders.push(...batch);
+			for (const order of batch) {
+				(order as { storeId?: number }).storeId = storeId;
+				orderMap.set(order.orderId, order);
+			}
 
 			const pages = Number(firstData.pages || 1);
 			for (let page = 2; page <= pages; page++) {
@@ -449,22 +514,23 @@ export async function fetchShipStationOrdersModifiedSince(options: {
 					},
 				});
 				const data = resp.data as { orders?: ShipStationOrder[] };
-				orders.push(...(data.orders || []));
+				for (const order of data.orders || []) {
+					(order as { storeId?: number }).storeId = storeId;
+					orderMap.set(order.orderId, order);
+				}
 			}
 
 			return batch.length;
 		};
 
-		// Primary: orders modified since the timestamp
-		const modifiedCount = await fetchPaged("modifyDateStart", modifyDateStart);
+		// Fetch orders modified since timestamp (catches updates to existing orders)
+		await fetchPaged("modifyDateStart", modifyDateStart);
 
-		// Fallback: pull by createDateStart for accounts where modifyDateStart is unreliable
-		if (modifiedCount === 0) {
-			await fetchPaged("createDateStart", createDateStart);
-		}
+		// Always also fetch by createDate so we don't miss new orders whose modifyDate is still old
+		await fetchPaged("createDateStart", createDateStart);
 	}
 
-	return { orders, storeIds };
+	return { orders: Array.from(orderMap.values()), storeIds };
 }
 
 //TODO cron job to refresh store https://ssapi.shipstation.com/stores/refreshstore?storeId=storeId

@@ -89,7 +89,7 @@ const OrderSchema = new mongoose.Schema({
 	warehouseShippingService: String,
 	customerId: { type: Number, required: true },
 	customerUsername: String,
-	customerEmail: { type: String, required: true },
+	customerEmail: { type: String, required: false, default: "" },
 	billTo: AddressSchema,
 	shipTo: AddressSchema,
 	items: [OrderItemSchema],
@@ -153,6 +153,8 @@ const OrderSchema = new mongoose.Schema({
 	externallyFulfilledByName: String,
 	labelMessages: String,
 	labelUrl: String,
+	// Required for ShipStation sync (see docs/SHIPSTATION_ORDER_SYNC.md)
+	storeId: { type: Number, ref: "Store" },
 	createdAt: { type: Date, default: Date.now },
 	updatedAt: { type: Date, default: Date.now },
 });
