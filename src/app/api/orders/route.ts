@@ -73,16 +73,15 @@ export async function GET(request: Request) {
 
 		// Status filtering based on user role
 		// Admin sees: waitingProduction, shipped (hazırlanıyor, kargoya verildi)
-		// Normal users see: waitingMatch, waitingPayment (eşleşme bekliyor, ödeme bekliyor)
+		// Normal users see: all statuses
 		if (status) {
 			query.status = status;
 		} else {
 			// Default filtering when no specific status is selected
 			if (session.user.role === "ADMIN") {
 				query.status = { $in: ["waitingProduction", "shipped"] };
-			} else {
-				query.status = { $in: ["waitingMatch", "waitingPayment"] };
 			}
+			// Normal users see all their orders (no status filter)
 		}
 
 		if (shopName) {
