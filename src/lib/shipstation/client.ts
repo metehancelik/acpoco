@@ -311,7 +311,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			}
 		}
 
-		const orderData: any = {
+		const orderData: Record<string, unknown> = {
 			orderId: shipStationOrder.orderId,
 			orderNumber: shipStationOrder.orderNumber,
 			orderKey: shipStationOrder.orderKey,
