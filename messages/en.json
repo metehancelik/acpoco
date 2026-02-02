@@ -154,7 +154,7 @@
 		"balance": "Balance",
 		"accountInfo": "Account Information",
 		"transferWarning": "Don't forget to write your Name Surname or Company Name in the description when making a transfer!",
-		"amountToSend": "Amount to Send ($)",
+		"amountToSend": "Amount to Send (€)",
 		"sending": "Sending...",
 		"send": "Send",
 		"requestCreated": "Request created successfully",

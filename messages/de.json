@@ -154,7 +154,7 @@
 		"balance": "Guthaben",
 		"accountInfo": "Kontoinformationen",
 		"transferWarning": "Vergessen Sie nicht, Ihren Namen oder Firmennamen in der Beschreibung anzugeben!",
-		"amountToSend": "Zu sendender Betrag ($)",
+		"amountToSend": "Zu sendender Betrag (€)",
 		"sending": "Senden...",
 		"send": "Senden",
 		"requestCreated": "Anfrage erfolgreich erstellt",

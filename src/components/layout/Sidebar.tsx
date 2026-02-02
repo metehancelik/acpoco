@@ -312,7 +312,7 @@ export default function Sidebar() {
 						>
 							{session?.data?.user.role !== "ADMIN" && (
 								<div className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-center text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200">
-									{tWallet("balance")}: ${wallet?.data?.balance}
+									{tWallet("balance")}: €{wallet?.data?.balance.toFixed(2)}
 								</div>
 							)}
 						</button>

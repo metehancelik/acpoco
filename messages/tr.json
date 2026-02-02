@@ -154,7 +154,7 @@
 		"balance": "Bakiye",
 		"accountInfo": "Hesap Bilgileri",
 		"transferWarning": "Havale/EFT yaparken açıklama kısmına İsim Soyisim veya Şirket İsminizi yazmayı unutmayınız!",
-		"amountToSend": "Gönderilecek Tutar($)",
+		"amountToSend": "Gönderilecek Tutar(€)",
 		"sending": "Gönderiliyor...",
 		"send": "Gönder",
 		"requestCreated": "Talep başarıyla oluşturuldu",
