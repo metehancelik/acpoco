@@ -306,7 +306,8 @@
 		"warehouseCostRequired": "Warehouse cost is required",
 		"shippingCostRequired": "Shipping cost is required",
 		"nextOrder": "Next Order",
-		"saveAndChangeStatus": "Save & Change Status"
+		"saveAndChangeStatus": "Save & Change Status",
+		"feesLockedLabelUploaded": "Warehouse and shipping costs cannot be edited because a label has been uploaded for this order."
 	},
 	"Wallets": {
 		"name": "Name",

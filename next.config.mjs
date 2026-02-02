@@ -23,9 +23,6 @@ const nextConfig = {
 				hostname: "www.angoragumus.com",
 			},
 			{
-				hostname: `${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com`,
-			},
-			{
 				hostname: "i.ibb.co",
 			},
 			{

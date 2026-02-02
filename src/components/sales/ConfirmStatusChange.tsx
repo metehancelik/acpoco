@@ -25,6 +25,7 @@ type OrderData = OrderWithPopulatedItems & {
 	_id: string;
 	warehousePrice?: number;
 	shippingAmount?: number;
+	labelUrl?: string;
 };
 
 interface ConfirmStatusChangeProps {
@@ -54,11 +55,13 @@ const ConfirmStatusChange = ({
 	const queryClient = useQueryClient();
 
 	// Find orders that are missing warehouse/shipping fees
+	// Exclude orders with labels uploaded (fees cannot be edited for those)
 	const ordersWithMissingFees = useMemo(() => {
 		if (status !== "shipped" || !orders || !orderIds) return [];
 		return orders.filter(
 			(order) =>
 				orderIds.includes(order._id) &&
+				!order.labelUrl && // Skip orders with labels - fees cannot be edited
 				(order.warehousePrice == null ||
 					order.warehousePrice === 0 ||
 					order.shippingAmount == null ||

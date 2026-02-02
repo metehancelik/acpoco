@@ -23,6 +23,7 @@ interface Props {
 		warehouseShippingService?: string;
 		warehousePrice?: number;
 		shippingAmount?: number;
+		labelUrl?: string;
 	};
 }
 
@@ -40,6 +41,9 @@ const WarehouseModal: React.FC<Props> = ({
 }) => {
 	const t = useTranslations("Orders");
 	const tCommon = useTranslations("Common");
+
+	// Check if order has a label uploaded - fees cannot be edited
+	const hasLabel = Boolean(order?.labelUrl);
 	const form = useForm<FormValues>({
 		defaultValues: {
 			trackingNumber: order?.warehouseTrackingNumber || "",
@@ -137,6 +141,8 @@ const WarehouseModal: React.FC<Props> = ({
 							step="0.01"
 							min="0"
 							placeholder={t("enterWarehouseCost")}
+							disabled={hasLabel}
+							className={hasLabel ? "bg-slate-100 cursor-not-allowed" : ""}
 							{...form.register("warehousePrice")}
 						/>
 					</div>
@@ -149,9 +155,17 @@ const WarehouseModal: React.FC<Props> = ({
 							step="0.01"
 							min="0"
 							placeholder={t("enterShippingCost")}
+							disabled={hasLabel}
+							className={hasLabel ? "bg-slate-100 cursor-not-allowed" : ""}
 							{...form.register("shippingAmount")}
 						/>
 					</div>
+
+					{hasLabel && (
+						<p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
+							{t("feesLockedLabelUploaded")}
+						</p>
+					)}
 
 					<div className="flex justify-end gap-2 pt-4">
 						<Button type="button" variant="outline" onClick={handleClose}>

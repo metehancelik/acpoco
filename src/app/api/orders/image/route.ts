@@ -1,18 +1,10 @@
-import { DeleteObjectCommand, S3, S3Client } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 
+import { deleteByPublicUrl, putObject } from "@/lib/objectStorage";
 import type { ShipStationOrderItem } from "@/lib/shipstation/types";
 import { Order } from "@/models";
-
-const s3Client = new S3({
-	region: process.env.S3_REGION!,
-	credentials: {
-		accessKeyId: process.env.S3_ACCESS_KEY!,
-		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-	},
-});
 
 export async function POST(request: NextRequest) {
 	try {
@@ -67,16 +59,12 @@ export async function POST(request: NextRequest) {
 		}
 
 		const params = {
-			Bucket: process.env.S3_BUCKET_NAME!,
-			Key: uniqueFileName,
-			Body: optimizedBuffer,
-			ContentType: contentType,
+			key: uniqueFileName,
+			body: optimizedBuffer,
+			contentType,
 		};
 
-		await s3Client.putObject(params);
-
-		// Generate the image URL
-		const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${uniqueFileName}`;
+		const { publicUrl: imageUrl } = await putObject(params);
 
 		const order = await Order.findById(orderId);
 		if (!order) throw new Error("Order not found");
@@ -123,22 +111,7 @@ export async function DELETE(request: NextRequest) {
 
 		// If there's an existing image, delete it from S3
 		if (item.designUrl) {
-			const s3 = new S3Client({
-				region: process.env.S3_REGION!,
-				credentials: {
-					accessKeyId: process.env.S3_ACCESS_KEY!,
-					secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-				},
-			});
-
-			const key = item.designUrl.split("/").pop();
-			if (key) {
-				const deleteParams = {
-					Bucket: process.env.S3_BUCKET_NAME!,
-					Key: key,
-				};
-				await s3.send(new DeleteObjectCommand(deleteParams));
-			}
+			await deleteByPublicUrl(item.designUrl);
 		}
 
 		// Clear the designUrl

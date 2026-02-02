@@ -1,17 +1,9 @@
-import { S3 } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 
+import { putObject } from "@/lib/objectStorage";
 import { Order } from "@/models";
-
-const s3Client = new S3({
-	region: process.env.S3_REGION!,
-	credentials: {
-		accessKeyId: process.env.S3_ACCESS_KEY!,
-		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-	},
-});
 
 export async function POST(request: NextRequest) {
 	try {
@@ -68,16 +60,12 @@ export async function POST(request: NextRequest) {
 		}
 
 		const params = {
-			Bucket: process.env.S3_BUCKET_NAME!,
-			Key: uniqueFileName,
-			Body: optimizedBuffer,
-			ContentType: contentType,
+			key: uniqueFileName,
+			body: optimizedBuffer,
+			contentType,
 		};
 
-		await s3Client.putObject(params);
-
-		// Generate the image URL
-		const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${uniqueFileName}`;
+		const { publicUrl: imageUrl } = await putObject(params);
 
 		// Only update order if it's an order upload
 		if (uploadType === "order" && orderId && orderItemId) {

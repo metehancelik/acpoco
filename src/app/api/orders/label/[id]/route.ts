@@ -1,16 +1,8 @@
-import { DeleteObjectCommand, S3, S3Client } from "@aws-sdk/client-s3";
 import type { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
+import { deleteByPublicUrl, putObject } from "@/lib/objectStorage";
 import { Order } from "@/models";
-
-const s3Client = new S3({
-	region: process.env.S3_REGION!,
-	credentials: {
-		accessKeyId: process.env.S3_ACCESS_KEY!,
-		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-	},
-});
 
 export async function POST(
 	request: NextRequest,
@@ -31,17 +23,13 @@ export async function POST(
 		const bodyBuffer = Buffer.from(arrayBuffer);
 
 		const params = {
-			Bucket: process.env.S3_BUCKET_NAME!,
-			Key: uniqueFileName,
-			Body: bodyBuffer,
-			ContentType: "application/pdf",
-			ContentDisposition: `attachment; filename="${uniqueFileName}"`,
+			key: uniqueFileName,
+			body: bodyBuffer,
+			contentType: "application/pdf",
+			contentDisposition: `attachment; filename="${uniqueFileName}"`,
 		};
 
-		await s3Client.putObject(params);
-
-		// Generate the image URL
-		const imageUrl = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/${uniqueFileName}`;
+		const { publicUrl: imageUrl } = await putObject(params);
 
 		await Order.findByIdAndUpdate(id, { labelUrl: imageUrl });
 
@@ -60,19 +48,10 @@ export async function DELETE(
 	if (!order) {
 		return Response.json({ error: "Order not found" }, { status: 404 });
 	}
-	const s3 = new S3Client({
-		region: process.env.S3_REGION!,
-		credentials: {
-			accessKeyId: process.env.S3_ACCESS_KEY!,
-			secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-		},
-	});
-	const key = order.labelUrl.split("/").pop();
-	const deleteParams = {
-		Bucket: process.env.S3_BUCKET_NAME!,
-		Key: key,
-	};
-	await s3.send(new DeleteObjectCommand(deleteParams));
+	if (!order.labelUrl) {
+		return Response.json({ success: true });
+	}
+	await deleteByPublicUrl(order.labelUrl);
 
 	await Order.findByIdAndUpdate(id, { labelUrl: null });
 
