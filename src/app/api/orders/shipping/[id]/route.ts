@@ -25,6 +25,18 @@ export async function PATCH(
 		return NextResponse.json({ error: "Order not found" }, { status: 404 });
 	}
 
+	const hasUploadedFile =
+		Boolean(order.labelUrl) || order.items?.some((item: { designUrl?: string }) => item.designUrl);
+	if (hasUploadedFile && (warehousePrice !== undefined || shippingAmount !== undefined)) {
+		return NextResponse.json(
+			{
+				error:
+					"Warehouse/shipping fees are locked because a file has been uploaded for this order.",
+			},
+			{ status: 400 },
+		);
+	}
+
 	if (trackingNumber !== undefined) {
 		order.warehouseTrackingNumber = trackingNumber;
 	}

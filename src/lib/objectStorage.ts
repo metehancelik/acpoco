@@ -13,7 +13,9 @@ function normalizeBaseUrl(url: string): string {
 }
 
 function getLocalUploadDir(): string {
-	return getEnv("UPLOAD_DIR") ?? "/app/uploads";
+	// Default to a writable path both locally and in containers.
+	// In Coolify, set UPLOAD_DIR=/app/uploads and mount a persistent volume there.
+	return getEnv("UPLOAD_DIR") ?? path.join(process.cwd(), "uploads");
 }
 
 function ensureSafeKey(key: string): string {

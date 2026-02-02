@@ -29,9 +29,15 @@ interface OrderWithFees {
 	orderId: number;
 	warehousePrice?: number;
 	shippingAmount?: number;
+	labelUrl?: string;
+	items?: { designUrl?: string | null }[];
 	advancedOptions: {
 		storeId: number;
 	};
+}
+
+function orderHasUploadedFile(order: OrderWithFees): boolean {
+	return Boolean(order.labelUrl) || Boolean(order.items?.some((i) => i.designUrl));
 }
 
 // Helper function to deduct shipping fees from users' wallets
@@ -56,6 +62,7 @@ async function deductShippingFees(
 		{ totalFees: number; orderIds: Types.ObjectId[] }
 	> = {};
 	for (const order of orders) {
+		if (orderHasUploadedFile(order)) continue;
 		const userId = storeToUserMap[order.advancedOptions?.storeId];
 		if (!userId) continue;
 
@@ -174,13 +181,28 @@ export async function PATCH(request: Request) {
 				ordersToUpdate = await Order.find({
 					...query,
 					shippingFeesDeducted: { $ne: true },
-				}).select("_id orderId warehousePrice shippingAmount advancedOptions");
+				}).select(
+					"_id orderId warehousePrice shippingAmount advancedOptions labelUrl items.designUrl",
+				);
 			} else {
 				// Get specific orders that haven't had fees deducted yet
 				ordersToUpdate = await Order.find({
 					_id: { $in: orderIds },
 					shippingFeesDeducted: { $ne: true },
-				}).select("_id orderId warehousePrice shippingAmount advancedOptions");
+				}).select(
+					"_id orderId warehousePrice shippingAmount advancedOptions labelUrl items.designUrl",
+				);
+			}
+
+			// If fees are locked (file uploaded), mark as deducted so we never try again.
+			const lockedOrderIds = ordersToUpdate
+				.filter(orderHasUploadedFile)
+				.map((o) => o._id);
+			if (lockedOrderIds.length > 0) {
+				await Order.updateMany(
+					{ _id: { $in: lockedOrderIds } },
+					{ $set: { shippingFeesDeducted: true } },
+				);
 			}
 
 			// Deduct fees from users' wallets

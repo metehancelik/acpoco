@@ -307,7 +307,7 @@
 		"shippingCostRequired": "Kargo ücreti gerekli",
 		"nextOrder": "Sonraki Sipariş",
 		"saveAndChangeStatus": "Kaydet ve Durumu Değiştir",
-		"feesLockedLabelUploaded": "Bu sipariş için etiket yüklendiğinden depo ve kargo ücretleri düzenlenemez."
+		"feesLockedLabelUploaded": "Bu sipariş için bir dosya yüklendiğinden depo ve kargo ücretleri düzenlenemez."
 	},
 	"Wallets": {
 		"name": "İsim",

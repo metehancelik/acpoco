@@ -11,7 +11,8 @@ function getEnv(name: string): string | undefined {
 }
 
 function getUploadDir(): string {
-	return getEnv("UPLOAD_DIR") ?? "/app/uploads";
+	// Default to a writable path both locally and in containers.
+	return getEnv("UPLOAD_DIR") ?? path.join(process.cwd(), "uploads");
 }
 
 function contentTypeForExt(ext: string): string {

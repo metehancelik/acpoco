@@ -909,11 +909,13 @@ const SellerOrdersTable: React.FC<Props> = ({
 										{/* Design */}
 										<td className="px-2 py-1.5">
 											<div className="flex flex-col items-center gap-1">
-												{order.items.map((item) => (
-													<div
-														className="flex items-center gap-1"
-														key={item.orderItemId}
-													>
+												{order.items.map((item) => {
+													const inputId = `design-${order._id}-${item.orderItemId}`;
+													return (
+														<div
+															className="flex items-center gap-1"
+															key={item.orderItemId}
+														>
 														{item.designUrl ? (
 															<div className="relative group/img">
 																<Image
@@ -952,7 +954,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 														) : (
 															/* biome-ignore lint/a11y/useKeyWithClickEvents: fix later */
 															<label
-																htmlFor="image"
+																htmlFor={inputId}
 																onClick={() => setSelectedOrder(order)}
 																aria-disabled={uploadImageMutation.isPending}
 																className="text-[10px] text-violet-600 bg-violet-50 border border-violet-200 rounded px-2 py-1 cursor-pointer hover:bg-violet-100 flex items-center gap-1"
@@ -963,7 +965,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 														)}
 														<Input
 															type="file"
-															id="image"
+															id={inputId}
 															className="hidden"
 															placeholder={t("uploadImage")}
 															onChange={async (e) => {
@@ -977,10 +979,13 @@ const SellerOrdersTable: React.FC<Props> = ({
 																	item.orderItemId.toString(),
 																);
 																uploadImageMutation.mutate(formData);
+																// allow re-uploading same file
+																e.currentTarget.value = "";
 															}}
 														/>
-													</div>
-												))}
+														</div>
+													);
+												})}
 											</div>
 										</td>
 

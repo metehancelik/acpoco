@@ -307,7 +307,7 @@
 		"shippingCostRequired": "Versandkosten sind erforderlich",
 		"nextOrder": "Nächste Bestellung",
 		"saveAndChangeStatus": "Speichern & Status ändern",
-		"feesLockedLabelUploaded": "Lager- und Versandkosten können nicht bearbeitet werden, da für diese Bestellung ein Etikett hochgeladen wurde."
+		"feesLockedLabelUploaded": "Lager- und Versandkosten können nicht bearbeitet werden, da für diese Bestellung eine Datei hochgeladen wurde."
 	},
 	"Wallets": {
 		"name": "Name",

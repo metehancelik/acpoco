@@ -55,13 +55,15 @@ const ConfirmStatusChange = ({
 	const queryClient = useQueryClient();
 
 	// Find orders that are missing warehouse/shipping fees
-	// Exclude orders with labels uploaded (fees cannot be edited for those)
+	// Exclude orders with uploaded files (fees are locked / not required)
 	const ordersWithMissingFees = useMemo(() => {
 		if (status !== "shipped" || !orders || !orderIds) return [];
+		const orderHasUploadedFile = (order: OrderData) =>
+			Boolean(order.labelUrl) || order.items?.some((item) => Boolean(item.designUrl));
 		return orders.filter(
 			(order) =>
 				orderIds.includes(order._id) &&
-				!order.labelUrl && // Skip orders with labels - fees cannot be edited
+				!orderHasUploadedFile(order) &&
 				(order.warehousePrice == null ||
 					order.warehousePrice === 0 ||
 					order.shippingAmount == null ||

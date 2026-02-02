@@ -42,8 +42,9 @@ const WarehouseModal: React.FC<Props> = ({
 	const t = useTranslations("Orders");
 	const tCommon = useTranslations("Common");
 
-	// Check if order has a label uploaded - fees cannot be edited
-	const hasLabel = Boolean(order?.labelUrl);
+	// If an order has an uploaded file (label or user design), fees cannot be edited.
+	const hasUploadedFile =
+		Boolean(order?.labelUrl) || order?.items?.some((item) => Boolean(item.designUrl));
 	const form = useForm<FormValues>({
 		defaultValues: {
 			trackingNumber: order?.warehouseTrackingNumber || "",
@@ -68,12 +69,15 @@ const WarehouseModal: React.FC<Props> = ({
 	}, [order, form]);
 
 	const updateOrder = async (data: FormValues) => {
-		await httpClient.patch(`/orders/shipping/${order._id}`, {
+		const payload: Record<string, unknown> = {
 			trackingNumber: data.trackingNumber,
 			shippingService: data.shippingService,
-			warehousePrice: data.warehousePrice ? Number(data.warehousePrice) : null,
-			shippingAmount: data.shippingAmount ? Number(data.shippingAmount) : null,
-		});
+		};
+		if (!hasUploadedFile) {
+			payload.warehousePrice = data.warehousePrice ? Number(data.warehousePrice) : null;
+			payload.shippingAmount = data.shippingAmount ? Number(data.shippingAmount) : null;
+		}
+		await httpClient.patch(`/orders/shipping/${order._id}`, payload);
 	};
 
 	const mutation = useMutation({
@@ -141,8 +145,10 @@ const WarehouseModal: React.FC<Props> = ({
 							step="0.01"
 							min="0"
 							placeholder={t("enterWarehouseCost")}
-							disabled={hasLabel}
-							className={hasLabel ? "bg-slate-100 cursor-not-allowed" : ""}
+							disabled={hasUploadedFile}
+							className={
+								hasUploadedFile ? "bg-slate-100 cursor-not-allowed" : ""
+							}
 							{...form.register("warehousePrice")}
 						/>
 					</div>
@@ -155,13 +161,15 @@ const WarehouseModal: React.FC<Props> = ({
 							step="0.01"
 							min="0"
 							placeholder={t("enterShippingCost")}
-							disabled={hasLabel}
-							className={hasLabel ? "bg-slate-100 cursor-not-allowed" : ""}
+							disabled={hasUploadedFile}
+							className={
+								hasUploadedFile ? "bg-slate-100 cursor-not-allowed" : ""
+							}
 							{...form.register("shippingAmount")}
 						/>
 					</div>
 
-					{hasLabel && (
+					{hasUploadedFile && (
 						<p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded p-2">
 							{t("feesLockedLabelUploaded")}
 						</p>
