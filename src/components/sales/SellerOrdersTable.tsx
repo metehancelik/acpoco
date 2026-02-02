@@ -222,8 +222,9 @@ const SellerOrdersTable: React.FC<Props> = ({
 	};
 	const uploadLabelMutation = useMutation({
 		mutationFn: async (formData: FormData) => {
+			const orderId = formData.get("orderId") as string;
 			const response = await axios.post(
-				`/api/orders/label/${selectedOrder?._id}`,
+				`/api/orders/label/${orderId}`,
 				formData,
 				{
 					headers: {
@@ -774,7 +775,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 													<>
 														{/* biome-ignore lint/a11y/useKeyWithClickEvents: fix later */}
 														<label
-															htmlFor="label"
+															htmlFor={`label-${order._id}`}
 															onClick={() => setSelectedOrder(order)}
 															aria-disabled={
 																uploadLabelMutation.isPending &&
@@ -787,7 +788,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 														</label>
 														<Input
 															type="file"
-															id="label"
+															id={`label-${order._id}`}
 															className="hidden"
 															placeholder={t("uploadLabel")}
 															onChange={async (e) => {
@@ -796,7 +797,10 @@ const SellerOrdersTable: React.FC<Props> = ({
 																if (!file) return;
 																const formData = new FormData();
 																formData.append("file", file);
+																formData.append("orderId", order._id);
 																uploadLabelMutation.mutate(formData);
+																// allow re-uploading same file
+																e.currentTarget.value = "";
 															}}
 														/>
 													</>
