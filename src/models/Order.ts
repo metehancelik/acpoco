@@ -103,6 +103,7 @@ const OrderSchema = new mongoose.Schema({
 	giftMessage: String,
 	sellerNote: String,
 	isPayed: Boolean,
+	shippingFeesDeducted: { type: Boolean, default: false },
 	paymentMethod: String,
 	requestedShippingService: String,
 	carrierCode: String,

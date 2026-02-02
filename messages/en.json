@@ -322,7 +322,8 @@
 		"rejected": "Rejected",
 		"processing": "Processing...",
 		"errorOccurred": "An error occurred!",
-		"orderPayment": "Order Payment"
+		"orderPayment": "Order Payment",
+		"shippingFees": "Shipping & Warehouse Fees"
 	},
 	"Dashboard": {
 		"adminDashboard": "Admin Dashboard",

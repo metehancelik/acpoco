@@ -322,7 +322,8 @@
 		"rejected": "Red",
 		"processing": "İşleniyor...",
 		"errorOccurred": "Bir hata oluştu!",
-		"orderPayment": "Sipariş ödemesi"
+		"orderPayment": "Sipariş ödemesi",
+		"shippingFees": "Kargo ve Depo Ücretleri"
 	},
 	"Dashboard": {
 		"adminDashboard": "Admin Dashboard",

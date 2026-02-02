@@ -322,7 +322,8 @@
 		"rejected": "Abgelehnt",
 		"processing": "Verarbeitung...",
 		"errorOccurred": "Ein Fehler ist aufgetreten!",
-		"orderPayment": "Bestellung bezahlt"
+		"orderPayment": "Bestellung bezahlt",
+		"shippingFees": "Versand- und Lagergebühren"
 	},
 	"Dashboard": {
 		"adminDashboard": "Admin Dashboard",
