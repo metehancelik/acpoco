@@ -299,7 +299,14 @@
 		"confirmStatusChange": "Are you sure you want to change to?",
 		"statusUpdated": "Status updated successfully",
 		"statusUpdateFailed": "Failed to update status",
-		"selected": "selected"
+		"selected": "selected",
+		"enterFeesBeforeShipping": "Enter Fees Before Shipping",
+		"orderMissingFees": "Order {current} of {total} is missing warehouse/shipping fees",
+		"feesRequired": "Both warehouse cost and shipping cost are required",
+		"warehouseCostRequired": "Warehouse cost is required",
+		"shippingCostRequired": "Shipping cost is required",
+		"nextOrder": "Next Order",
+		"saveAndChangeStatus": "Save & Change Status"
 	},
 	"Wallets": {
 		"name": "Name",

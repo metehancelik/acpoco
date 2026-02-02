@@ -1032,6 +1032,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 				status={selectedStatus}
 				isAllSelected={isAllSelected}
 				orderIds={selectedOrderIds}
+				orders={data}
 			/>
 			{selectedOrder && (
 				<PaymentModal

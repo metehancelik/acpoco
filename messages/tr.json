@@ -299,7 +299,14 @@
 		"confirmStatusChange": "olarak değiştirmek istediğinize emin misiniz?",
 		"statusUpdated": "Durum başarıyla güncellendi",
 		"statusUpdateFailed": "Durum güncellenemedi",
-		"selected": "seçili"
+		"selected": "seçili",
+		"enterFeesBeforeShipping": "Gönderi Öncesi Ücretleri Girin",
+		"orderMissingFees": "Sipariş {current} / {total} - Depo/kargo ücreti eksik",
+		"feesRequired": "Hem depo ücreti hem de kargo ücreti gereklidir",
+		"warehouseCostRequired": "Depo ücreti gerekli",
+		"shippingCostRequired": "Kargo ücreti gerekli",
+		"nextOrder": "Sonraki Sipariş",
+		"saveAndChangeStatus": "Kaydet ve Durumu Değiştir"
 	},
 	"Wallets": {
 		"name": "İsim",

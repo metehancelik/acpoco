@@ -299,7 +299,14 @@
 		"confirmStatusChange": "Sind Sie sicher, dass Sie ändern möchten auf?",
 		"statusUpdated": "Status erfolgreich aktualisiert",
 		"statusUpdateFailed": "Status konnte nicht aktualisiert werden",
-		"selected": "ausgewählt"
+		"selected": "ausgewählt",
+		"enterFeesBeforeShipping": "Gebühren vor dem Versand eingeben",
+		"orderMissingFees": "Bestellung {current} von {total} - Lager-/Versandgebühren fehlen",
+		"feesRequired": "Sowohl Lagerkosten als auch Versandkosten sind erforderlich",
+		"warehouseCostRequired": "Lagerkosten sind erforderlich",
+		"shippingCostRequired": "Versandkosten sind erforderlich",
+		"nextOrder": "Nächste Bestellung",
+		"saveAndChangeStatus": "Speichern & Status ändern"
 	},
 	"Wallets": {
 		"name": "Name",
