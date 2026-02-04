@@ -867,7 +867,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 														className="text-[11px] py-1.5 px-2 rounded border border-slate-200 bg-white focus:ring-1 focus:ring-primary/30"
 													>
 														<option value="">{t("selectWarehouse")}</option>
-														<option value="shipEntegra">{t("germany")}</option>
+														<option value="DE">{t("germany")}</option>
 														<option value="kullanıcı">
 															{t("sellerSendToMe")}
 														</option>
@@ -920,73 +920,73 @@ const SellerOrdersTable: React.FC<Props> = ({
 															className="flex items-center gap-1"
 															key={item.orderItemId}
 														>
-														{item.designUrl ? (
-															<div className="relative group/img">
-																<Image
-																	onClick={() =>
-																		item.designUrl &&
-																		window.open(item.designUrl, "_blank")
-																	}
-																	src={item.designUrl}
-																	width={52}
-																	height={52}
-																	className="w-13 h-13 rounded cursor-pointer border border-slate-200 object-cover hover:border-primary transition-colors"
-																	alt="design"
-																/>
-																<Button
-																	variant="destructive"
-																	size="sm"
-																	className="absolute -top-1 -right-1 h-5 w-5 p-0 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
-																	disabled={
-																		deleteImageMutation.isPending &&
-																		selectedOrder?._id === order._id
-																	}
-																	onClick={() => {
-																		setSelectedOrder(order);
-																		const formData = new FormData();
-																		formData.append("orderId", order._id);
-																		formData.append(
-																			"orderItemId",
-																			item.orderItemId.toString(),
-																		);
-																		deleteImageMutation.mutate(formData);
-																	}}
+															{item.designUrl ? (
+																<div className="relative group/img">
+																	<Image
+																		onClick={() =>
+																			item.designUrl &&
+																			window.open(item.designUrl, "_blank")
+																		}
+																		src={item.designUrl}
+																		width={52}
+																		height={52}
+																		className="w-13 h-13 rounded cursor-pointer border border-slate-200 object-cover hover:border-primary transition-colors"
+																		alt="design"
+																	/>
+																	<Button
+																		variant="destructive"
+																		size="sm"
+																		className="absolute -top-1 -right-1 h-5 w-5 p-0 rounded-full opacity-0 group-hover/img:opacity-100 transition-opacity"
+																		disabled={
+																			deleteImageMutation.isPending &&
+																			selectedOrder?._id === order._id
+																		}
+																		onClick={() => {
+																			setSelectedOrder(order);
+																			const formData = new FormData();
+																			formData.append("orderId", order._id);
+																			formData.append(
+																				"orderItemId",
+																				item.orderItemId.toString(),
+																			);
+																			deleteImageMutation.mutate(formData);
+																		}}
+																	>
+																		<Trash2 className="h-2.5 w-2.5" />
+																	</Button>
+																</div>
+															) : (
+																/* biome-ignore lint/a11y/useKeyWithClickEvents: fix later */
+																<label
+																	htmlFor={inputId}
+																	onClick={() => setSelectedOrder(order)}
+																	aria-disabled={uploadImageMutation.isPending}
+																	className="text-[10px] text-violet-600 bg-violet-50 border border-violet-200 rounded px-2 py-1 cursor-pointer hover:bg-violet-100 flex items-center gap-1"
 																>
-																	<Trash2 className="h-2.5 w-2.5" />
-																</Button>
-															</div>
-														) : (
-															/* biome-ignore lint/a11y/useKeyWithClickEvents: fix later */
-															<label
-																htmlFor={inputId}
-																onClick={() => setSelectedOrder(order)}
-																aria-disabled={uploadImageMutation.isPending}
-																className="text-[10px] text-violet-600 bg-violet-50 border border-violet-200 rounded px-2 py-1 cursor-pointer hover:bg-violet-100 flex items-center gap-1"
-															>
-																<Upload className="h-3 w-3" />
-																Upload
-															</label>
-														)}
-														<Input
-															type="file"
-															id={inputId}
-															className="hidden"
-															placeholder={t("uploadImage")}
-															onChange={async (e) => {
-																const file = e.target.files?.[0];
-																if (!file) return;
-																const formData = new FormData();
-																formData.append("file", file);
-																formData.append("orderId", order._id);
-																formData.append(
-																	"orderItemId",
-																	item.orderItemId.toString(),
-																);
-																uploadImageMutation.mutate(formData);
-																// allow re-uploading same file
-																e.currentTarget.value = "";
-															}}
-														/>
+																	<Upload className="h-3 w-3" />
+																	Upload
+																</label>
+															)}
+															<Input
+																type="file"
+																id={inputId}
+																className="hidden"
+																placeholder={t("uploadImage")}
+																onChange={async (e) => {
+																	const file = e.target.files?.[0];
+																	if (!file) return;
+																	const formData = new FormData();
+																	formData.append("file", file);
+																	formData.append("orderId", order._id);
+																	formData.append(
+																		"orderItemId",
+																		item.orderItemId.toString(),
+																	);
+																	uploadImageMutation.mutate(formData);
+																	// allow re-uploading same file
+																	e.currentTarget.value = "";
+																}}
+															/>
 														</div>
 													);
 												})}
