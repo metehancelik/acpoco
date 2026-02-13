@@ -324,6 +324,7 @@
 		"processing": "İşleniyor...",
 		"errorOccurred": "Bir hata oluştu!",
 		"orderPayment": "Sipariş ödemesi",
+		"autoOrderPayment": "Otomatik Sipariş Ödemesi",
 		"shippingFees": "Kargo ve Depo Ücretleri"
 	},
 	"Dashboard": {

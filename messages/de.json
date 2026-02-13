@@ -324,6 +324,7 @@
 		"processing": "Verarbeitung...",
 		"errorOccurred": "Ein Fehler ist aufgetreten!",
 		"orderPayment": "Bestellung bezahlt",
+		"autoOrderPayment": "Automatische Bestellungszahlung",
 		"shippingFees": "Versand- und Lagergebühren"
 	},
 	"Dashboard": {

@@ -324,6 +324,7 @@
 		"processing": "Processing...",
 		"errorOccurred": "An error occurred!",
 		"orderPayment": "Order Payment",
+		"autoOrderPayment": "Automatic Order Payment",
 		"shippingFees": "Shipping & Warehouse Fees"
 	},
 	"Dashboard": {
