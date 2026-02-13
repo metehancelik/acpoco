@@ -126,7 +126,7 @@ const AllWalletLogs = () => {
 										€{log.currentBalance.toFixed(2)}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-900">
-										€{log.finalBalance}
+										€{Number(log.finalBalance).toFixed(2)}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
 										{formatDateLocalized(log.createdAt)}
