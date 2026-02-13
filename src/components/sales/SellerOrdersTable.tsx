@@ -1017,7 +1017,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 					<span className="text-white font-semibold">{data?.length || 0}</span>{" "}
 					{t("ordersShown")}
 				</div>
-				<Pagination totalPages={totalPages} />
+				<Pagination totalPages={totalPages} variant="dark" />
 				<div className="text-[10px] text-slate-400 font-medium tracking-wide">
 					<span className="text-white font-semibold">{totalPages}</span>{" "}
 					{t("pages")}
