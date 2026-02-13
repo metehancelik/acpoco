@@ -119,11 +119,11 @@ const AllWalletLogs = () => {
 											}`}
 										>
 											{log.changeAmount >= 0 ? "+" : ""}
-											{log.changeAmount}
+											{log.changeAmount.toFixed(2)}
 										</span>
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
-										€{log.currentBalance}
+										€{log.currentBalance.toFixed(2)}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-900">
 										€{log.finalBalance}
