@@ -3,7 +3,12 @@
  * These domains are returned as-is so the browser loads them directly
  * (avoids "upstream response is invalid" when Next.js server fetches are blocked).
  */
-const DIRECT_LOAD_DOMAINS = ["cdn.shopify.com", "shop.acpoco.de"];
+const DIRECT_LOAD_DOMAINS = [
+	"cdn.shopify.com",
+	"shop.acpoco.de",
+	"drive.google.com",
+	"lh3.googleusercontent.com",
+];
 
 export default function imageLoader({ src, width, quality }) {
 	if (
