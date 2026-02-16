@@ -1,5 +1,6 @@
 "use client";
 
+import { MagnifyingGlassIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type React from "react";
@@ -28,29 +29,38 @@ const ProductFilter = () => {
 	};
 
 	return (
-		<div className="flex items-center space-x-2 w-full lg:w-1/2 mx-auto mb-12 flex-col sm:flex-row gap-2">
+		<div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<form
-				className="flex w-full gap-2 flex-col sm:flex-row"
+				className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center"
 				onSubmit={handleSubmit}
 			>
-				<input
-					type="text"
-					placeholder={t("searchPlaceholder")}
-					className="flex-1 px-4 py-2 border border-slate-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-xs lg:placeholder:text-base"
-					onChange={handleChange}
-					value={query}
-				/>
+				<label htmlFor="product-search" className="sr-only">
+					{t("searchPlaceholder")}
+				</label>
+				<div className="relative flex-1">
+					<MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+					<input
+						id="product-search"
+						type="text"
+						placeholder={t("searchPlaceholder")}
+						className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-4 text-gray-900 transition-colors placeholder:text-gray-400 focus:border-gold focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold/20"
+						onChange={handleChange}
+						value={query}
+					/>
+				</div>
 				<button
 					type="submit"
-					className="px-6 py-2 bg-slate-700 text-white rounded-full hover:bg-slate-500 focus:outline-none text-sm lg:text-base"
+					className="cursor-pointer rounded-xl bg-gold px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
 				>
 					{t("findProduct")}
 				</button>
 			</form>
 			<button
+				type="button"
 				onClick={handleAllProducts}
-				className="w-full sm:w-48 px-6 py-2 bg-white text-slate-700 rounded-full border border-slate-700 hover:bg-slate-700 hover:text-white focus:outline-none text-sm lg:text-base"
+				className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 sm:shrink-0"
 			>
+				<Squares2X2Icon className="h-5 w-5 text-gray-500" />
 				{tCommon("viewAll")}
 			</button>
 		</div>

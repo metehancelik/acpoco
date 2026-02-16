@@ -52,56 +52,49 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 	return (
 		<div
 			key={product._id}
-			className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md"
+			className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
 		>
-			{hasValidImage ? (
-				<Image
-					alt={product.title}
-					src={imageSrc}
-					width={400}
-					height={400}
-					className="aspect-square w-full bg-gray-200 object-cover group-hover:opacity-75 sm:aspect-square"
-				/>
-			) : (
-				<div
-					className="aspect-square w-full bg-gray-200 sm:aspect-square"
-					aria-hidden
-				/>
-			)}
-			<div className="flex flex-1 flex-col space-y-2 p-4">
-				<Link href={`/product/${product._id}`}>{product.title}</Link>
-
-				<p className="text-sm text-gray-500">SKU: {displaySku}</p>
-				<div className="flex flex-1 items-end justify-between">
-					<div className="flex items-center gap-2">
-						{showDiscount ? (
-							<>
-								<span className="text-base font-semibold text-gray-900">
-									€{discounted}
-								</span>
-								<span className="text-sm text-gray-500 line-through">
-									€{basePrice}
-								</span>
-								<span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-									%{discountPercent} {t("discount")}
-								</span>
-							</>
-						) : (
-							<span className="text-base font-medium text-gray-900">
-								{t("price")}: €{basePrice}
+			<Link href={`/product/${product._id}`} className="cursor-pointer">
+				{hasValidImage ? (
+					<Image
+						alt={product.title}
+						src={imageSrc}
+						width={400}
+						height={400}
+						className="aspect-square w-full bg-gray-100 object-cover"
+					/>
+				) : (
+					<div className="aspect-square w-full bg-gray-100" aria-hidden />
+				)}
+			</Link>
+			<div className="flex flex-col gap-1 p-3">
+				<Link
+					href={`/product/${product._id}`}
+					className="line-clamp-2 text-sm font-medium text-gray-900 cursor-pointer hover:text-gold transition-colors"
+				>
+					{product.title}
+				</Link>
+				<p className="text-xs text-gray-500 truncate">SKU: {displaySku}</p>
+				<div className="flex flex-wrap items-center gap-1.5">
+					{showDiscount ? (
+						<>
+							<span className="text-sm font-semibold text-gray-900">€{discounted}</span>
+							<span className="text-xs text-gray-500 line-through">€{basePrice}</span>
+							<span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-800">
+								%{discountPercent}
 							</span>
-						)}
-					</div>
+						</>
+					) : (
+						<span className="text-sm font-medium text-gray-900">€{basePrice}</span>
+					)}
 				</div>
-				<div className="flex items-center gap-x-2">
-					<Link
-						href={`/product/${product._id}`}
-						className="flex items-center gap-x-2 bg-slate-700 text-white rounded-md px-2 py-2 text-sm w-full justify-center"
-					>
-						<p>{t("view")}</p>
-						<MagnifyingGlassIcon className="" width={24} height={24} />
-					</Link>
-				</div>
+				<Link
+					href={`/product/${product._id}`}
+					className="mt-1 flex cursor-pointer items-center justify-center gap-1 rounded-md bg-slate-700 py-1.5 text-xs text-white transition-colors hover:bg-slate-600"
+				>
+					{t("view")}
+					<MagnifyingGlassIcon className="h-4 w-4" />
+				</Link>
 			</div>
 		</div>
 	);

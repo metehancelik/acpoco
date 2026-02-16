@@ -1,144 +1,67 @@
-import type { PipelineStage } from "mongoose";
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+import { NextRequest, NextResponse } from "next/server";
 
-import { authOptions } from "@/lib/auth";
+import dbConnect from "@/lib/db";
 import Product from "@/models/Product";
-import { ProductVariantModel } from "@/models/ProductVariant";
+import type { IProduct } from "@/models/Product";
 
-function createTurkishRegexPattern(query: string) {
-	const turkishChars: { [key: string]: string } = {
-		a: "[aâ]",
-		e: "[eê]",
-		i: "[iİıî]",
-		o: "[oö]",
-		u: "[uüû]",
-		s: "[sş]",
-		c: "[cç]",
-		g: "[gğ]",
-	};
+const ITEMS_PER_PAGE = 24;
 
-	return query
-		.toLowerCase()
-		.split("")
-		.map((char) => turkishChars[char] || char)
-		.join("");
-}
-
-export async function GET(request: Request) {
-	const { searchParams } = new URL(request.url);
-	const query = searchParams.get("query") || undefined;
-	const page = Number(searchParams.get("page")) || 1;
-	const limit = Number(searchParams.get("limit")) || 20;
-
-	const pipeline: PipelineStage[] = [
-		{
-			$lookup: {
-				from: "categories",
-				localField: "category",
-				foreignField: "_id",
-				as: "category",
-			},
-		},
-		{ $unwind: "$category" },
-	];
-
-	if (query) {
-		const pattern = createTurkishRegexPattern(query);
-		pipeline.push({
-			$match: {
-				$or: [
-					{ title: { $regex: pattern, $options: "i" } },
-					{ "category.name": { $regex: pattern, $options: "i" } },
-				],
-			},
-		});
-	}
-
-	pipeline.push({ $skip: (page - 1) * limit }, { $limit: limit });
-
-	const products = await Product.aggregate(pipeline);
-
-	const countPipeline: PipelineStage[] = pipeline.slice(0, -2);
-	countPipeline.push({ $count: "total" });
-	const [countResult] = await Product.aggregate(countPipeline);
-	const total = countResult?.total || 0;
-
-	return NextResponse.json({ products, total });
-}
-
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
 	try {
-		const session = await getServerSession(authOptions);
-		if (!session || session.user?.role !== "ADMIN") {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		const { searchParams } = new URL(request.url);
+		const page = Math.max(1, Number(searchParams.get("page") ?? 1));
+		const category = searchParams.get("category") ?? undefined;
+		const query = searchParams.get("query") ?? undefined;
+
+		await dbConnect();
+
+		// biome-ignore lint/suspicious/noExplicitAny: mongoose filter
+		const filter: Record<string, any> = {};
+		if (category) {
+			filter.category = category;
+		}
+		if (query?.trim()) {
+			const regex = new RegExp(query.trim(), "i");
+			filter.$or = [
+				{ title: { $regex: regex } },
+				{ parentSku: { $regex: regex } },
+			];
 		}
 
-		const body = await request.json();
-		const {
-			parentSku,
-			title,
-			price,
-			description,
-			weight,
-			dimensions,
-			images,
-			attributes,
-			category,
-			estimatedProductionTime,
-			variants,
-		} = body;
+		const totalItems = await Product.countDocuments(filter);
+		const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+		const hasNextPage = page < totalPages;
+		const skip = (page - 1) * ITEMS_PER_PAGE;
 
-		// Create the main product
-		const product = new Product({
-			parentSku,
-			title,
-			price,
-			description,
-			weight,
-			dimensions,
-			images,
-			attributes,
-			category,
-			estimatedProductionTime,
-		});
+		const products = await Product.find(filter)
+			.populate("category")
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(ITEMS_PER_PAGE)
+			.lean();
 
-		const savedProduct = await product.save();
+		const data: {
+			products: IProduct[];
+			hasNextPage: boolean;
+			nextPage: number | null;
+			page: number;
+		} = {
+			products: JSON.parse(JSON.stringify(products)),
+			hasNextPage,
+			nextPage: hasNextPage ? page + 1 : null,
+			page,
+		};
 
-		// Create variants if provided
-		if (variants && variants.length > 0) {
-			const variantPromises = variants.map(
-				(variant: {
-					childSku: string;
-					price: number;
-					attributes: { name: string; value: string }[];
-					stock?: number;
-				}) => {
-					const productVariant = new ProductVariantModel({
-						productId: savedProduct._id,
-						childSku: variant.childSku,
-						price: variant.price,
-						attributes: variant.attributes,
-						stock: variant.stock || 0,
-					});
-
-					return productVariant.save();
-				},
-			);
-
-			await Promise.all(variantPromises);
-		}
-
-		return NextResponse.json({
-			success: true,
-			product: savedProduct,
-			message: "Product created successfully",
-		});
+		return NextResponse.json(data);
 	} catch (error) {
-		console.error("Error creating product:", error);
-
+		console.error("Error fetching products:", error);
 		return NextResponse.json(
-			{ error: "Failed to create product" },
+			{
+				products: [],
+				hasNextPage: false,
+				nextPage: null,
+				page: 1,
+			},
 			{ status: 500 },
 		);
 	}

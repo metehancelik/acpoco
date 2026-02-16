@@ -16,11 +16,13 @@ const Categories = ({ categories }: Props) => {
 	};
 
 	return (
-		<div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-7 gap-2 lg:gap-6 pb-12">
+		<div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-7 gap-3 lg:gap-4">
 			{categories?.map((category) => (
 				<button
 					key={category._id}
+					type="button"
 					onClick={() => handleCategoryClick(category._id)}
+					className="cursor-pointer"
 				>
 					<div className="col-span-1 relative text-white rounded-lg h-20 lg:h-40 hover:scale-105 transition-all duration-300 shadow-lg">
 						<Image
