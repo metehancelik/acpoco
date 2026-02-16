@@ -6,7 +6,10 @@ import Product from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
 import type { ShopifyVariant } from "@/utils/shopify";
 
-const ITEMS_PER_PAGE = 24;
+const DEFAULT_ITEMS_PER_PAGE = 20;
+const MAX_ITEMS_PER_PAGE = 40;
+// Allowed so every row is full: grid is 2 / 4 / 5 cols → use multiple of LCM(2,4,5) = 20
+const ALLOWED_PAGE_SIZES = [20, 40];
 
 type DbVariant = {
 	_id: { toString: () => string };
@@ -54,6 +57,13 @@ export async function GET(request: NextRequest) {
 		const page = Math.max(1, Number(searchParams.get("page") ?? 1));
 		const category = searchParams.get("category") ?? undefined;
 		const query = searchParams.get("query") ?? undefined;
+		const requestedLimit = searchParams.get("limit");
+		const limit = requestedLimit
+			? ALLOWED_PAGE_SIZES.includes(Number(requestedLimit))
+				? Number(requestedLimit)
+				: DEFAULT_ITEMS_PER_PAGE
+			: DEFAULT_ITEMS_PER_PAGE;
+		const ITEMS_PER_PAGE = Math.min(limit, MAX_ITEMS_PER_PAGE);
 
 		await dbConnect();
 
@@ -118,13 +128,8 @@ export async function GET(request: NextRequest) {
 			};
 		});
 
-		const data: {
-			products: IProduct[];
-			hasNextPage: boolean;
-			nextPage: number | null;
-			page: number;
-		} = {
-			products: productsWithVariants,
+		const data = {
+			products: productsWithVariants as unknown as IProduct[],
 			hasNextPage,
 			nextPage: hasNextPage ? page + 1 : null,
 			page,

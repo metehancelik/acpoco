@@ -15,6 +15,9 @@ type ProductsResponse = {
 	page: number;
 };
 
+// Multiple of grid columns (2, 4, 5) so every row is full on all breakpoints
+const LANDING_PAGE_SIZE = 20;
+
 function buildProductsUrl(
 	page: number,
 	category: string | null,
@@ -22,6 +25,7 @@ function buildProductsUrl(
 ): string {
 	const params = new URLSearchParams();
 	params.set("page", String(page));
+	params.set("limit", String(LANDING_PAGE_SIZE));
 	if (category) params.set("category", category);
 	if (query?.trim()) params.set("query", query.trim());
 	return `/api/products?${params.toString()}`;
