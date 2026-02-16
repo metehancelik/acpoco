@@ -58,7 +58,7 @@ export default function LandingSidebar({
 	const rawCategory = searchParams?.get("category");
 	const defaultCategory = categories.find((c) => c._id === defaultCategoryId);
 	const defaultSlug = defaultCategory ? slugify(defaultCategory.name) : null;
-	const isAll = rawCategory === "all" || rawCategory === null;
+	const isAll = rawCategory === "all";
 	const currentSlug = rawCategory ?? defaultSlug;
 	const isCategorySelected = (cat: ICategory) =>
 		!isAll && currentSlug === slugify(cat.name);
