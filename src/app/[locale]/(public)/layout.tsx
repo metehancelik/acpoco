@@ -74,8 +74,14 @@ export default async function RootLayout({
 									className="fixed inset-0 -z-10 bg-linear-to-br from-stone-50 via-stone-50/98 to-amber-50/50"
 									aria-hidden
 								/>
-								<div className="fixed top-0 right-0 h-[480px] w-[480px] -translate-y-1/4 translate-x-1/3 rounded-full bg-amber-100/30 blur-3xl -z-10 pointer-events-none" aria-hidden />
-								<div className="fixed bottom-0 left-0 h-[360px] w-[360px] -translate-x-1/3 translate-y-1/3 rounded-full bg-stone-200/35 blur-3xl -z-10 pointer-events-none" aria-hidden />
+								<div
+									className="fixed top-0 right-0 h-[480px] w-[480px] -translate-y-1/4 translate-x-1/3 rounded-full bg-amber-100/30 blur-3xl -z-10 pointer-events-none"
+									aria-hidden
+								/>
+								<div
+									className="fixed bottom-0 left-0 h-[360px] w-[360px] -translate-x-1/3 translate-y-1/3 rounded-full bg-stone-200/35 blur-3xl -z-10 pointer-events-none"
+									aria-hidden
+								/>
 
 								<div className="relative flex flex-col min-h-screen w-full max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-5 xl:px-6">
 									<PublicNavbar />

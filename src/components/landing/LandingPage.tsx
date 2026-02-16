@@ -34,7 +34,10 @@ export default function LandingPage({ categories }: LandingPageProps) {
 
 	return (
 		<div className="flex min-h-0 w-full flex-1 overflow-hidden">
-			<LandingSidebar categories={categories} defaultCategoryId={DEFAULT_CATEGORY_ID} />
+			<LandingSidebar
+				categories={categories}
+				defaultCategoryId={DEFAULT_CATEGORY_ID}
+			/>
 			<main
 				id="main-scroll"
 				className="relative min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8"

@@ -41,10 +41,7 @@ const ProductFilter = () => {
 			role="search"
 			aria-label="Product search and filters"
 		>
-			<form
-				className="relative min-w-0 flex-1"
-				onSubmit={handleSubmit}
-			>
+			<form className="relative min-w-0 flex-1" onSubmit={handleSubmit}>
 				<label htmlFor="product-search" className="sr-only">
 					{t("searchPlaceholder")}
 				</label>

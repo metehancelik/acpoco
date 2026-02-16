@@ -35,8 +35,12 @@ export default function BackToTop() {
 		updateVisible();
 		const mainScroll = document.getElementById(MAIN_SCROLL_ID);
 		const contentScroll = document.getElementById(CONTENT_SCROLL_ID);
-		if (mainScroll) mainScroll.addEventListener("scroll", updateVisible, { passive: true });
-		if (contentScroll) contentScroll.addEventListener("scroll", updateVisible, { passive: true });
+		if (mainScroll)
+			mainScroll.addEventListener("scroll", updateVisible, { passive: true });
+		if (contentScroll)
+			contentScroll.addEventListener("scroll", updateVisible, {
+				passive: true,
+			});
 		window.addEventListener("scroll", updateVisible, { passive: true });
 		return () => {
 			const m = document.getElementById(MAIN_SCROLL_ID);

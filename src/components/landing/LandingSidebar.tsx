@@ -15,7 +15,10 @@ type Props = {
 	defaultCategoryId: string;
 };
 
-export default function LandingSidebar({ categories, defaultCategoryId }: Props) {
+export default function LandingSidebar({
+	categories,
+	defaultCategoryId,
+}: Props) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const tCommon = useTranslations("Common");
@@ -166,7 +169,10 @@ export default function LandingSidebar({ categories, defaultCategoryId }: Props)
 											aria-hidden
 										/>
 									)}
-									<div className="absolute inset-0 rounded-lg ring-inset ring-white/40" aria-hidden />
+									<div
+										className="absolute inset-0 rounded-lg ring-inset ring-white/40"
+										aria-hidden
+									/>
 								</div>
 								<span
 									className={`mt-1 block truncate px-0.5 text-[11px] font-semibold leading-tight transition-colors ${
