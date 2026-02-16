@@ -51,6 +51,7 @@
 		"discount": "indirim",
 		"inStock": "stokta",
 		"outOfStock": "Stok yok",
+		"lowStock": "az stok",
 		"description": "Açıklama",
 		"productInformation": "Ürün Bilgileri",
 		"vendor": "Satıcı",

@@ -50,6 +50,7 @@
 		"discount": "Rabatt",
 		"inStock": "auf Lager",
 		"outOfStock": "Nicht vorrätig",
+		"lowStock": "Wenig auf Lager",
 		"description": "Beschreibung",
 		"productInformation": "Produktinformationen",
 		"vendor": "Verkäufer",

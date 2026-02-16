@@ -51,6 +51,7 @@
 		"discount": "discount",
 		"inStock": "in stock",
 		"outOfStock": "Out of stock",
+		"lowStock": "low stock",
 		"description": "Description",
 		"productInformation": "Product Information",
 		"vendor": "Vendor",

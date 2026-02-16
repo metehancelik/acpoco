@@ -1,6 +1,5 @@
 "use client";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -20,8 +19,17 @@ type ProductWithShopify = IProduct & {
 type Props = {
 	product: ProductWithShopify;
 };
+
 const ProductCard: React.FC<Props> = ({ product }) => {
 	const variants = product.shopifyData?.variants || [];
+	// Match product detail page: use first variant (same as initialVariant fallback there)
+	const displayVariant = variants[0] ?? null;
+	const inStock = !!(
+		displayVariant?.availableForSale &&
+		(displayVariant?.inventoryQuantity ?? 0) > 0
+	);
+	const stockQuantity = displayVariant?.inventoryQuantity ?? 0;
+
 	const availableWithSku = variants.find(
 		(v) =>
 			v.availableForSale &&
@@ -36,7 +44,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 		"N/A";
 
 	const { getDiscountedPrice } = useDiscounts();
-	const t = useTranslations("Common");
+	const tProducts = useTranslations("Products");
 	const { finalPrice: discounted, discountPercent } = getDiscountedPrice(
 		product.price,
 		product.category?._id || (product.category as unknown as string),
@@ -49,58 +57,73 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 		: "";
 	const hasValidImage = imageSrc.length > 0;
 
+	const stockLabel = inStock ? tProducts("inStock") : tProducts("outOfStock");
+	const stockVariant = inStock ? "ok" : "out";
+	const isLowStock = inStock && stockQuantity <= 5;
+
 	return (
 		<div
 			key={product._id}
-			className="group relative flex min-w-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+			className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200/80 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-stone-300/80"
 		>
-			<Link href={`/product/${product._id}`} className="cursor-pointer">
+			<Link
+				href={`/product/${product._id}`}
+				className="cursor-pointer block focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-t-xl"
+			>
 				{hasValidImage ? (
 					<Image
 						alt={product.title}
 						src={imageSrc}
 						width={400}
 						height={400}
-						className="aspect-square w-full bg-gray-100 object-cover"
+						className="aspect-square w-full bg-stone-100 object-cover transition-opacity duration-200 group-hover:opacity-95"
 					/>
 				) : (
-					<div className="aspect-square w-full bg-gray-100" aria-hidden />
+					<div className="aspect-square w-full bg-stone-100" aria-hidden />
 				)}
 			</Link>
-			<div className="flex flex-col gap-1 p-3">
+			<div className="flex flex-col gap-2 p-4">
 				<Link
 					href={`/product/${product._id}`}
-					className="line-clamp-2 text-sm font-medium text-gray-900 cursor-pointer hover:text-gold transition-colors"
+					className="line-clamp-2 text-sm font-medium text-stone-900 cursor-pointer hover:text-gold transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-1 focus-visible:rounded"
 				>
 					{product.title}
 				</Link>
-				<p className="text-xs text-gray-500 truncate">SKU: {displaySku}</p>
-				<div className="flex flex-wrap items-center gap-1.5">
+				<p className="text-xs text-stone-500 truncate">SKU: {displaySku}</p>
+				<div className="flex flex-wrap items-center gap-2">
 					{showDiscount ? (
 						<>
-							<span className="text-sm font-semibold text-gray-900">
+							<span className="text-base font-semibold text-stone-900">
 								€{discounted}
 							</span>
-							<span className="text-xs text-gray-500 line-through">
+							<span className="text-sm text-stone-400 line-through">
 								€{basePrice}
 							</span>
-							<span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-800">
-								%{discountPercent}
+							<span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200/80">
+								−{discountPercent}%
 							</span>
 						</>
 					) : (
-						<span className="text-sm font-medium text-gray-900">
+						<span className="text-base font-semibold text-stone-900">
 							€{basePrice}
 						</span>
 					)}
 				</div>
-				<Link
-					href={`/product/${product._id}`}
-					className="mt-1 flex cursor-pointer items-center justify-center gap-1 rounded-md bg-slate-700 py-1.5 text-xs text-white transition-colors hover:bg-slate-600"
-				>
-					{t("view")}
-					<MagnifyingGlassIcon className="h-4 w-4" />
-				</Link>
+				<div className="flex items-center gap-2 pt-0.5">
+					<span
+						className={`text-xs font-medium ${
+							stockVariant === "out"
+								? "text-red-600"
+								: isLowStock
+									? "text-amber-600"
+									: "text-stone-500"
+						}`}
+					>
+						{stockVariant === "out"
+							? stockLabel
+							: `${stockQuantity} ${stockLabel}`}
+					</span>
+				</div>
 			</div>
 		</div>
 	);
