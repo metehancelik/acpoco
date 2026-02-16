@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -117,19 +118,10 @@ const FavoriteProductCard: React.FC<Props> = ({
 						peer-hover:border-sage-blue/50
 					`}
 					>
-						<svg
-							className={`w-3 h-3 text-white transition-all duration-200 ${isSelected ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={3}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M5 13l4 4L19 7"
-							/>
-						</svg>
+						<Check
+							className={`h-3 w-3 text-white stroke-3 transition-all duration-200 ${isSelected ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}
+							aria-hidden
+						/>
 					</div>
 				</label>
 			</div>

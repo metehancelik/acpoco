@@ -11,10 +11,12 @@ type Props = {
 const ProductList = ({ products, categories }: Props) => {
 	return (
 		<div className="bg-white">
-			<div className="mx-auto max-w-2xl px-4 lg:px-0 py-8 lg:py-16 lg:max-w-6xl">
+			<div className="mx-auto w-full max-w-6xl px-3 py-5 sm:px-4 sm:py-6 lg:px-6 lg:py-8">
 				<Categories categories={categories} />
-				<ProductFilter />
-				<div className="grid grid-cols-2 gap-x-2 gap-y-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-8">
+				<div className="mt-4 sm:mt-5">
+					<ProductFilter />
+				</div>
+				<div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{products?.map((product: IProduct) => (
 						<ProductCard product={product} key={product._id} />
 					))}

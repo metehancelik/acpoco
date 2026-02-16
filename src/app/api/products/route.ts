@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import dbConnect from "@/lib/db";
-import Product from "@/models/Product";
 import type { IProduct } from "@/models/Product";
+import Product from "@/models/Product";
 
 const ITEMS_PER_PAGE = 24;
 

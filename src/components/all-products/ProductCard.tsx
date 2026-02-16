@@ -78,14 +78,20 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 				<div className="flex flex-wrap items-center gap-1.5">
 					{showDiscount ? (
 						<>
-							<span className="text-sm font-semibold text-gray-900">€{discounted}</span>
-							<span className="text-xs text-gray-500 line-through">€{basePrice}</span>
+							<span className="text-sm font-semibold text-gray-900">
+								€{discounted}
+							</span>
+							<span className="text-xs text-gray-500 line-through">
+								€{basePrice}
+							</span>
 							<span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-green-100 text-green-800">
 								%{discountPercent}
 							</span>
 						</>
 					) : (
-						<span className="text-sm font-medium text-gray-900">€{basePrice}</span>
+						<span className="text-sm font-medium text-gray-900">
+							€{basePrice}
+						</span>
 					)}
 				</div>
 				<Link

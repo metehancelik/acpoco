@@ -19,6 +19,7 @@ import {
 	XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -214,10 +215,10 @@ export default function Sidebar() {
 				</div>
 			</Dialog>
 
-			{/* Static sidebar for desktop */}
-			<div className="hidden lg:fixed lg:top-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-20 bg-white shadow-md">
-				<div className="flex grow gap-y-5 cursor-default w-full max-w-6xl mx-auto h-full">
-					<div className="flex items-center gap-x-2 h-full">
+			{/* Static sidebar for desktop — arka plan full genişlik, içerik kenarlardan boşluklu */}
+			<div className="hidden lg:fixed lg:top-0 lg:left-0 lg:right-0 lg:z-50 lg:flex lg:flex-col lg:w-full lg:h-20 lg:bg-white lg:shadow-md lg:border-b lg:border-stone-200/80">
+				<div className="flex gap-x-8 cursor-default w-full h-full items-center px-6 sm:px-8 xl:px-10">
+					<div className="flex items-center gap-x-2 h-full shrink-0">
 						<Link href="/">
 							<Image
 								alt="ACPOCO"
@@ -227,10 +228,10 @@ export default function Sidebar() {
 							/>
 						</Link>
 					</div>
-					<nav className="flex items-center mx-auto">
-						<ul role="list" className="flex flex-1 gap-y-7">
+					<nav className="flex flex-1 min-w-0 items-center justify-center">
+						<ul role="list" className="flex flex-1 justify-center gap-y-7">
 							<li>
-								<ul role="list" className="flex -mx-2 space-x-2">
+								<ul role="list" className="flex -mx-2 space-x-2 items-center">
 									{session?.data?.user?.role === "ADMIN" && (
 										<li>
 											<Link
@@ -302,52 +303,30 @@ export default function Sidebar() {
 							</li>
 						</ul>
 					</nav>
-					{session?.data?.user && (
-						<button
-							type="button"
-							onClick={() => {
-								setIsModalOpen(true);
-							}}
-							className="flex items-center text-sm font-semibold"
-						>
-							{session?.data?.user.role !== "ADMIN" && (
+					{/* Sağ blok: Lang → Balance → Logout (ayar, hesap, çıkış) */}
+					<div className="flex items-center gap-x-3 shrink-0 pl-2 border-l border-stone-200">
+						<LocaleSwitcher />
+						{session?.data?.user && session?.data?.user.role !== "ADMIN" && (
+							<button
+								type="button"
+								onClick={() => setIsModalOpen(true)}
+								className="flex items-center text-sm font-semibold shrink-0"
+							>
 								<div className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-2 text-center text-white shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200">
 									{tWallet("balance")}: €{wallet?.data?.balance.toFixed(2)}
 								</div>
-							)}
-						</button>
-					)}
-					<div className="flex items-center gap-x-3 ml-2">
-						<LocaleSwitcher />
+							</button>
+						)}
 						{session?.data?.user ? (
 							<button
 								type="button"
 								onClick={handleLogout}
 								disabled={isLoggingOut}
-								className="flex items-center gap-2 rounded-xl bg-red-500 hover:bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200 disabled:opacity-50"
+								className="flex items-center gap-2 rounded-xl bg-red-500 hover:bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200 disabled:opacity-50 shrink-0"
 							>
 								{isLoggingOut ? (
 									<>
-										<svg
-											className="animate-spin h-4 w-4"
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-										>
-											<circle
-												className="opacity-25"
-												cx="12"
-												cy="12"
-												r="10"
-												stroke="currentColor"
-												strokeWidth="4"
-											/>
-											<path
-												className="opacity-75"
-												fill="currentColor"
-												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-											/>
-										</svg>
+										<Loader2 className="h-4 w-4 animate-spin" aria-hidden />
 										{tCommon("loggingOut")}
 									</>
 								) : (
@@ -361,7 +340,7 @@ export default function Sidebar() {
 							<button
 								type="button"
 								onClick={() => setIsLoginModalOpen(true)}
-								className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-gold/30 hover:shadow-xl hover:shadow-gold/40 transition-all duration-200"
+								className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-gold to-amber-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-gold/30 hover:shadow-xl hover:shadow-gold/40 transition-all duration-200 shrink-0"
 							>
 								<UserCircleIcon className="h-5 w-5" />
 								{tCommon("login")}
@@ -376,15 +355,17 @@ export default function Sidebar() {
 				</div>
 			</div>
 
-			<div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gradient-to-r from-gold to-amber-500 px-4 py-4 shadow-lg sm:px-6 lg:hidden">
-				<button
-					type="button"
-					onClick={() => setSidebarOpen(true)}
-					className="-m-2.5 p-2.5 text-white lg:hidden hover:bg-white/10 rounded-xl transition-colors"
-				>
-					<span className="sr-only">{tCommon("openSidebar")}</span>
-					<Bars3Icon aria-hidden="true" className="h-6 w-6" />
-				</button>
+			<div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gradient-to-r from-gold to-amber-500 py-4 shadow-lg lg:hidden w-full">
+				<div className="flex items-center gap-x-6 w-full px-5 sm:px-8">
+					<button
+						type="button"
+						onClick={() => setSidebarOpen(true)}
+						className="-m-2.5 p-2.5 text-white lg:hidden hover:bg-white/10 rounded-xl transition-colors"
+					>
+						<span className="sr-only">{tCommon("openSidebar")}</span>
+						<Bars3Icon aria-hidden="true" className="h-6 w-6" />
+					</button>
+				</div>
 			</div>
 
 			{/* Login Modal */}

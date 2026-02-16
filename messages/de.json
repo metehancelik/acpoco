@@ -8,7 +8,8 @@
 	},
 	"AllProducts": {
 		"title": "Alle Produkte",
-		"description": "Hier finden Sie alle unsere Produkte"
+		"description": "Hier finden Sie alle unsere Produkte",
+		"noProductsFound": "Keine Produkte gefunden."
 	},
 	"Common": {
 		"login": "Anmelden",
@@ -39,7 +40,7 @@
 		"pleaseWait": "Bitte warten..."
 	},
 	"Products": {
-		"searchPlaceholder": "Suchen Sie nach einem Produkt...",
+		"searchPlaceholder": "Produkt suchen...",
 		"findProduct": "Produkt finden",
 		"addToCart": "In den Warenkorb",
 		"adding": "Hinzufügen...",

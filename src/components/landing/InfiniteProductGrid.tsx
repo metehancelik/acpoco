@@ -1,6 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -49,9 +50,7 @@ export default function InfiniteProductGrid({
 	} = useInfiniteQuery({
 		queryKey: ["products", "infinite", category, query],
 		queryFn: async ({ pageParam }) => {
-			const res = await fetch(
-				buildProductsUrl(pageParam, category, query),
-			);
+			const res = await fetch(buildProductsUrl(pageParam, category, query));
 			if (!res.ok) throw new Error("Failed to fetch products");
 			return res.json() as Promise<ProductsResponse>;
 		},
@@ -85,13 +84,12 @@ export default function InfiniteProductGrid({
 		return () => observer.disconnect();
 	}, [observeSentinel]);
 
-	const products =
-		data?.pages.flatMap((p) => p.products) ?? [];
+	const products = data?.pages.flatMap((p) => p.products) ?? [];
 
 	if (isLoading) {
 		return (
-			<div className="py-4">
-				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+			<div className="py-3 lg:py-4">
+				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{Array.from({ length: 8 }).map((_, i) => (
 						<div
 							key={i}
@@ -121,8 +119,8 @@ export default function InfiniteProductGrid({
 
 	return (
 		<>
-			<div className="py-4">
-				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5">
+			<div className="py-3 lg:py-4">
+				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{products.map((product: IProduct) => (
 						<ProductCard product={product} key={product._id} />
 					))}
@@ -130,32 +128,12 @@ export default function InfiniteProductGrid({
 			</div>
 			<div
 				ref={sentinelRef}
-				className="flex min-h-[120px] items-center justify-center py-8"
+				className="flex min-h-[80px] items-center justify-center py-5"
 				aria-hidden
 			>
 				{isFetchingNextPage && (
 					<div className="flex items-center gap-2 text-gray-500">
-						<svg
-							className="h-5 w-5 animate-spin"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							aria-hidden
-						>
-							<circle
-								className="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								strokeWidth="4"
-							/>
-							<path
-								className="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							/>
-						</svg>
+						<Loader2 className="h-5 w-5 animate-spin" aria-hidden />
 						<span className="text-sm">{tCommon("loading")}</span>
 					</div>
 				)}

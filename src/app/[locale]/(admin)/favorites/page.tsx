@@ -3,6 +3,7 @@
 import { HeartIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -131,24 +132,15 @@ export default function FavoritesPage() {
 									group-hover:border-sage-blue/50
 								"
 								>
-									<svg
-										className={`w-3.5 h-3.5 text-white transition-all duration-200 ${
+									<Check
+										className={`h-3.5 w-3.5 text-white transition-all duration-200 stroke-3 ${
 											favorites?.length > 0 &&
 											selectedItemsIds.length === favorites.length
 												? "opacity-100 scale-100"
 												: "opacity-0 scale-50"
 										}`}
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-										strokeWidth={3}
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
+										aria-hidden
+									/>
 								</div>
 							</div>
 							<span className="font-medium text-gray-700 group-hover:text-gray-900 transition-colors">

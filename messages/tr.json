@@ -8,7 +8,8 @@
 	},
 	"AllProducts": {
 		"title": "Tüm ürünler",
-		"description": "Tüm ürünlerimizi burada bulabilirsiniz"
+		"description": "Tüm ürünlerimizi burada bulabilirsiniz",
+		"noProductsFound": "Ürün bulunamadı."
 	},
 	"Common": {
 		"login": "Giriş Yap",
@@ -39,7 +40,7 @@
 		"pleaseWait": "Bekleyiniz..."
 	},
 	"Products": {
-		"searchPlaceholder": "Aradığınız ürünü yazınız...",
+		"searchPlaceholder": "Ürün ara...",
 		"findProduct": "Ürün Bul",
 		"addToCart": "Sepete Ekle",
 		"adding": "Ekleniyor...",

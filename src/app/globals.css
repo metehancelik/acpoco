@@ -90,9 +90,24 @@
 		background-color: #007b40;
 		border-radius: 10px;
 	}
+	/* Hide native search clear so we use only our custom clear button (which also updates URL) */
+	.hide-search-cancel::-webkit-search-cancel-button {
+		-webkit-appearance: none;
+		appearance: none;
+	}
+	.hide-search-cancel::-webkit-search-decoration {
+		-webkit-appearance: none;
+	}
 
 	body {
 		font-family: Arial, Helvetica, sans-serif;
+	}
+	/* Public landing: e-commerce design system (Rubik + Nunito Sans) */
+	.font-sans-landing {
+		font-family: var(--font-nunito-sans), ui-sans-serif, system-ui, sans-serif;
+	}
+	.font-display-landing {
+		font-family: var(--font-rubik), ui-sans-serif, system-ui, sans-serif;
 	}
 	.react-datepicker-wrapper {
 		width: 100%;

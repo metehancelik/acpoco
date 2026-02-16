@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
+/** URL-safe slug from category name (e.g. "Running Shoes" → "running-shoes") */
+export function slugify(name: string): string {
+	return name
+		.trim()
+		.toLowerCase()
+		.replace(/\s+/g, "-")
+		.replace(/[^a-z0-9-]/g, "");
+}
+
 export function getWarehouseLocation(warehouse: string) {
 	switch (warehouse) {
 		case "US":
