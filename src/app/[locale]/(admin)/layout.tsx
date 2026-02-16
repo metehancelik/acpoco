@@ -56,7 +56,7 @@ export default async function RootLayout({
 					{/* Fixed-height area below navbar (lg); scroll lives inside children (products column only) */}
 					<div
 						id="content-scroll"
-						className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-4 pb-6 px-4 sm:px-6 lg:mt-20 lg:h-[calc(100vh-5rem)] lg:px-0 lg:pt-0 lg:pb-0"
+						className="flex min-h-0 flex-1 flex-col overflow-y-auto pt-4 pb-6 px-2 sm:px-6 lg:mt-20 lg:h-[calc(100vh-5rem)] lg:px-0 lg:pt-0 lg:pb-0"
 					>
 						{children}
 					</div>

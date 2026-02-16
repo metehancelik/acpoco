@@ -540,13 +540,20 @@ const SellerOrdersTable: React.FC<Props> = ({
 												>
 													{/* Product Image */}
 													<div className="relative self-stretch mr-1">
-														<Image
-															src={normalizeImageSrc(item.imageUrl!)}
-															alt={item.sku}
-															width={90}
-															height={120}
-															className="w-[90px] h-full min-h-[70px] object-cover rounded-lg border border-slate-200"
-														/>
+														{item.imageUrl ? (
+															<Image
+																src={normalizeImageSrc(item.imageUrl)}
+																alt={item.sku}
+																width={90}
+																height={120}
+																className="w-[90px] h-full min-h-[70px] object-cover rounded-lg border border-slate-200"
+																unoptimized
+															/>
+														) : (
+															<div className="w-[90px] min-h-[70px] rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center text-[10px] text-slate-400">
+																—
+															</div>
+														)}
 														<span className="absolute -bottom-1 -right-1 bg-slate-800 text-white text-[9px] font-bold px-1 rounded">
 															x{item.quantity}
 														</span>
@@ -932,6 +939,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 																		height={52}
 																		className="w-13 h-13 rounded cursor-pointer border border-slate-200 object-cover hover:border-primary transition-colors"
 																		alt="design"
+																		unoptimized
 																	/>
 																	<Button
 																		variant="destructive"

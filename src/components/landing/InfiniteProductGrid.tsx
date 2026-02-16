@@ -89,7 +89,7 @@ export default function InfiniteProductGrid({
 	if (isLoading) {
 		return (
 			<div className="py-3 lg:py-4">
-				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
+				<div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{Array.from({ length: 8 }).map((_, i) => (
 						<div
 							key={i}
@@ -120,7 +120,7 @@ export default function InfiniteProductGrid({
 	return (
 		<>
 			<div className="py-3 lg:py-4">
-				<div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
+				<div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{products.map((product: IProduct) => (
 						<ProductCard product={product} key={product._id} />
 					))}

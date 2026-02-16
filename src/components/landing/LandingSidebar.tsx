@@ -66,9 +66,9 @@ export default function LandingSidebar({
 	return (
 		<aside
 			aria-label="Search and filters"
-			className="flex h-full w-full flex-col border-r border-stone-200/60 bg-white/90 backdrop-blur-xl lg:h-full lg:w-72 lg:overflow-y-auto lg:rounded-2xl lg:border-0 lg:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(255,255,255,0.6)_inset] xl:w-72"
+			className="flex w-full min-w-0 shrink-0 flex-col border-b border-stone-200/60 bg-white/90 backdrop-blur-xl lg:h-full lg:w-72 lg:border-b-0 lg:border-r lg:overflow-y-auto lg:rounded-2xl lg:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_8px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(255,255,255,0.6)_inset] xl:w-72"
 		>
-			<div className="flex flex-col gap-4 p-4 sm:p-5">
+			<div className="flex flex-col gap-4 p-2 sm:p-5">
 				<form onSubmit={handleSearch} className="relative" role="search">
 					<label htmlFor="sidebar-search" className="sr-only">
 						{tProducts("searchPlaceholder")}
@@ -123,7 +123,7 @@ export default function LandingSidebar({
 							</button>
 						)}
 					</div>
-					<div className="grid grid-cols-4 gap-2 lg:grid-cols-2 lg:gap-2.5">
+					<div className="grid min-w-0 grid-cols-4 gap-2 lg:grid-cols-2 lg:gap-2.5">
 						<button
 							type="button"
 							onClick={() => handleCategoryClick(null)}

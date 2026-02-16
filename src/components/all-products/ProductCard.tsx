@@ -52,7 +52,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 	return (
 		<div
 			key={product._id}
-			className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+			className="group relative flex min-w-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
 		>
 			<Link href={`/product/${product._id}`} className="cursor-pointer">
 				{hasValidImage ? (

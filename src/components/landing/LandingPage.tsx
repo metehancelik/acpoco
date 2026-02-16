@@ -33,14 +33,14 @@ export default function LandingPage({ categories }: LandingPageProps) {
 	const query = searchParams?.get("query") ?? null;
 
 	return (
-		<div className="flex min-h-0 w-full flex-1 overflow-hidden">
+		<div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto lg:flex-row lg:overflow-hidden">
 			<LandingSidebar
 				categories={categories}
 				defaultCategoryId={DEFAULT_CATEGORY_ID}
 			/>
 			<main
 				id="main-scroll"
-				className="relative min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8"
+				className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-0 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8"
 			>
 				<section aria-label="Product list" className="space-y-0">
 					<InfiniteProductGrid category={categoryId} query={query} />
