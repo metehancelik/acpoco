@@ -99,6 +99,21 @@
 		-webkit-appearance: none;
 	}
 
+	/* Landing sidebar: thin scrollbar with gold accent */
+	.landing-sidebar::-webkit-scrollbar {
+		width: 6px;
+	}
+	.landing-sidebar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.landing-sidebar::-webkit-scrollbar-thumb {
+		background: rgba(120, 113, 108, 0.35);
+		border-radius: 9999px;
+	}
+	.landing-sidebar::-webkit-scrollbar-thumb:hover {
+		background: var(--color-gold);
+	}
+
 	body {
 		font-family: Arial, Helvetica, sans-serif;
 	}
