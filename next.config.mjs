@@ -6,6 +6,8 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
 	output: "standalone",
 	images: {
+		loader: "custom",
+		loaderFile: "./imageLoader.mjs",
 		remotePatterns: [
 			{
 				protocol: "https",
@@ -14,6 +16,7 @@ const nextConfig = {
 			{
 				protocol: "https",
 				hostname: "cdn.shopify.com",
+				pathname: "/**",
 			},
 			{
 				protocol: "https",
