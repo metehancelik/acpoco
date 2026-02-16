@@ -163,320 +163,340 @@ const BillingAddress = () => {
 
 	//
 
+	const inputClass =
+		"w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground leading-relaxed transition-colors duration-200 placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20";
+	const labelClass = "block text-sm font-medium text-foreground mb-0.5";
+	const errorClass = "text-destructive text-xs mt-0.5";
+
 	return (
 		<form
-			className="grid grid-cols-12 gap-3 text-sm"
+			className="flex h-full min-h-0 flex-col text-sm leading-relaxed"
 			onSubmit={handleSubmit(onSubmit)}
 		>
-			<Controller
-				control={control}
-				name="salutation"
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("salutation")}</label>
-						<select
-							{...field}
-							id="salutation"
-							name="salutation"
-							className="w-full p-2 border border-gray-300 rounded-md text-sm bg-white"
-						>
-							<option value="">{t("select")}</option>
-							<option value="Mr">{t("mr")}</option>
-							<option value="Ms">{t("ms")}</option>
-							<option value="Other">{t("other")}</option>
-						</select>
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="title"
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("title")}</label>
-						<input
-							{...field}
-							type="text"
-							id="title"
-							name="title"
-							placeholder={t("invoiceTitle")}
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="firstName"
-				rules={{
-					validate: (v) =>
-						isCompany
-							? true
-							: Boolean((v || "").trim()) || t("firstNameRequired"),
-				}}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("firstName")}</label>
-						<input
-							{...field}
-							placeholder={t("enterFirstName")}
-							type="text"
-							id="firstName"
-							name="firstName"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.firstName && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.firstName.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="lastName"
-				rules={{
-					validate: (v) =>
-						isCompany
-							? true
-							: Boolean((v || "").trim()) || t("lastNameRequired"),
-				}}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("lastName")}</label>
-						<input
-							{...field}
-							type="text"
-							placeholder={t("enterLastName")}
-							id="lastName"
-							name="lastName"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.lastName && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.lastName.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="street"
-				rules={{ required: t("streetRequired") }}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("street")}</label>
-						<input
-							{...field}
-							type="text"
-							placeholder={t("streetName")}
-							id="street"
-							name="street"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.street && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.street.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="houseNumber"
-				rules={{ required: t("houseNumberRequired") }}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("houseNumber")}</label>
-						<input
-							{...field}
-							type="text"
-							id="houseNumber"
-							placeholder={t("houseBuildingNo")}
-							name="houseNumber"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.houseNumber && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.houseNumber.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="addressLine2"
-				render={({ field }) => (
-					<div className="col-span-12">
-						<label htmlFor="">{t("addressLine2")}</label>
-						<input
-							{...field}
-							type="text"
-							id="addressLine2"
-							placeholder={t("addressLine2Placeholder")}
-							name="addressLine2"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="city"
-				rules={{ required: t("cityRequired") }}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("city")}</label>
-						<input
-							{...field}
-							type="text"
-							id="city"
-							placeholder={t("enterCity")}
-							name="city"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.city && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.city.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="country"
-				rules={{ required: t("countryRequired") }}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("country")}</label>
-						<input
-							{...field}
-							type="text"
-							id="country"
-							placeholder={t("enterCountry")}
-							name="country"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.country && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.country.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="zipCode"
-				rules={{
-					required: t("zipCodeRequired"),
-					pattern: { value: /^[0-9]{5}$/, message: t("zipCode5Digits") },
-				}}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("zipCode")}</label>
-						<input
-							{...field}
-							type="text"
-							id="zipCode"
-							placeholder={t("enterZipCode")}
-							name="zipCode"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.zipCode && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.zipCode.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="gsmNumber"
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("phone")}</label>
-						<input
-							{...field}
-							type="text"
-							id="gsmNumber"
-							placeholder={t("gsmNumber")}
-							name="gsmNumber"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="companyName"
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("companyName")}</label>
-						<input
-							{...field}
-							type="text"
-							id="companyName"
-							placeholder={t("companyNamePlaceholder")}
-							name="companyName"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-					</div>
-				)}
-			/>
-			<Controller
-				control={control}
-				name="vatNumber"
-				rules={{
-					validate: (v) => {
-						if (!isCompany) return true;
-						const ok = /^DE[0-9]{9}$/.test((v || "").toUpperCase());
-						return ok || t("vatNumberInvalid");
-					},
-				}}
-				render={({ field }) => (
-					<div className="col-span-6">
-						<label htmlFor="">{t("vatNumber")}</label>
-						<input
-							{...field}
-							type="text"
-							id="vatNumber"
-							placeholder={t("vatNumberPlaceholder")}
-							name="vatNumber"
-							value={field.value}
-							className="w-full p-2 border border-gray-300 rounded-md text-sm"
-						/>
-						{errors.vatNumber && (
-							<p className="text-red-600 text-xs mt-1">
-								{String(errors.vatNumber.message)}
-							</p>
-						)}
-					</div>
-				)}
-			/>
-			<div className="col-span-6 flex items-end">
+			<div className="grid flex-1 grid-cols-12 gap-3 content-start">
+				<Controller
+					control={control}
+					name="salutation"
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="salutation" className={labelClass}>
+								{t("salutation")}
+							</label>
+							<select
+								{...field}
+								id="salutation"
+								name="salutation"
+								className={inputClass}
+							>
+								<option value="">{t("select")}</option>
+								<option value="Mr">{t("mr")}</option>
+								<option value="Ms">{t("ms")}</option>
+								<option value="Other">{t("other")}</option>
+							</select>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="title"
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="title" className={labelClass}>
+								{t("title")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="title"
+								name="title"
+								placeholder={t("invoiceTitle")}
+								value={field.value}
+								className={inputClass}
+							/>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="firstName"
+					rules={{
+						validate: (v) =>
+							isCompany
+								? true
+								: Boolean((v || "").trim()) || t("firstNameRequired"),
+					}}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="firstName" className={labelClass}>
+								{t("firstName")}
+							</label>
+							<input
+								{...field}
+								placeholder={t("enterFirstName")}
+								type="text"
+								id="firstName"
+								name="firstName"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.firstName && (
+								<p className={errorClass}>{String(errors.firstName.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="lastName"
+					rules={{
+						validate: (v) =>
+							isCompany
+								? true
+								: Boolean((v || "").trim()) || t("lastNameRequired"),
+					}}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="lastName" className={labelClass}>
+								{t("lastName")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								placeholder={t("enterLastName")}
+								id="lastName"
+								name="lastName"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.lastName && (
+								<p className={errorClass}>{String(errors.lastName.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="street"
+					rules={{ required: t("streetRequired") }}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="street" className={labelClass}>
+								{t("street")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								placeholder={t("streetName")}
+								id="street"
+								name="street"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.street && (
+								<p className={errorClass}>{String(errors.street.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="houseNumber"
+					rules={{ required: t("houseNumberRequired") }}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="houseNumber" className={labelClass}>
+								{t("houseNumber")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="houseNumber"
+								placeholder={t("houseBuildingNo")}
+								name="houseNumber"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.houseNumber && (
+								<p className={errorClass}>
+									{String(errors.houseNumber.message)}
+								</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="addressLine2"
+					render={({ field }) => (
+						<div className="col-span-12 space-y-1">
+							<label htmlFor="addressLine2" className={labelClass}>
+								{t("addressLine2")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="addressLine2"
+								placeholder={t("addressLine2Placeholder")}
+								name="addressLine2"
+								value={field.value}
+								className={inputClass}
+							/>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="city"
+					rules={{ required: t("cityRequired") }}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="city" className={labelClass}>
+								{t("city")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="city"
+								placeholder={t("enterCity")}
+								name="city"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.city && (
+								<p className={errorClass}>{String(errors.city.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="country"
+					rules={{ required: t("countryRequired") }}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="country" className={labelClass}>
+								{t("country")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="country"
+								placeholder={t("enterCountry")}
+								name="country"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.country && (
+								<p className={errorClass}>{String(errors.country.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="zipCode"
+					rules={{
+						required: t("zipCodeRequired"),
+						pattern: { value: /^[0-9]{5}$/, message: t("zipCode5Digits") },
+					}}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="zipCode" className={labelClass}>
+								{t("zipCode")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="zipCode"
+								placeholder={t("enterZipCode")}
+								name="zipCode"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.zipCode && (
+								<p className={errorClass}>{String(errors.zipCode.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="gsmNumber"
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="gsmNumber" className={labelClass}>
+								{t("phone")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="gsmNumber"
+								placeholder={t("gsmNumber")}
+								name="gsmNumber"
+								value={field.value}
+								className={inputClass}
+							/>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="companyName"
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="companyName" className={labelClass}>
+								{t("companyName")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="companyName"
+								placeholder={t("companyNamePlaceholder")}
+								name="companyName"
+								value={field.value}
+								className={inputClass}
+							/>
+						</div>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="vatNumber"
+					rules={{
+						validate: (v) => {
+							if (!isCompany) return true;
+							const ok = /^DE[0-9]{9}$/.test((v || "").toUpperCase());
+							return ok || t("vatNumberInvalid");
+						},
+					}}
+					render={({ field }) => (
+						<div className="col-span-6 space-y-1">
+							<label htmlFor="vatNumber" className={labelClass}>
+								{t("vatNumber")}
+							</label>
+							<input
+								{...field}
+								type="text"
+								id="vatNumber"
+								placeholder={t("vatNumberPlaceholder")}
+								name="vatNumber"
+								value={field.value}
+								className={inputClass}
+							/>
+							{errors.vatNumber && (
+								<p className={errorClass}>{String(errors.vatNumber.message)}</p>
+							)}
+						</div>
+					)}
+				/>
+			</div>
+			<div className="mt-auto pt-3">
 				<button
+					type="submit"
 					disabled={isFetching || isUpdating}
-					className="text-primary font-bold w-full px-4 py-2 text-sm flex items-center justify-center space-x-3 border border-primary rounded-md bg-white hover:bg-primary hover:text-white"
+					className="cursor-pointer w-full rounded-lg border border-primary bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60"
 				>
-					<p>{isUpdating ? tCommon("pleaseWait") : tCommon("save")}</p>
+					{isUpdating ? tCommon("pleaseWait") : tCommon("save")}
 				</button>
 			</div>
 		</form>
