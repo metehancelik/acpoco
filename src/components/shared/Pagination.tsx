@@ -8,7 +8,10 @@ type PaginationProps = {
 	variant?: "light" | "dark";
 };
 
-const Pagination: React.FC<PaginationProps> = ({ totalPages, variant = "light" }) => {
+const Pagination: React.FC<PaginationProps> = ({
+	totalPages,
+	variant = "light",
+}) => {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const currentPage = Math.min(
@@ -49,16 +52,12 @@ const Pagination: React.FC<PaginationProps> = ({ totalPages, variant = "light" }
 					{currentPage}
 				</span>
 				<span
-					className={`text-xs ${
-						isDark ? "text-slate-400" : "text-slate-500"
-					}`}
+					className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}
 				>
 					/
 				</span>
 				<span
-					className={`text-sm ${
-						isDark ? "text-slate-300" : "text-slate-600"
-					}`}
+					className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}
 				>
 					{totalPages}
 				</span>

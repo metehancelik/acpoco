@@ -21,13 +21,13 @@ export async function GET(_req: Request) {
 		}
 
 		// Fetch ALL active discounts that COULD apply to this user
-		// (User-level, Category-level, or Variant-level)
+		// (User-level, Category-level, or Product-level)
 		const discounts = await DiscountModel.find({
 			isActive: true,
 			$or: [
 				{ "scope.userId": user._id },
 				{ "scope.type": "category" },
-				{ "scope.type": "variant" },
+				{ "scope.type": "product" },
 			],
 		});
 

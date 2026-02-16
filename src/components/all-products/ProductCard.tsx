@@ -8,6 +8,7 @@ import type React from "react";
 
 import { useDiscounts } from "@/hooks/useDiscounts";
 import type { IProduct } from "@/models/Product";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 import type { ShopifyVariant } from "@/utils/shopify";
 
 type ProductWithShopify = IProduct & {
@@ -39,22 +40,34 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 	const { finalPrice: discounted, discountPercent } = getDiscountedPrice(
 		product.price,
 		product.category?._id || (product.category as unknown as string),
+		product._id,
 	);
 	const showDiscount = discountPercent > 0;
 	const basePrice = product.price;
+	const imageSrc = product.images?.[0]
+		? normalizeImageSrc(product.images[0])
+		: "";
+	const hasValidImage = imageSrc.length > 0;
 
 	return (
 		<div
 			key={product._id}
 			className="group relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md"
 		>
-			<Image
-				alt={product.images[0]}
-				src={product.images[0]}
-				width={400}
-				height={400}
-				className="aspect-square w-full bg-gray-200 object-cover group-hover:opacity-75 sm:aspect-square"
-			/>
+			{hasValidImage ? (
+				<Image
+					alt={product.title}
+					src={imageSrc}
+					width={400}
+					height={400}
+					className="aspect-square w-full bg-gray-200 object-cover group-hover:opacity-75 sm:aspect-square"
+				/>
+			) : (
+				<div
+					className="aspect-square w-full bg-gray-200 sm:aspect-square"
+					aria-hidden
+				/>
+			)}
 			<div className="flex flex-1 flex-col space-y-2 p-4">
 				<Link href={`/product/${product._id}`}>{product.title}</Link>
 

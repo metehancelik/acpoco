@@ -37,7 +37,9 @@ interface OrderWithFees {
 }
 
 function orderHasUploadedFile(order: OrderWithFees): boolean {
-	return Boolean(order.labelUrl) || Boolean(order.items?.some((i) => i.designUrl));
+	return (
+		Boolean(order.labelUrl) || Boolean(order.items?.some((i) => i.designUrl))
+	);
 }
 
 // Helper function to deduct shipping fees from users' wallets
@@ -84,7 +86,9 @@ async function deductShippingFees(
 	for (const [userId, { totalFees, orderIds }] of userEntries) {
 		const userWallet = await Wallet.findOne({ userId });
 		if (!userWallet) {
-			console.warn(`Wallet not found for user ${userId}, skipping fee deduction`);
+			console.warn(
+				`Wallet not found for user ${userId}, skipping fee deduction`,
+			);
 			continue;
 		}
 

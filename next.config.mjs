@@ -8,36 +8,47 @@ const nextConfig = {
 	images: {
 		remotePatterns: [
 			{
+				protocol: "https",
 				hostname: "sage-demo.vercel.app",
 			},
 			{
+				protocol: "https",
 				hostname: "cdn.shopify.com",
 			},
 			{
+				protocol: "https",
 				hostname: "i.etsystatic.com",
 			},
 			{
+				protocol: "https",
 				hostname: "tailwindui.com",
 			},
 			{
+				protocol: "https",
 				hostname: "www.angoragumus.com",
 			},
 			{
+				protocol: "https",
 				hostname: "i.ibb.co",
 			},
 			{
+				protocol: "https",
 				hostname: "m.media-amazon.com",
 			},
 			{
+				protocol: "https",
 				hostname: "drive.google.com",
 			},
 			{
+				protocol: "https",
 				hostname: "lh3.googleusercontent.com",
 			},
 			{
+				protocol: "https",
 				hostname: "shop.acpoco.de",
 			},
 			{
+				protocol: "https",
 				hostname: "i.ebayimg.com",
 			},
 		],

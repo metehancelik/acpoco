@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import { DiscountRequestModel } from "@/models/DiscountRequest";
+import "@/models/ProductVariant";
+
 import User from "@/models/User";
 
 export async function POST(req: Request) {
@@ -75,7 +77,11 @@ export async function GET(req: Request) {
 			}
 			const requests = await DiscountRequestModel.find()
 				.populate("userId", "name surname email")
-				.populate("items.productId", "title images")
+				.populate({
+					path: "items.productId",
+					select: "title images category",
+					populate: { path: "category", select: "name" },
+				})
 				.populate("items.variantId", "childSku attributes price")
 				.sort({ createdAt: -1 });
 			return NextResponse.json(requests);

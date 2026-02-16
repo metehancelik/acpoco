@@ -34,7 +34,9 @@ export function buildPublicObjectUrl(key: string): string {
 
 	const base = getEnv("UPLOAD_PUBLIC_BASE_URL");
 	const prefix = getUploadsUrlPrefix();
-	return base ? `${normalizeBaseUrl(base)}${prefix}${cleanKey}` : `${prefix}${cleanKey}`;
+	return base
+		? `${normalizeBaseUrl(base)}${prefix}${cleanKey}`
+		: `${prefix}${cleanKey}`;
 }
 
 export function extractKeyFromPublicObjectUrl(publicUrl: string): string {
@@ -69,7 +71,10 @@ export async function putObject(params: {
 	const filePath = path.join(uploadDir, cleanKey);
 	const resolvedBase = path.resolve(uploadDir);
 	const resolvedTarget = path.resolve(filePath);
-	if (!resolvedTarget.startsWith(resolvedBase + path.sep) && resolvedTarget !== resolvedBase) {
+	if (
+		!resolvedTarget.startsWith(resolvedBase + path.sep) &&
+		resolvedTarget !== resolvedBase
+	) {
 		throw new Error("Invalid upload path");
 	}
 
@@ -91,4 +96,3 @@ export async function deleteByPublicUrl(publicUrl: string): Promise<void> {
 		// ignore missing files
 	}
 }
-

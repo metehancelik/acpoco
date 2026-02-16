@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import type { IDiscount } from "@/models/Discount";
 import type { ICategory } from "@/models/Product";
 import httpClient from "@/utils/httpClient";
+import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 
 interface IDiscountPopulated extends Omit<IDiscount, "scope"> {
 	scope: {
@@ -412,19 +413,24 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 													}`}
 												>
 													{/* Product Image */}
-													<div className="relative w-12 h-12 rounded-md overflow-hidden flex-shrink-0 bg-gray-100">
-														{product.images?.[0] ? (
-															<Image
-																src={product.images[0]}
-																alt={product.title}
-																fill
-																className="object-cover"
-															/>
-														) : (
-															<div className="w-full h-full flex items-center justify-center text-gray-400">
-																<Package size={20} />
-															</div>
-														)}
+													<div className="relative w-12 h-12 rounded-md overflow-hidden shrink-0 bg-gray-100">
+														{(() => {
+															const imageSrc = product.images?.[0]
+																? normalizeImageSrc(product.images[0])
+																: "";
+															return imageSrc ? (
+																<Image
+																	src={imageSrc}
+																	alt={product.title}
+																	fill
+																	className="object-cover"
+																/>
+															) : (
+																<div className="w-full h-full flex items-center justify-center text-gray-400">
+																	<Package size={20} />
+																</div>
+															);
+														})()}
 													</div>
 
 													{/* Product Info */}

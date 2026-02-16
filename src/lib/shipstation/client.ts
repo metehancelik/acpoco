@@ -174,14 +174,15 @@ async function processOrderAutoMatchAndPayment(
 					item.matchId = matchedVariant._id;
 					const basePrice = matchedVariant.price;
 
-					// Calculate discounted price
+					// Calculate discounted price (scope.productId is Product _id, not variant)
 					const categoryId =
 						matchedVariant.productId?.category?.toString() || "";
+					const productId = matchedVariant.productId?._id?.toString() || "";
 					const { finalPrice } = calculateDiscountedPrice(
 						basePrice,
 						user._id.toString(),
 						categoryId,
-						matchedVariant._id.toString(),
+						productId,
 						activeDiscounts,
 					);
 
@@ -422,14 +423,15 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 							matchId = matchedVariant._id;
 							const basePrice = matchedVariant.price;
 
-							// Calculate discounted price
+							// Calculate discounted price (scope.productId is Product _id, not variant)
 							const categoryId =
 								matchedVariant.productId?.category?.toString() || "";
+							const productId = matchedVariant.productId?._id?.toString() || "";
 							const { finalPrice } = calculateDiscountedPrice(
 								basePrice,
 								user._id.toString(),
 								categoryId,
-								matchedVariant._id.toString(),
+								productId,
 								activeDiscounts,
 							);
 

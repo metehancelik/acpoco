@@ -92,7 +92,7 @@ const ShopifyProductClient = ({
 			selectedVariant ? Number(selectedVariant.price) : 0,
 			(product as unknown as { category: { _id: string } }).category?._id ||
 				(product as unknown as { category: string }).category,
-			selectedVariant?.id,
+			product.id,
 		);
 	const showDiscount = discountPercent > 0;
 

@@ -44,7 +44,8 @@ const WarehouseModal: React.FC<Props> = ({
 
 	// If an order has an uploaded file (label or user design), fees cannot be edited.
 	const hasUploadedFile =
-		Boolean(order?.labelUrl) || order?.items?.some((item) => Boolean(item.designUrl));
+		Boolean(order?.labelUrl) ||
+		order?.items?.some((item) => Boolean(item.designUrl));
 	const form = useForm<FormValues>({
 		defaultValues: {
 			trackingNumber: order?.warehouseTrackingNumber || "",
@@ -74,8 +75,12 @@ const WarehouseModal: React.FC<Props> = ({
 			shippingService: data.shippingService,
 		};
 		if (!hasUploadedFile) {
-			payload.warehousePrice = data.warehousePrice ? Number(data.warehousePrice) : null;
-			payload.shippingAmount = data.shippingAmount ? Number(data.shippingAmount) : null;
+			payload.warehousePrice = data.warehousePrice
+				? Number(data.warehousePrice)
+				: null;
+			payload.shippingAmount = data.shippingAmount
+				? Number(data.shippingAmount)
+				: null;
 		}
 		await httpClient.patch(`/orders/shipping/${order._id}`, payload);
 	};

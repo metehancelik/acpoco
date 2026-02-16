@@ -8,7 +8,7 @@ export interface DiscountResult {
 
 /**
  * Calculate the discounted price for a product.
- * Priority: product > category > user (highest specificity wins)
+ * Highest percentage wins (among all applicable user/category/product discounts).
  *
  * @param basePrice - Original price of the product
  * @param userId - ID of the user
@@ -63,27 +63,10 @@ export function calculateDiscountedPrice(
 		};
 	}
 
-	// Priority order: product > category > user
-	// Within same priority, pick highest percentage
-	const priorityOrder: Record<IDiscountScope["type"], number> = {
-		product: 3,
-		category: 2,
-		user: 1,
-	};
-
-	// Sort by priority (descending) and then by percentage (descending)
-	const sortedDiscounts = applicableDiscounts.sort((a, b) => {
-		const priorityA = priorityOrder[a.scope.type];
-		const priorityB = priorityOrder[b.scope.type];
-
-		if (priorityA !== priorityB) {
-			return priorityB - priorityA;
-		}
-
-		return b.percentage - a.percentage;
-	});
-
-	const bestDiscount = sortedDiscounts[0];
+	// Highest percentage wins
+	const bestDiscount = applicableDiscounts.reduce((best, d) =>
+		d.percentage > best.percentage ? d : best,
+	);
 	const discountPercent = Math.min(100, Math.max(0, bestDiscount.percentage));
 	const discountedPrice = basePrice * (1 - discountPercent / 100);
 

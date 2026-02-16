@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import type mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
@@ -59,8 +59,7 @@ export async function PUT(
 		await dbConnect();
 
 		const body = await req.json();
-		const { status, adminNotes, percentage, scopeType, categoryId, variantId } =
-			body;
+		const { status, adminNotes, percentage, scopeType, categoryId } = body;
 
 		const discountRequest = await DiscountRequestModel.findById(params.id);
 		if (!discountRequest) {
@@ -85,55 +84,61 @@ export async function PUT(
 				);
 			}
 
-			// Start transaction for atomic discount creation and request update
-			const sessionMongoose = await mongoose.startSession();
-			sessionMongoose.startTransaction();
+			// Create Discount records
+			const createdDiscountIds: mongoose.Types.ObjectId[] = [];
 
-			try {
-				// 1. Create the Discount record
+			if (scopeType === "product") {
+				// For product scope, create a discount for each item in the request
+				for (const item of discountRequest.items) {
+					const discount = await DiscountModel.create({
+						percentage,
+						scope: {
+							type: "product",
+							userId: discountRequest.userId, // Optional: verify if userId should be included in product scope
+							productId: item.productId,
+						},
+						discountRequestId: discountRequest._id,
+						createdBy: session.user.id,
+						isActive: true,
+					});
+					createdDiscountIds.push(discount._id);
+				}
+			} else {
+				// For user or category scope, create a single discount
 				const scope: {
 					type: string;
 					userId?: mongoose.Types.ObjectId;
 					categoryId?: string;
-					variantId?: string;
+					productId?: string;
 				} = { type: scopeType || "user" };
+
 				if (scope.type === "user") scope.userId = discountRequest.userId;
 				if (scope.type === "category") scope.categoryId = categoryId;
-				if (scope.type === "variant") scope.variantId = variantId;
+				// product case handled above
 
-				const discount = await DiscountModel.create(
-					[
-						{
-							percentage,
-							scope,
-							discountRequestId: discountRequest._id,
-							createdBy: session.user.id,
-							isActive: true,
-						},
-					],
-					{ session: sessionMongoose },
-				);
-
-				// 2. Update the DiscountRequest
-				discountRequest.status = "approved";
-				discountRequest.adminNotes = adminNotes;
-				discountRequest.approvedBy = session.user.id;
-				discountRequest.approvedAt = new Date();
-				discountRequest.discountId = discount[0]._id;
-				await discountRequest.save({ session: sessionMongoose });
-
-				await sessionMongoose.commitTransaction();
-				sessionMongoose.endSession();
-
-				return NextResponse.json({
-					message: "Request approved and discount created",
-					discountRequest,
+				const discount = await DiscountModel.create({
+					percentage,
+					scope,
+					discountRequestId: discountRequest._id,
+					createdBy: session.user.id,
+					isActive: true,
 				});
-			} catch (err) {
-				await sessionMongoose.abortTransaction();
-				sessionMongoose.endSession();
-				throw err;
+				createdDiscountIds.push(discount._id);
 			}
+
+			// Update the DiscountRequest
+			discountRequest.status = "approved";
+			discountRequest.adminNotes = adminNotes;
+			discountRequest.approvedBy = session.user.id;
+			discountRequest.approvedAt = new Date();
+			discountRequest.discountIds = createdDiscountIds;
+
+			await discountRequest.save();
+
+			return NextResponse.json({
+				message: "Request approved and discount(s) created",
+				discountRequest,
+			});
 		} else if (status === "rejected") {
 			discountRequest.status = "rejected";
 			discountRequest.adminNotes = adminNotes;

@@ -33,10 +33,10 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 	const [percentage, setPercentage] = useState<number>(10);
 	const [adminNotes, setAdminNotes] = useState("");
 	const [activeScope, setActiveScope] = useState<
-		"user" | "category" | "variant"
+		"user" | "category" | "product"
 	>("user");
 	const [selectedCategoryId, setSelectedCategoryId] = useState("");
-	const [selectedVariantId, setSelectedVariantId] = useState("");
+	const [selectedProductId, setSelectedProductId] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	// Default selections based on request
@@ -45,7 +45,7 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 			const firstItem = request.items[0];
 			const cat = firstItem.productId.category;
 			setSelectedCategoryId(typeof cat === "string" ? cat : cat?._id || "");
-			setSelectedVariantId(firstItem.variantId?._id || "");
+			setSelectedProductId(firstItem.productId?._id || "");
 		}
 	}, [request]);
 
@@ -59,7 +59,7 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 				adminNotes,
 				scopeType: activeScope,
 				categoryId: activeScope === "category" ? selectedCategoryId : undefined,
-				variantId: activeScope === "variant" ? selectedVariantId : undefined,
+				productId: activeScope === "product" ? selectedProductId : undefined,
 			});
 
 			toast.success(t("approveSuccess"));
@@ -237,9 +237,18 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 														.filter(Boolean) as string[],
 												),
 											).map((catId: string) => {
+												const matchingItem = request.items.find((item) => {
+													const cat = item.productId?.category;
+													const id = typeof cat === "string" ? cat : cat?._id;
+													return id === catId;
+												});
+												const catName =
+													typeof matchingItem?.productId?.category === "object"
+														? matchingItem?.productId?.category?.name
+														: undefined;
 												return (
 													<option key={catId} value={catId}>
-														{t("categoryInRequest", { id: catId })}
+														{catName || t("categoryInRequest", { id: catId })}
 													</option>
 												);
 											})}
@@ -248,54 +257,52 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 								)}
 							</div>
 
-							{/* Variant Level */}
+							{/* Product Level */}
 							<div
-								className={`border rounded-md overflow-hidden ${activeScope === "variant" ? "ring-1 ring-sage-blue" : ""}`}
+								className={`border rounded-md overflow-hidden ${activeScope === "product" ? "ring-1 ring-sage-blue" : ""}`}
 							>
 								<button
 									type="button"
-									onClick={() => setActiveScope("variant")}
+									onClick={() => setActiveScope("product")}
 									className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
 								>
 									<div className="flex items-center gap-2">
 										<Tag
 											size={18}
 											className={
-												activeScope === "variant"
+												activeScope === "product"
 													? "text-sage-blue"
 													: "text-gray-400"
 											}
 										/>
 										<span
-											className={`text-sm ${activeScope === "variant" ? "font-bold text-sage-blue" : "font-medium"}`}
+											className={`text-sm ${activeScope === "product" ? "font-bold text-sage-blue" : "font-medium"}`}
 										>
-											{t("scopeVariant")}
+											{t("scopeProduct")}
 										</span>
 									</div>
-									{activeScope === "variant" ? (
+									{activeScope === "product" ? (
 										<ChevronDown size={18} />
 									) : (
 										<ChevronRight size={18} />
 									)}
 								</button>
-								{activeScope === "variant" && (
+								{activeScope === "product" && (
 									<div className="p-3 space-y-3 border-t bg-white">
 										<p className="text-xs text-gray-600">
-											{t("scopeVariantDescription")}
+											{t("scopeProductDescription")}
 										</p>
 										<select
-											value={selectedVariantId}
-											onChange={(e) => setSelectedVariantId(e.target.value)}
+											value={selectedProductId}
+											onChange={(e) => setSelectedProductId(e.target.value)}
 											className="w-full p-2 border rounded-md text-sm"
 										>
-											<option value="">{t("selectVariant")}</option>
+											<option value="">{t("selectProduct")}</option>
 											{request.items.map((item, idx: number) => {
-												const varId = item.variantId?._id || "";
-												const displaySku =
-													item.variantId?.childSku || t("noMessage"); // Reusing noMessage for Unknown
+												const prodId = item.productId?._id || "";
 												return (
-													<option key={varId || `item-${idx}`} value={varId}>
-														{item.productId?.title} - {displaySku}
+													<option key={prodId || `item-${idx}`} value={prodId}>
+														{item.productId?.title}
 													</option>
 												);
 											})}
@@ -335,7 +342,7 @@ const DiscountApprovalModal: React.FC<DiscountApprovalModalProps> = ({
 							disabled={
 								isSubmitting ||
 								(activeScope === "category" && !selectedCategoryId) ||
-								(activeScope === "variant" && !selectedVariantId)
+								(activeScope === "product" && !selectedProductId)
 							}
 							className="bg-sage-blue hover:bg-indigo-400"
 						>

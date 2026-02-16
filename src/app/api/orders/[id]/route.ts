@@ -78,19 +78,22 @@ export async function POST(
 			);
 		}
 
-		// Fetch active discounts for this user and item
+		const populatedProduct = productVariant.productId as unknown as {
+			_id: mongoose.Types.ObjectId;
+			category: mongoose.Types.ObjectId;
+		};
+		const productIdForDiscount =
+			populatedProduct?._id ??
+			(productVariant.productId as mongoose.Types.ObjectId);
+		const categoryIdForDiscount = populatedProduct?.category?.toString() ?? "";
+
+		// Fetch active discounts for this user and item (scope.productId is Product _id, not variant)
 		const activeDiscounts = await DiscountModel.find({
 			isActive: true,
 			$or: [
 				{ "scope.userId": user._id },
-				{
-					"scope.categoryId": (
-						productVariant.productId as unknown as {
-							category: mongoose.Types.ObjectId;
-						}
-					).category,
-				},
-				{ "scope.variantId": productVariant._id },
+				{ "scope.categoryId": populatedProduct?.category },
+				{ "scope.productId": productIdForDiscount },
 				{ "scope.type": "category" },
 			],
 		});
@@ -103,12 +106,8 @@ export async function POST(
 				const { finalPrice } = calculateDiscountedPrice(
 					basePrice,
 					user._id.toString(),
-					(
-						productVariant.productId as unknown as {
-							category: string | { toString(): string };
-						}
-					).category?.toString() || "",
-					productVariant._id.toString(),
+					categoryIdForDiscount,
+					productIdForDiscount.toString(),
 					activeDiscounts,
 				);
 

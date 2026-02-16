@@ -59,7 +59,8 @@ const ConfirmStatusChange = ({
 	const ordersWithMissingFees = useMemo(() => {
 		if (status !== "shipped" || !orders || !orderIds) return [];
 		const orderHasUploadedFile = (order: OrderData) =>
-			Boolean(order.labelUrl) || order.items?.some((item) => Boolean(item.designUrl));
+			Boolean(order.labelUrl) ||
+			order.items?.some((item) => Boolean(item.designUrl));
 		return orders.filter(
 			(order) =>
 				orderIds.includes(order._id) &&
@@ -121,8 +122,12 @@ const ConfirmStatusChange = ({
 	const updateFeesMutation = useMutation({
 		mutationFn: async (data: FeeFormValues) => {
 			await httpClient.patch(`/orders/shipping/${currentOrder._id}`, {
-				warehousePrice: data.warehousePrice ? Number(data.warehousePrice) : null,
-				shippingAmount: data.shippingAmount ? Number(data.shippingAmount) : null,
+				warehousePrice: data.warehousePrice
+					? Number(data.warehousePrice)
+					: null,
+				shippingAmount: data.shippingAmount
+					? Number(data.shippingAmount)
+					: null,
 			});
 		},
 		onSuccess: () => {
@@ -210,7 +215,10 @@ const ConfirmStatusChange = ({
 							</p>
 						</DialogDescription>
 					</DialogHeader>
-					<form onSubmit={form.handleSubmit(onSubmitFees)} className="space-y-4">
+					<form
+						onSubmit={form.handleSubmit(onSubmitFees)}
+						className="space-y-4"
+					>
 						<div className="flex flex-col gap-2">
 							<Label htmlFor="warehousePrice">{t("warehouseCost")} *</Label>
 							<Input
@@ -255,7 +263,9 @@ const ConfirmStatusChange = ({
 							</Button>
 							<Button
 								type="submit"
-								disabled={updateFeesMutation.isPending || statusMutation.isPending}
+								disabled={
+									updateFeesMutation.isPending || statusMutation.isPending
+								}
 							>
 								{updateFeesMutation.isPending
 									? tCommon("saving")

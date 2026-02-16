@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import "@/models/Category";
+
 import Product from "@/models/Product";
 import User from "@/models/User";
 

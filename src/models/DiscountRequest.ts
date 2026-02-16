@@ -15,7 +15,7 @@ export interface IDiscountRequest extends Document {
 	adminNotes?: string;
 	approvedBy?: mongoose.Types.ObjectId;
 	approvedAt?: Date;
-	discountId?: mongoose.Types.ObjectId;
+	discountIds?: mongoose.Types.ObjectId[];
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -89,10 +89,12 @@ const DiscountRequestSchema = new mongoose.Schema(
 			ref: "User",
 		},
 		approvedAt: { type: Date },
-		discountId: {
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Discount",
-		},
+		discountIds: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Discount",
+			},
+		],
 	},
 	{
 		timestamps: true,

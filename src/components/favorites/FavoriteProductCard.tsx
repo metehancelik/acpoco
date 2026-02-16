@@ -34,6 +34,7 @@ const FavoriteProductCard: React.FC<Props> = ({
 	const { finalPrice: discounted, discountPercent } = getDiscountedPrice(
 		product.price,
 		product.category?._id || (product.category as unknown as string),
+		product._id,
 	);
 	const showDiscount = discountPercent > 0;
 	const basePrice = product.price;
@@ -231,7 +232,7 @@ const FavoriteProductCard: React.FC<Props> = ({
 
 				{/* Price Section */}
 				<div className="mt-auto">
-					<div className="flex items-baseline gap-1.5 mb-2">
+					<div className="flex flex-wrap items-baseline gap-1.5 mb-2">
 						{showDiscount ? (
 							<>
 								<span className="text-base sm:text-lg font-bold bg-gradient-to-r from-sage-blue to-indigo-500 bg-clip-text text-transparent">
@@ -239,6 +240,9 @@ const FavoriteProductCard: React.FC<Props> = ({
 								</span>
 								<span className="text-xs text-gray-400 line-through">
 									€{basePrice}
+								</span>
+								<span className="text-xs font-semibold text-emerald-600">
+									%{discountPercent} {t("discount")}
 								</span>
 							</>
 						) : (

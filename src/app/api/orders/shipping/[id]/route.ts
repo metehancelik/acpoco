@@ -26,8 +26,12 @@ export async function PATCH(
 	}
 
 	const hasUploadedFile =
-		Boolean(order.labelUrl) || order.items?.some((item: { designUrl?: string }) => item.designUrl);
-	if (hasUploadedFile && (warehousePrice !== undefined || shippingAmount !== undefined)) {
+		Boolean(order.labelUrl) ||
+		order.items?.some((item: { designUrl?: string }) => item.designUrl);
+	if (
+		hasUploadedFile &&
+		(warehousePrice !== undefined || shippingAmount !== undefined)
+	) {
 		return NextResponse.json(
 			{
 				error:

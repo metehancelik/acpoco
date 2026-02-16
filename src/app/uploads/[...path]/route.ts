@@ -43,7 +43,10 @@ export async function GET(
 	const filePath = path.join(uploadDir, ...parts);
 	const resolvedBase = path.resolve(uploadDir);
 	const resolvedTarget = path.resolve(filePath);
-	if (!resolvedTarget.startsWith(resolvedBase + path.sep) && resolvedTarget !== resolvedBase) {
+	if (
+		!resolvedTarget.startsWith(resolvedBase + path.sep) &&
+		resolvedTarget !== resolvedBase
+	) {
 		return new Response("Not found", { status: 404 });
 	}
 
@@ -72,6 +75,7 @@ export async function GET(
 	}
 
 	const stream = createReadStream(resolvedTarget);
-	return new Response(Readable.toWeb(stream) as unknown as BodyInit, { headers });
+	return new Response(Readable.toWeb(stream) as unknown as BodyInit, {
+		headers,
+	});
 }
-
