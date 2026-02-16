@@ -22,13 +22,15 @@ type Props = {
 
 const ProductCard: React.FC<Props> = ({ product }) => {
 	const variants = product.shopifyData?.variants || [];
-	// Match product detail page: use first variant (same as initialVariant fallback there)
-	const displayVariant = variants[0] ?? null;
-	const inStock = !!(
-		displayVariant?.availableForSale &&
-		(displayVariant?.inventoryQuantity ?? 0) > 0
+	// Calculate total stock count across all variants
+	const stockQuantity = variants.reduce(
+		(total, variant) => total + (variant.inventoryQuantity ?? 0),
+		0,
 	);
-	const stockQuantity = displayVariant?.inventoryQuantity ?? 0;
+	// Product is in stock if any variant has inventory and is available for sale
+	const inStock = variants.some(
+		(v) => v.availableForSale && (v.inventoryQuantity ?? 0) > 0,
+	);
 
 	const availableWithSku = variants.find(
 		(v) =>
