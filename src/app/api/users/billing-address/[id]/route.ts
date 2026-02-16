@@ -11,7 +11,11 @@ export async function PUT(request: Request, params: { id: string }) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 	const userId = session.user?.id;
+	if (!userId) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 	const id = params.id;
+	const isUpdate = id && id !== "undefined";
 	try {
 		const body = await request.json();
 		const {
@@ -30,7 +34,7 @@ export async function PUT(request: Request, params: { id: string }) {
 			vatNumber,
 			zipCode,
 		} = body;
-		const filter = id ? { _id: id } : {};
+		const filter = isUpdate ? { _id: id, userId } : { userId };
 		const billingAddress = await BillingAddress.findOneAndUpdate(
 			filter,
 			{

@@ -55,6 +55,12 @@ const AllWalletLogs = () => {
 		return `${day} ${month} ${year} - ${hour}:${minute}`;
 	};
 
+	const formatEur = (v: number) =>
+		new Intl.NumberFormat("de-DE", {
+			style: "currency",
+			currency: "EUR",
+		}).format(v);
+
 	useEffect(() => {
 		const getWalletLogs = async () => {
 			try {
@@ -111,22 +117,28 @@ const AllWalletLogs = () => {
 										{log.userId.name} {log.userId.surname}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm">
-										<span
-											className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
-												log.changeAmount >= 0
-													? "bg-emerald-50 text-emerald-700"
-													: "bg-red-50 text-red-700"
-											}`}
-										>
-											{log.changeAmount >= 0 ? "+" : ""}
-											{log.changeAmount.toFixed(2)}
-										</span>
+										{(() => {
+											const isCredit =
+												Number(log.finalBalance) > log.currentBalance;
+											return (
+												<span
+													className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+														isCredit
+															? "bg-emerald-50 text-emerald-700"
+															: "bg-red-50 text-red-700"
+													}`}
+												>
+													{isCredit ? "+" : "−"}
+													{formatEur(Math.abs(log.changeAmount))}
+												</span>
+											);
+										})()}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm text-gray-500">
-										€{log.currentBalance.toFixed(2)}
+										{formatEur(log.currentBalance)}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-center text-sm font-medium text-gray-900">
-										€{Number(log.finalBalance).toFixed(2)}
+										{formatEur(Number(log.finalBalance))}
 									</td>
 									<td className="whitespace-nowrap px-3 py-4 text-sm text-gray-600">
 										{formatDateLocalized(log.createdAt)}

@@ -11,6 +11,7 @@ import {
 	X,
 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import type React from "react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -48,6 +49,7 @@ interface ProductSearchResult {
 const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 	userId,
 }) => {
+	const t = useTranslations("ManualDiscount");
 	const queryClient = useQueryClient();
 	const [percentage, setPercentage] = useState<number>(10);
 	const [activeScope, setActiveScope] = useState<
@@ -95,11 +97,11 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 
 	const handleCreateDiscount = async () => {
 		if (activeScope === "category" && !selectedCategoryId) {
-			toast.error("Lütfen bir kategori seçin.");
+			toast.error(t("pleaseSelectCategory"));
 			return;
 		}
 		if (activeScope === "product" && !selectedProductId) {
-			toast.error("Lütfen bir ürün seçin.");
+			toast.error(t("pleaseSelectProduct"));
 			return;
 		}
 
@@ -113,7 +115,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 				productId: activeScope === "product" ? selectedProductId : undefined,
 			});
 
-			toast.success("İndirim başarıyla tanımlandı.");
+			toast.success(t("discountDefinedSuccess"));
 			queryClient.invalidateQueries({
 				queryKey: ["user-discounts-admin", userId],
 			});
@@ -124,7 +126,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 			setProductQuery("");
 		} catch (error) {
 			console.error("Error creating discount:", error);
-			toast.error("İndirim tanımlanırken bir hata oluştu.");
+			toast.error(t("discountDefineError"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -133,13 +135,13 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 	const handleDeactivateDiscount = async (discountId: string) => {
 		try {
 			await httpClient.delete(`/discounts/${discountId}`);
-			toast.success("İndirim kaldırıldı.");
+			toast.success(t("discountRemovedSuccess"));
 			queryClient.invalidateQueries({
 				queryKey: ["user-discounts-admin", userId],
 			});
 		} catch (error) {
 			console.error("Error deleting discount:", error);
-			toast.error("İndirim kaldırılırken bir hata oluştu.");
+			toast.error(t("discountRemoveError"));
 		}
 	};
 
@@ -150,15 +152,11 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 	};
 
 	return (
-		<div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-6">
-			<h3 className="text-lg font-bold text-gray-900 border-b pb-4">
-				İndirim Yönetimi
-			</h3>
-
+		<div className="space-y-6">
 			{/* Active Discounts List */}
 			<div className="space-y-4">
 				<h4 className="text-sm font-semibold text-gray-700">
-					Aktif İndirimler
+					{t("activeDiscounts")}
 				</h4>
 				{userDiscounts && userDiscounts.length > 0 ? (
 					<div className="grid grid-cols-1 gap-2">
@@ -173,18 +171,24 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									</div>
 									<div>
 										<span className="capitalize font-medium text-gray-700">
-											{discount.scope.type}
+											{t(
+												discount.scope.type === "user"
+													? "scopeUser"
+													: discount.scope.type === "category"
+														? "scopeCategory"
+														: "scopeProduct",
+											)}
 										</span>
 										{discount.scope.categoryId && (
 											<span className="text-gray-500 ml-1">
 												{" "}
-												(Kat: {discount.scope.categoryId})
+												({t("categoryLabel")}: {discount.scope.categoryId})
 											</span>
 										)}
 										{discount.scope.productId && (
 											<span className="text-gray-500 ml-1">
 												{" "}
-												(Ürün: {discount.scope.productId})
+												({t("productLabel")}: {discount.scope.productId})
 											</span>
 										)}
 									</div>
@@ -192,7 +196,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 								<button
 									onClick={() => handleDeactivateDiscount(discount._id)}
 									className="text-red-500 hover:text-red-700 p-1"
-									title="İndirimi Kaldır"
+									title={t("removeDiscountTitle")}
 								>
 									<Trash2 size={16} />
 								</button>
@@ -201,14 +205,14 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 					</div>
 				) : (
 					<p className="text-sm text-gray-500 italic">
-						Bu kullanıcı için aktif özel indirim bulunmuyor.
+						{t("noActiveDiscounts")}
 					</p>
 				)}
 			</div>
 
 			<div className="border-t pt-6 space-y-4">
 				<h4 className="text-sm font-semibold text-gray-700">
-					Yeni İndirim Tanımla
+					{t("defineNewDiscount")}
 				</h4>
 
 				{/* Percentage Input */}
@@ -217,7 +221,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 						htmlFor="manual-discount-percentage"
 						className="text-xs font-medium text-gray-500 uppercase tracking-wider"
 					>
-						İndirim Oranı (%)
+						{t("discountRatePercent")}
 					</label>
 					<input
 						id="manual-discount-percentage"
@@ -236,7 +240,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 						htmlFor="scope-selector"
 						className="text-xs font-medium text-gray-500 uppercase tracking-wider"
 					>
-						İndirim Kapsamı
+						{t("discountScope")}
 					</label>
 
 					{/* User Scope */}
@@ -258,10 +262,10 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									<span
 										className={`block text-sm ${activeScope === "user" ? "font-bold text-sage-blue" : "font-semibold text-gray-700"}`}
 									>
-										Kullanıcı Genel
+										{t("scopeUser")}
 									</span>
 									<span className="text-xs text-gray-500">
-										Kullanıcının sepetindeki tüm ürünlere uygulanır.
+										{t("scopeUserDescription")}
 									</span>
 								</div>
 							</div>
@@ -294,10 +298,10 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									<span
 										className={`block text-sm ${activeScope === "category" ? "font-bold text-sage-blue" : "font-semibold text-gray-700"}`}
 									>
-										Kategori Bazlı
+										{t("scopeCategory")}
 									</span>
 									<span className="text-xs text-gray-500">
-										Sadece seçilen kategorideki ürünlere uygulanır.
+										{t("scopeCategoryDescription")}
 									</span>
 								</div>
 							</div>
@@ -314,7 +318,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									onChange={(e) => setSelectedCategoryId(e.target.value)}
 									className="w-full p-2.5 border rounded-md text-sm bg-white"
 								>
-									<option value="">Kategori Seçin</option>
+									<option value="">{t("selectCategory")}</option>
 									{(categories || []).map((cat) => (
 										<option key={cat._id} value={cat._id}>
 											{cat.name}
@@ -346,10 +350,10 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 									<span
 										className={`block text-sm ${activeScope === "product" ? "font-bold text-sage-blue" : "font-semibold text-gray-700"}`}
 									>
-										Ürün Bazlı
+										{t("scopeProduct")}
 									</span>
 									<span className="text-xs text-gray-500">
-										Sadece seçilen ürüne uygulanır.
+										{t("scopeProductDescription")}
 									</span>
 								</div>
 							</div>
@@ -383,7 +387,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 								<div className="relative">
 									<input
 										type="text"
-										placeholder="Ürün ismi veya SKU ile ara..."
+										placeholder={t("searchProductPlaceholder")}
 										value={productQuery}
 										onChange={(e) => setProductQuery(e.target.value)}
 										className="w-full p-2.5 border rounded-md text-sm bg-white pr-10"
@@ -456,7 +460,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 								{productQuery.length >= 2 &&
 									productSearchData?.products?.length === 0 && (
 										<p className="text-sm text-gray-500 text-center py-4">
-											Ürün bulunamadı.
+											{t("noProductsFound")}
 										</p>
 									)}
 							</div>
@@ -469,7 +473,7 @@ const ManualDiscountManagement: React.FC<ManualDiscountManagementProps> = ({
 					disabled={isSubmitting}
 					className="w-full bg-sage-blue hover:bg-indigo-400 text-white font-bold h-12 rounded-lg"
 				>
-					{isSubmitting ? "İşleniyor..." : "İndirimi Tanımla"}
+					{isSubmitting ? t("processing") : t("defineDiscount")}
 				</Button>
 			</div>
 		</div>

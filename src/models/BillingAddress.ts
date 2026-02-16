@@ -42,7 +42,11 @@ const BillingAddressSchema: Schema = new Schema(
 				message: "Invalid German PLZ (5 digits required)",
 			},
 		},
-		userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+		userId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+			index: true,
+		},
 	},
 	{ timestamps: true },
 );

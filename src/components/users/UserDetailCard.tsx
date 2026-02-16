@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import type { IUserRoot } from "@/app/[locale]/(admin)/users/[id]/page";
@@ -17,24 +18,22 @@ interface IWallet {
 	userId: string;
 }
 
+const formatEur = (value: number) =>
+	new Intl.NumberFormat("de-DE", {
+		style: "currency",
+		currency: "EUR",
+	}).format(value);
+
 const UserDetailCard: React.FC<Props> = ({ user }) => {
+	const t = useTranslations("UserDetail");
+	const tDashboard = useTranslations("Dashboard");
 	const [isModalOpen, setIsModalOpen] = React.useState(false);
-	// const [productPriceRate, setProductPriceRate] = React.useState(
-	//   user?.productPriceRate || 2,
-	// );
-	// const [shippingPriceRate, setShippingPriceRate] = React.useState(
-	//   user?.shippingPriceRate || 2,
-	// );
-	// const [warehousePriceRate, setWarehousePriceRate] = React.useState(
-	//   user?.warehousePriceRate || 2,
-	// );
 
 	const { data: wallet } = useQuery<IWallet>({
 		queryKey: ["userWallet", user?._id],
 		queryFn: async () => {
 			if (!user?._id) throw new Error("User ID is required");
 			const response = await httpClient.get(`wallet/user-wallet/${user._id}`);
-
 			return response.data;
 		},
 		enabled: !!user?._id,
@@ -45,89 +44,61 @@ const UserDetailCard: React.FC<Props> = ({ user }) => {
 		setIsModalOpen(!isModalOpen);
 	};
 
-	// const handleSubmitProductPriceRate = async (e: React.SyntheticEvent) => {
-	//   e.preventDefault();
-	//   try {
-	//     await httpClient.put(`users/${user?._id}/product-rate`, {
-	//       productPriceRate,
-	//     });
-	//     AlertNotification("Ürün fiyat çarpanı başarıyla güncellendi", "success");
-	//   } catch (error) {
-	//     console.error(error);
-	//     AlertNotification("Bir hata oluştu", "error");
-	//   }
-	// };
-	// const handleSubmitShippingPriceRate = async (e: React.SyntheticEvent) => {
-	//   e.preventDefault();
-	//   try {
-	//     await httpClient.put(`users/${user?._id}/shipping-rate`, {
-	//       shippingPriceRate,
-	//     });
-	//     AlertNotification("Kargo fiyat çarpanı başarıyla güncellendi", "success");
-	//   } catch (error: unknown) {
-	//     console.error(error);
-	//     AlertNotification("Bir hata oluştu", "error");
-	//   }
-	// };
-	// const handleSubmitWarehousePriceRate = async (e: React.SyntheticEvent) => {
-	//   e.preventDefault();
-	//   try {
-	//     await httpClient.put(`users/${user?._id}/warehouse-rate`, {
-	//       warehousePriceRate,
-	//     });
-	//     AlertNotification("Depo fiyat çarpanı başarıyla güncellendi", "success");
-	//   } catch (error: unknown) {
-	//     console.error(error);
-	//     AlertNotification("Bir hata oluştu", "error");
-	//   }
-	// };
-
-	// useEffect(() => {
-	//   setProductPriceRate(user?.productPriceRate || 2);
-	//   setShippingPriceRate(user?.shippingPriceRate || 2);
-	//   setWarehousePriceRate(user?.warehousePriceRate || 2);
-	// }, [user]);
+	if (!user) {
+		return <p className="text-sm text-muted-foreground">{t("loadingUser")}</p>;
+	}
 
 	return (
-		<div className="w-1/2 flex flex-col space-y-6 bg-gray-50 p-4 rounded-md shadow-md text-text-primary">
-			<div className="flex items-center justify-between">
-				<h1 className="text-xl font-semibold text-primary">
-					Kullanıcı Bilgileri
-				</h1>
+		<div className="space-y-4 text-sm">
+			<div className="flex flex-wrap items-baseline gap-x-2">
+				<span className="font-medium text-gray-500">{t("name")}</span>
+				<span className="text-gray-900">
+					{user.name} {user.surname}
+				</span>
 			</div>
-			<div className="flex space-x-3 items-center">
-				<h2 className="text-sm font-semibold">İsim:</h2>
-				<p>{user?.name}</p>
-				<p>{user?.surname}</p>
+			<div className="flex flex-wrap items-baseline gap-x-2">
+				<span className="font-medium text-gray-500">{t("email")}</span>
+				<span className="text-gray-900">{user.email}</span>
 			</div>
-			<div className="flex space-x-3 items-center">
-				<h2 className="text-sm font-semibold">Email:</h2>
-				<p>{user?.email}</p>
+			<div className="flex flex-wrap items-baseline gap-x-2">
+				<span className="font-medium text-gray-500">{t("role")}</span>
+				<span className="capitalize text-gray-900">
+					{user.role?.toLowerCase()}
+				</span>
 			</div>
-			<div className="flex space-x-3 items-center">
-				<h2 className="text-sm font-semibold">Rol:</h2>
-				<p>{user?.role}</p>
-			</div>
-
-			<div className="flex space-x-3 items-center">
-				<h2 className="text-sm font-semibold">Bakiye:</h2>
-				<p>{wallet?.balance || 0}</p>
+			<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+				<span className="font-medium text-gray-500">
+					{tDashboard("balance")}
+				</span>
+				<span className="font-semibold text-gray-900">
+					{formatEur(wallet?.balance ?? 0)}
+				</span>
 				<button
+					type="button"
 					onClick={handleModal}
-					className="bg-sage-orange text-white rounded-md py-1 px-4 hover:bg-orange-400"
+					className="cursor-pointer rounded-lg bg-sage-orange px-4 py-1.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-sage-orange focus:ring-offset-2"
 				>
-					Bakiye Düzenle
+					{t("editBalance")}
 				</button>
 			</div>
-			<div className="flex space-x-3 items-center">
-				<h2 className="text-base font-semibold">Mağazalar:</h2>
-				{user?.stores.map((store) => (
-					<p key={store._id}>{store.storeName}</p>
-				))}
-			</div>
+			{user.stores && user.stores.length > 0 && (
+				<div className="space-y-2">
+					<span className="font-medium text-gray-500">{t("stores")}</span>
+					<div className="flex flex-wrap gap-2">
+						{user.stores.map((store) => (
+							<span
+								key={store._id}
+								className="inline-flex items-center rounded-lg border border-border bg-slate-50/50 px-3 py-1.5 text-gray-900"
+							>
+								{store.storeName}
+							</span>
+						))}
+					</div>
+				</div>
+			)}
 			<BalanceChangeModal
 				isOpen={isModalOpen}
-				userId={user?._id || ""}
+				userId={user._id}
 				setIsModalOpen={setIsModalOpen}
 			/>
 		</div>

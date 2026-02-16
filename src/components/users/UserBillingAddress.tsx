@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import { useTranslations } from "next-intl";
 
 import type { IBillingAddress } from "@/app/[locale]/(admin)/users/[id]/page";
 
@@ -9,65 +9,46 @@ interface Props {
 }
 
 const UserBillingAddress: React.FC<Props> = ({ billingAddress }) => {
+	const t = useTranslations("Billing");
+	const tUserDetail = useTranslations("UserDetail");
+
+	if (!billingAddress) {
+		return (
+			<p className="text-sm text-muted-foreground">
+				{tUserDetail("noBillingAddress")}
+			</p>
+		);
+	}
+
+	const rows: { label: string; value: string | undefined }[] = [
+		{ label: t("title"), value: billingAddress.title },
+		{ label: t("firstName"), value: billingAddress.firstName },
+		{ label: t("lastName"), value: billingAddress.lastName },
+		{ label: t("companyName"), value: billingAddress.companyName },
+		{
+			label: tUserDetail("identityNumber"),
+			value: billingAddress.identityNumber,
+		},
+		{ label: t("vatNumber"), value: billingAddress.vatNumber },
+		{ label: tUserDetail("taxOffice"), value: billingAddress.taxOffice },
+		{ label: t("gsmNumber"), value: billingAddress.gsmNumber },
+		{ label: tUserDetail("addressLine1"), value: billingAddress.addressLine1 },
+		{ label: t("addressLine2"), value: billingAddress.addressLine2 },
+		{ label: t("city"), value: billingAddress.city },
+		{ label: t("country"), value: billingAddress.country },
+		{ label: t("zipCode"), value: billingAddress.zipCode },
+	];
+
 	return (
-		<div className="bg-gray-50 rounded-md shadow-md p-4 text-text-primary w-1/2">
-			<h2 className="text-lg font-semibold mb-4 text-primary">
-				Billing Address
-			</h2>
-			<div className="grid grid-cols-2 gap-4">
-				<div>
-					<p className="text-sm font-semibold">Title</p>
-					<p>{billingAddress?.title}</p>
+		<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+			{rows.map(({ label, value }) => (
+				<div key={label} className="space-y-0.5">
+					<p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+						{label}
+					</p>
+					<p className="text-sm text-gray-900">{value ?? "–"}</p>
 				</div>
-				<div>
-					<p className="text-sm font-semibold">First Name</p>
-					<p>{billingAddress?.firstName}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Last Name</p>
-					<p>{billingAddress?.lastName}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Company Name</p>
-					<p>{billingAddress?.companyName}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Identity Number</p>
-					<p>{billingAddress?.identityNumber}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">VAT Number</p>
-					<p>{billingAddress?.vatNumber}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Tax Office</p>
-					<p>{billingAddress?.taxOffice}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">GSM Number</p>
-					<p>{billingAddress?.gsmNumber}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Address Line 1</p>
-					<p>{billingAddress?.addressLine1}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Address Line 2</p>
-					<p>{billingAddress?.addressLine2}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">City</p>
-					<p>{billingAddress?.city}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Country</p>
-					<p>{billingAddress?.country}</p>
-				</div>
-				<div>
-					<p className="text-sm font-semibold">Zip Code</p>
-					<p>{billingAddress?.zipCode}</p>
-				</div>
-			</div>
+			))}
 		</div>
 	);
 };

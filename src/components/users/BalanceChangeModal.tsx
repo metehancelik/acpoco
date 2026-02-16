@@ -1,6 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import AlertNotification from "@/utils/alertNotification";
@@ -16,6 +17,8 @@ export const BalanceChangeModal = ({
 	setIsModalOpen,
 	userId,
 }: BalanceChangeModalProps) => {
+	const t = useTranslations("UserDetail");
+	const tCommon = useTranslations("Common");
 	const [type, setType] = useState("");
 	const [amount, setAmount] = useState("");
 	const [info, setInfo] = useState("");
@@ -32,7 +35,7 @@ export const BalanceChangeModal = ({
 			return response.data;
 		},
 		onSuccess: () => {
-			AlertNotification("Bakiye başarıyla güncellendi", "success");
+			AlertNotification(t("balanceUpdateSuccess"), "success");
 			setIsModalOpen(false);
 			// Revalidate both user and wallet logs queries
 			queryClient.invalidateQueries({ queryKey: ["user", userId] });
@@ -41,7 +44,7 @@ export const BalanceChangeModal = ({
 		},
 		onError: (error) => {
 			console.error("Balance change error:", error);
-			AlertNotification("Bir hata oluştu", "error");
+			AlertNotification(t("errorGeneric"), "error");
 		},
 	});
 
@@ -61,7 +64,7 @@ export const BalanceChangeModal = ({
 			<div className="fixed inset-0 flex items-center justify-center p-4">
 				<DialogPanel className="mx-auto w-full max-w-md rounded bg-white p-6">
 					<DialogTitle className="text-lg font-medium leading-6 text-gray-900 mb-4">
-						Change Balance
+						{t("changeBalance")}
 					</DialogTitle>
 
 					<form onSubmit={handleSubmit} className="space-y-4">
@@ -70,7 +73,7 @@ export const BalanceChangeModal = ({
 								htmlFor="type"
 								className="block text-sm font-medium text-gray-700"
 							>
-								İşlem Tipi
+								{t("transactionType")}
 							</label>
 							<select
 								id="type"
@@ -79,9 +82,9 @@ export const BalanceChangeModal = ({
 								className="mt-1 block w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 								required
 							>
-								<option value="">Seçiniz</option>
-								<option value="credit">Ekle</option>
-								<option value="debit">Çıkar</option>
+								<option value="">{t("select")}</option>
+								<option value="credit">{t("credit")}</option>
+								<option value="debit">{t("debit")}</option>
 							</select>
 						</div>
 
@@ -90,7 +93,7 @@ export const BalanceChangeModal = ({
 								htmlFor="amount"
 								className="block text-sm font-medium text-gray-700"
 							>
-								Miktar
+								{t("amount")}
 							</label>
 							<input
 								type="number"
@@ -107,12 +110,12 @@ export const BalanceChangeModal = ({
 								htmlFor="info"
 								className="block text-sm font-medium text-gray-700"
 							>
-								Bilgi
+								{t("infoLabel")}
 							</label>
 							<textarea
 								id="info"
 								value={info}
-								placeholder="Değişiklik sebebini giriniz..."
+								placeholder={t("infoPlaceholder")}
 								onChange={(e) => setInfo(e.target.value)}
 								className="mt-1 block w-full text-sm rounded-md border border-primary py-2 pl-3 text-gray-900"
 								rows={3}
@@ -127,14 +130,16 @@ export const BalanceChangeModal = ({
 								}}
 								className="text-danger font-bold w-full px-4 py-2 text-sm border border-danger rounded-md bg-white hover:bg-primary hover:text-white"
 							>
-								Cancel
+								{tCommon("cancel")}
 							</button>
 							<button
 								type="submit"
 								disabled={balanceChangeMutation.isPending}
 								className="px-4 py-2 text-sm font-medium w-full text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
 							>
-								{balanceChangeMutation.isPending ? "İşleniyor..." : "Submit"}
+								{balanceChangeMutation.isPending
+									? tCommon("pleaseWait")
+									: tCommon("submit")}
 							</button>
 						</div>
 					</form>
