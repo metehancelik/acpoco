@@ -276,16 +276,18 @@ const FilterForm = () => {
 											💳 {t("waitingPayment")}
 										</option>
 										<option value="waitingProduction">
-											⚙️ {t("processing")}
+											📦 {t("waitingProduction")}
 										</option>
+										<option value="processing">⚙️ {t("processing")}</option>
 										<option value="shipped">🚚 {t("shipped")}</option>
 									</>
 								)}
 								{session.data?.user?.role === "ADMIN" && (
 									<>
 										<option value="waitingProduction">
-											⚙️ {t("processing")}
+											📦 {t("waitingProduction")}
 										</option>
+										<option value="processing">⚙️ {t("processing")}</option>
 										<option value="shipped">🚚 {t("shipped")}</option>
 									</>
 								)}

@@ -6,13 +6,13 @@ export const formatStatus = (status: string) => {
 		return "Eşleşme Bekliyor";
 	}
 	if (status === "waitingProduction") {
-		return "Üretim Bekliyor";
+		return "Sipariş Hazırlanacak";
 	}
 	if (status === "processing") {
-		return "Üretiliyor";
+		return "Sipariş Hazırlandı";
 	}
 	if (status === "shipped") {
-		return "Kargo Teslim";
+		return "Kargoya Verildi";
 	}
 
 	return null;
