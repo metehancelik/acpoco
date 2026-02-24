@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
 	Calendar,
+	Check,
 	Download,
 	Gift,
 	MapPin,
@@ -111,6 +112,10 @@ const SellerOrdersTable: React.FC<Props> = ({
 				warehouseShippingService?: string;
 		  })
 		| null
+	>(null);
+
+	const [copiedAddressOrderId, setCopiedAddressOrderId] = React.useState<
+		string | null
 	>(null);
 
 	const openNoteModal = (order: OrderWithPopulatedItems & { _id: string }) => {
@@ -799,9 +804,40 @@ const SellerOrdersTable: React.FC<Props> = ({
 														<button
 															type="button"
 															id={`address-${order._id}`}
-															className="mt-0.5 text-[10px] text-primary hover:text-primary/80 underline-offset-2 hover:underline cursor-pointer transition-colors"
+															className="mt-0.5 inline-flex items-center justify-center gap-1 whitespace-nowrap text-[10px] text-primary hover:text-primary/80 underline-offset-2 hover:underline cursor-pointer transition-colors"
+															onClick={async () => {
+																const fullAddress = formatFullAddress(
+																	order.shipTo,
+																);
+																if (!fullAddress) return;
+																try {
+																	if (navigator?.clipboard?.writeText) {
+																		await navigator.clipboard.writeText(
+																			fullAddress,
+																		);
+																	}
+																	setCopiedAddressOrderId(order._id);
+																	setTimeout(() => {
+																		setCopiedAddressOrderId((prev) =>
+																			prev === order._id ? null : prev,
+																		);
+																	}, 1000);
+																} catch (error) {
+																	console.error(
+																		"Error copying address:",
+																		error,
+																	);
+																}
+															}}
 														>
-															{t("viewFullAddress")}
+															{copiedAddressOrderId === order._id ? (
+																<>
+																	<Check className="h-3 w-3" />
+																	{t("addressCopied")}
+																</>
+															) : (
+																t("viewFullAddress")
+															)}
 														</button>
 														<Tooltip
 															content={formatFullAddress(order.shipTo)}

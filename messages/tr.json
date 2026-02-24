@@ -309,8 +309,10 @@
 		"shippingCostRequired": "Kargo ücreti gerekli",
 		"nextOrder": "Sonraki Sipariş",
 		"saveAndChangeStatus": "Kaydet ve Durumu Değiştir",
-		"feesLockedLabelUploaded": "Bu sipariş için bir dosya yüklendiğinden depo ve kargo ücretleri düzenlenemez."
-		,"viewFullAddress": "Tam adresi göster"
+		"feesLockedLabelUploaded": "Bu sipariş için bir dosya yüklendiğinden depo ve kargo ücretleri düzenlenemez.",
+		"viewFullAddress": "Tam adresi göster",
+		"addressCopied": "Adres kopyalandı",
+		"addressCopyFailed": "Adres kopyalanamadı"
 	},
 	"Wallets": {
 		"name": "İsim",
