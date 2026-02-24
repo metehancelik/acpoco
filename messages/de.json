@@ -253,7 +253,7 @@
 		"trackingNo": "Sendungsnr.",
 		"service": "Service",
 		"enterShippingInfo": "Versandinfo eingeben",
-		"uploadImage": "Bild hochladen",
+		"upload": "Hochladen",
 		"makePayment": "Zahlung durchführen",
 		"noOrdersWaitingProduction": "Keine Bestellungen warten auf Produktion",
 		"noOrdersInProduction": "Keine Bestellungen in Produktion",
@@ -309,7 +309,10 @@
 		"shippingCostRequired": "Versandkosten sind erforderlich",
 		"nextOrder": "Nächste Bestellung",
 		"saveAndChangeStatus": "Speichern & Status ändern",
-		"feesLockedLabelUploaded": "Lager- und Versandkosten können nicht bearbeitet werden, da für diese Bestellung eine Datei hochgeladen wurde."
+		"feesLockedLabelUploaded": "Lager- und Versandkosten können nicht bearbeitet werden, da für diese Bestellung eine Datei hochgeladen wurde.",
+		"viewFullAddress": "Vollständige Adresse anzeigen",
+		"addressCopied": "Adresse kopiert",
+		"addressCopyFailed": "Adresse konnte nicht kopiert werden"
 	},
 	"Wallets": {
 		"name": "Name",

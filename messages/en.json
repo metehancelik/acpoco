@@ -253,7 +253,7 @@
 		"trackingNo": "Tracking No",
 		"service": "Service",
 		"enterShippingInfo": "Enter Shipping Info",
-		"uploadImage": "Upload Image",
+		"upload": "Upload",
 		"makePayment": "Make Payment",
 		"noOrdersWaitingProduction": "No orders to be prepared",
 		"noOrdersInProduction": "No prepared orders",
@@ -309,7 +309,10 @@
 		"shippingCostRequired": "Shipping cost is required",
 		"nextOrder": "Next Order",
 		"saveAndChangeStatus": "Save & Change Status",
-		"feesLockedLabelUploaded": "Warehouse and shipping costs cannot be edited because a file has been uploaded for this order."
+		"feesLockedLabelUploaded": "Warehouse and shipping costs cannot be edited because a file has been uploaded for this order.",
+		"viewFullAddress": "View full address",
+		"addressCopied": "Address copied",
+		"addressCopyFailed": "Failed to copy address"
 	},
 	"Wallets": {
 		"name": "Name",
