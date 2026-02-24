@@ -356,7 +356,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 			shipTo.country,
 		].filter(Boolean);
 
-		return parts.join(", ");
+		return parts.join(" ");
 	};
 
 	const handleWarehouse = (
