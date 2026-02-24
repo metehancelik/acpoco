@@ -334,6 +334,23 @@ const SellerOrdersTable: React.FC<Props> = ({
 		}
 	};
 
+	const formatFullAddress = (
+		shipTo: OrderWithPopulatedItems["shipTo"] | undefined,
+	) => {
+		if (!shipTo) return "";
+
+		const parts = [
+			(shipTo as any).street1 || (shipTo as any).address1,
+			(shipTo as any).street2 || (shipTo as any).address2,
+			shipTo.city,
+			shipTo.state,
+			shipTo.postalCode,
+			shipTo.country,
+		].filter(Boolean);
+
+		return parts.join(", ");
+	};
+
 	const handleWarehouse = (
 		e: React.ChangeEvent<HTMLSelectElement>,
 		orderId: string,
@@ -777,6 +794,29 @@ const SellerOrdersTable: React.FC<Props> = ({
 												<p className="text-[10px] text-slate-400">
 													{order.shipTo?.postalCode}, {order.shipTo?.country}
 												</p>
+												{formatFullAddress(order.shipTo) && (
+													<>
+														<button
+															type="button"
+															id={`address-${order._id}`}
+															className="mt-0.5 text-[10px] text-primary hover:text-primary/80 underline-offset-2 hover:underline cursor-pointer transition-colors"
+														>
+															{t("viewFullAddress")}
+														</button>
+														<Tooltip
+															content={formatFullAddress(order.shipTo)}
+															anchorSelect={`#address-${order._id}`}
+															place="top"
+															offset={4}
+															style={{
+																backgroundColor: "#1e293b",
+																borderRadius: "6px",
+																fontSize: "11px",
+																zIndex: 9999,
+															}}
+														/>
+													</>
+												)}
 												{/* Label */}
 												{!order.labelUrl ? (
 													<>
