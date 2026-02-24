@@ -636,7 +636,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 															{item.matchId ? (
 																<div className="flex flex-col items-center gap-0.5 text-center max-w-[140px]">
 																	<span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-																		✓ Matched
+																		{t("matched")}
 																	</span>
 																	{matchTitle && (
 																		<span
@@ -1012,14 +1012,14 @@ const SellerOrdersTable: React.FC<Props> = ({
 																	className="text-[10px] text-violet-600 bg-violet-50 border border-violet-200 rounded px-2 py-1 cursor-pointer hover:bg-violet-100 flex items-center gap-1"
 																>
 																	<Upload className="h-3 w-3" />
-																	Upload
+																	{t("upload")}
 																</label>
 															)}
 															<Input
 																type="file"
 																id={inputId}
 																className="hidden"
-																placeholder={t("uploadImage")}
+																placeholder={t("upload")}
 																onChange={async (e) => {
 																	const file = e.target.files?.[0];
 																	if (!file) return;
