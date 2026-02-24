@@ -339,14 +339,17 @@ const SellerOrdersTable: React.FC<Props> = ({
 		}
 	};
 
-	const formatFullAddress = (
-		shipTo: OrderWithPopulatedItems["shipTo"] | undefined,
-	) => {
+	type ShipToAddress = OrderWithPopulatedItems["shipTo"] & {
+		address1?: string;
+		address2?: string;
+	};
+
+	const formatFullAddress = (shipTo: ShipToAddress | undefined) => {
 		if (!shipTo) return "";
 
 		const parts = [
-			(shipTo as any).street1 || (shipTo as any).address1,
-			(shipTo as any).street2 || (shipTo as any).address2,
+			shipTo.street1 ?? shipTo.address1,
+			shipTo.street2 ?? shipTo.address2,
 			shipTo.city,
 			shipTo.state,
 			shipTo.postalCode,
@@ -796,9 +799,6 @@ const SellerOrdersTable: React.FC<Props> = ({
 												<p className="text-[11px] font-medium text-slate-700 truncate max-w-[110px]">
 													{order.shipTo?.name}
 												</p>
-												<p className="text-[10px] text-slate-400">
-													{order.shipTo?.postalCode}, {order.shipTo?.country}
-												</p>
 												{formatFullAddress(order.shipTo) && (
 													<>
 														<button
@@ -833,10 +833,10 @@ const SellerOrdersTable: React.FC<Props> = ({
 															{copiedAddressOrderId === order._id ? (
 																<>
 																	<Check className="h-3 w-3" />
-																	{t("addressCopied")}
+																	{t("copied")}
 																</>
 															) : (
-																t("viewFullAddress")
+																t("address")
 															)}
 														</button>
 														<Tooltip

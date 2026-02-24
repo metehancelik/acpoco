@@ -311,7 +311,7 @@
 		"saveAndChangeStatus": "Kaydet ve Durumu Değiştir",
 		"feesLockedLabelUploaded": "Bu sipariş için bir dosya yüklendiğinden depo ve kargo ücretleri düzenlenemez.",
 		"viewFullAddress": "Tam adresi göster",
-		"addressCopied": "Adres kopyalandı",
+		"copied": "Kopyalandı",
 		"addressCopyFailed": "Adres kopyalanamadı"
 	},
 	"Wallets": {

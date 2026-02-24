@@ -311,7 +311,7 @@
 		"saveAndChangeStatus": "Speichern & Status ändern",
 		"feesLockedLabelUploaded": "Lager- und Versandkosten können nicht bearbeitet werden, da für diese Bestellung eine Datei hochgeladen wurde.",
 		"viewFullAddress": "Vollständige Adresse anzeigen",
-		"addressCopied": "Adresse kopiert",
+		"copied": "kopiert",
 		"addressCopyFailed": "Adresse konnte nicht kopiert werden"
 	},
 	"Wallets": {
