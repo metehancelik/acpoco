@@ -427,6 +427,12 @@ const SellerOrdersTable: React.FC<Props> = ({
 								scope="col"
 								className="px-2 py-2 text-center text-[11px] font-semibold text-slate-200 uppercase"
 							>
+								{t("stock")}
+							</th>
+							<th
+								scope="col"
+								className="px-2 py-2 text-center text-[11px] font-semibold text-slate-200 uppercase"
+							>
 								{t("match")}
 							</th>
 							<th
@@ -473,7 +479,7 @@ const SellerOrdersTable: React.FC<Props> = ({
 					<tbody className="divide-y divide-slate-100">
 						{data && data.length === 0 ? (
 							<tr>
-								<td colSpan={11} className="text-center py-16">
+								<td colSpan={12} className="text-center py-16">
 									<div className="flex flex-col items-center gap-3">
 										<Package className="h-12 w-12 text-slate-300" />
 										<p className="text-slate-500 font-medium">
@@ -615,6 +621,53 @@ const SellerOrdersTable: React.FC<Props> = ({
 													</div>
 												</div>
 											))}
+										</td>
+
+										{/* Stock */}
+										<td className="px-2 py-1.5">
+											<div className="flex flex-col items-center gap-1">
+												{(
+													order.items as Array<
+														Omit<
+															OrderWithPopulatedItems["items"][0],
+															"matchId"
+														> & {
+															matchId?: IProduct & { stock?: number };
+														}
+													>
+												).map((item) => {
+													const stock = (
+														item.matchId as
+															| (IProduct & { stock?: number })
+															| undefined
+													)?.stock;
+													return (
+														<div
+															key={item.orderItemId}
+															className="mb-1 last:mb-0 flex items-center justify-center"
+														>
+															{item.matchId != null && stock != null ? (
+																<span
+																	className={classNames(
+																		"text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded",
+																		stock === 0
+																			? "text-red-700 bg-red-50 border border-red-200"
+																			: stock < 10
+																				? "text-amber-700 bg-amber-50 border border-amber-200"
+																				: "text-emerald-700 bg-emerald-50 border border-emerald-200",
+																	)}
+																>
+																	{stock}
+																</span>
+															) : (
+																<span className="text-slate-300 text-sm">
+																	—
+																</span>
+															)}
+														</div>
+													);
+												})}
+											</div>
 										</td>
 
 										{/* Match */}
