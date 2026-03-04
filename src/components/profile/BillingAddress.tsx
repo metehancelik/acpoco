@@ -397,7 +397,10 @@ const BillingAddress = () => {
 					name="zipCode"
 					rules={{
 						required: t("zipCodeRequired"),
-						pattern: { value: /^[0-9]{5}$/, message: t("zipCode5Digits") },
+						pattern: {
+							value: /^[A-Za-z0-9][A-Za-z0-9 -]{1,9}$/,
+							message: t("zipCodeInvalid"),
+						},
 					}}
 					render={({ field }) => (
 						<div className="col-span-6 space-y-1">
@@ -465,7 +468,10 @@ const BillingAddress = () => {
 					rules={{
 						validate: (v) => {
 							if (!isCompany) return true;
-							const ok = /^DE[0-9]{9}$/.test((v || "").toUpperCase());
+							if (!(v || "").trim()) return true;
+							const ok = /^[A-Za-z]{2}[A-Za-z0-9+*]{2,12}$/.test(
+								(v || "").trim(),
+							);
 							return ok || t("vatNumberInvalid");
 						},
 					}}
