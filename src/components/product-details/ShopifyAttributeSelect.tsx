@@ -28,53 +28,56 @@ const ShopifyAttributeSelect = ({
 	const t = useTranslations("Products");
 	const router = useRouter();
 	const searchParams = useSearchParams();
+
+	// Initialize directly from selectedVariant (which already reflects URL params via server-side logic)
+	// Using a lazy initializer avoids the empty-state flash that caused the infinite loop
 	const [selectedOptions, setSelectedOptions] = useState<
 		Record<string, string>
-	>({});
+	>(() => {
+		if (selectedVariant) {
+			const opts: Record<string, string> = {};
+			selectedVariant.selectedOptions.forEach((opt) => {
+				opts[opt.name] = opt.value;
+			});
+			return opts;
+		}
+		return {};
+	});
 
-	// Initialize selected options from selected variant or URL params
+	// Sync selectedOptions when selectedVariant changes externally (e.g. programmatic navigation)
 	useEffect(() => {
 		if (selectedVariant) {
-			const options: Record<string, string> = {};
-			selectedVariant.selectedOptions.forEach((option) => {
-				options[option.name] = option.value;
+			const opts: Record<string, string> = {};
+			selectedVariant.selectedOptions.forEach((opt) => {
+				opts[opt.name] = opt.value;
 			});
-			setSelectedOptions(options);
-		} else {
-			// Initialize from URL params
-			const params: Record<string, string> = {};
-			product.options?.forEach((option) => {
-				const value = searchParams?.get(option.name);
-				if (value && option.values.includes(value)) {
-					params[option.name] = value;
-				}
-			});
-			setSelectedOptions(params);
+			setSelectedOptions(opts);
 		}
-	}, [selectedVariant, searchParams, product.options]);
+	}, [selectedVariant]);
 
-	// Find variant based on selected options
+	// Find variant based on selected options and notify parent only when it actually changes
 	useEffect(() => {
 		if (Object.keys(selectedOptions).length === 0) {
-			// No options selected, use first available variant
 			const firstVariant = product.variants.edges[0]?.node || null;
-			onVariantChange(firstVariant);
-
+			if (firstVariant?.id !== selectedVariant?.id) {
+				onVariantChange(firstVariant);
+			}
 			return;
 		}
 
-		// Find matching variant
 		const matchingVariant =
 			product.variants.edges.find((edge) => {
 				const variant = edge.node;
-
 				return variant.selectedOptions.every(
 					(option) => selectedOptions[option.name] === option.value,
 				);
 			})?.node || null;
 
-		onVariantChange(matchingVariant);
-	}, [selectedOptions, product.variants, onVariantChange]);
+		// Guard: only propagate if the variant actually changed to break the feedback loop
+		if (matchingVariant?.id !== selectedVariant?.id) {
+			onVariantChange(matchingVariant);
+		}
+	}, [selectedOptions, product.variants, onVariantChange, selectedVariant]);
 
 	const handleOptionChange = (optionName: string, value: string) => {
 		const newOptions = { ...selectedOptions, [optionName]: value };
