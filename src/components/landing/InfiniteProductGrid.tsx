@@ -3,7 +3,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import ProductCard from "@/components/all-products/ProductCard";
 import type { IProduct } from "@/models/Product";
@@ -34,11 +34,15 @@ function buildProductsUrl(
 type InfiniteProductGridProps = {
 	category: string | null;
 	query: string | null;
+	selectionMode?: boolean;
+	onLoadedIdsChange?: (ids: string[]) => void;
 };
 
 export default function InfiniteProductGrid({
 	category,
 	query,
+	selectionMode = false,
+	onLoadedIdsChange,
 }: InfiniteProductGridProps) {
 	const t = useTranslations("AllProducts");
 	const tCommon = useTranslations("Common");
@@ -88,7 +92,19 @@ export default function InfiniteProductGrid({
 		return () => observer.disconnect();
 	}, [observeSentinel]);
 
-	const products = data?.pages.flatMap((p) => p.products) ?? [];
+	// Memoize so the array reference is stable until data actually changes,
+	// preventing the onLoadedIdsChange effect from firing on every render.
+	const products = useMemo(
+		() => data?.pages.flatMap((p) => p.products) ?? [],
+		[data],
+	);
+
+	// Notify parent of currently loaded product IDs (only when data changes)
+	useEffect(() => {
+		if (onLoadedIdsChange) {
+			onLoadedIdsChange(products.map((p) => p._id));
+		}
+	}, [products, onLoadedIdsChange]);
 
 	if (isLoading) {
 		return (
@@ -126,7 +142,11 @@ export default function InfiniteProductGrid({
 			<div className="py-3 lg:py-4">
 				<div className="grid min-w-0 grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:grid-cols-5 xl:gap-5">
 					{products.map((product: IProduct) => (
-						<ProductCard product={product} key={product._id} />
+						<ProductCard
+							product={product}
+							key={product._id}
+							selectionMode={selectionMode}
+						/>
 					))}
 				</div>
 			</div>

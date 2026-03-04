@@ -1,12 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useCallback, useState } from "react";
 
 import { slugify } from "@/lib/utils";
 import type { ICategory } from "@/models/Product";
+import { useProductSelectionStore } from "@/store/productSelectionStore";
 
 import InfiniteProductGrid from "./InfiniteProductGrid";
 import LandingSidebar from "./LandingSidebar";
+import ProductExportBar from "./ProductExportBar";
 
 const DEFAULT_CATEGORY_ID = "68fa224d4a779c7bb1e58ce5";
 
@@ -16,6 +19,8 @@ type LandingPageProps = {
 
 export default function LandingPage({ categories }: LandingPageProps) {
 	const searchParams = useSearchParams();
+	const [loadedIds, setLoadedIds] = useState<string[]>([]);
+	const { selectedIds } = useProductSelectionStore();
 
 	const rawCategory = searchParams?.get("category") ?? null;
 	// "all" or empty → no filter. No param → default category. Slug → resolve to id.
@@ -32,6 +37,12 @@ export default function LandingPage({ categories }: LandingPageProps) {
 					})();
 	const query = searchParams?.get("query") ?? null;
 
+	const handleLoadedIdsChange = useCallback((ids: string[]) => {
+		setLoadedIds(ids);
+	}, []);
+
+	const selectionMode = selectedIds.size > 0;
+
 	return (
 		<div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto lg:flex-row lg:overflow-hidden">
 			<LandingSidebar
@@ -42,8 +53,20 @@ export default function LandingPage({ categories }: LandingPageProps) {
 				id="main-scroll"
 				className="relative min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-0 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8"
 			>
+				<div className="mb-3">
+					<ProductExportBar
+						loadedIds={loadedIds}
+						category={categoryId}
+						query={query}
+					/>
+				</div>
 				<section aria-label="Product list" className="space-y-0">
-					<InfiniteProductGrid category={categoryId} query={query} />
+					<InfiniteProductGrid
+						category={categoryId}
+						query={query}
+						selectionMode={selectionMode}
+						onLoadedIdsChange={handleLoadedIdsChange}
+					/>
 				</section>
 			</main>
 		</div>

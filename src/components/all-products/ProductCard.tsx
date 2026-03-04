@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -7,6 +8,7 @@ import type React from "react";
 
 import { useDiscounts } from "@/hooks/useDiscounts";
 import type { IProduct } from "@/models/Product";
+import { useProductSelectionStore } from "@/store/productSelectionStore";
 import { normalizeImageSrc } from "@/utils/normalizeImageUrl";
 import type { ShopifyVariant } from "@/utils/shopify";
 
@@ -18,9 +20,12 @@ type ProductWithShopify = IProduct & {
 
 type Props = {
 	product: ProductWithShopify;
+	selectionMode?: boolean;
 };
 
-const ProductCard: React.FC<Props> = ({ product }) => {
+const ProductCard: React.FC<Props> = ({ product, selectionMode = false }) => {
+	const { toggle, isSelected } = useProductSelectionStore();
+	const selected = isSelected(product._id);
 	const variants = product.shopifyData?.variants || [];
 	// Calculate total stock count across all variants
 	const stockQuantity = variants.reduce(
@@ -66,8 +71,30 @@ const ProductCard: React.FC<Props> = ({ product }) => {
 	return (
 		<div
 			key={product._id}
-			className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-stone-200/80 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-stone-300/80"
+			className={`group relative flex min-w-0 flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md ${
+				selected
+					? "border-amber-500 ring-2 ring-amber-400/50 shadow-amber-100"
+					: "border-stone-200/80 hover:border-stone-300/80"
+			}`}
 		>
+			{/* Selection checkbox – visible on hover or when selection mode is active */}
+			<button
+				type="button"
+				aria-label={selected ? "Seçimi kaldır" : "Ürünü seç"}
+				onClick={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					toggle(product._id);
+				}}
+				className={`absolute left-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+					selected
+						? "border-amber-500 bg-amber-500 text-white opacity-100"
+						: "border-stone-300 bg-white/90 text-transparent opacity-0 group-hover:opacity-100"
+				} ${selectionMode ? "opacity-100" : ""}`}
+			>
+				<Check className="h-3.5 w-3.5" strokeWidth={3} />
+			</button>
+
 			<Link
 				href={`/product/${product._id}`}
 				className="cursor-pointer block focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 rounded-t-xl"
