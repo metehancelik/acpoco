@@ -386,18 +386,8 @@ export const GET_PRODUCTS_BY_COLLECTION_QUERY = `
 `;
 
 // Inventory helpers
-// Only request id - name requires read_locations or read_markets_home scope
-const GET_LOCATIONS_QUERY = `
-  query getLocations {
-    locations(first: 1) {
-      edges {
-        node {
-          id
-        }
-      }
-    }
-  }
-`;
+
+const SHOPIFY_GERMANY_LOCATION_ID = process.env.SHOPIFY_GERMANY_LOCATION_ID;
 
 const GET_VARIANT_BY_SKU_QUERY = `
   query getVariantBySku($query: String!) {
@@ -415,32 +405,56 @@ const GET_VARIANT_BY_SKU_QUERY = `
   }
 `;
 
-const INVENTORY_ADJUST_MUTATION = `
-  mutation adjustInventory($input: InventoryAdjustQuantitiesInput!) {
-    inventoryAdjustQuantities(input: $input) {
-      userErrors {
-        field
-        message
+const GET_VARIANT_BY_ID_QUERY = `
+  query getVariantById($id: ID!) {
+    productVariant(id: $id) {
+      id
+      inventoryItem {
+        id
       }
     }
   }
 `;
 
-let cachedDefaultLocationId: string | null = null;
+const GET_INVENTORY_LEVEL_QUERY = `
+  query getInventoryLevel($inventoryItemId: ID!, $locationId: ID!) {
+    inventoryItem(id: $inventoryItemId) {
+      inventoryLevel(locationId: $locationId) {
+        quantities(names: ["available"]) {
+          name
+          quantity
+        }
+      }
+    }
+  }
+`;
 
-export async function getDefaultLocationId(): Promise<string> {
-	if (cachedDefaultLocationId) {
-		return cachedDefaultLocationId;
+const INVENTORY_SET_MUTATION = `
+  mutation inventorySet($input: InventorySetQuantitiesInput!) {
+    inventorySetQuantities(input: $input) {
+      inventoryAdjustmentGroup {
+        createdAt
+        reason
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+const MAX_CAS_RETRIES = 3;
+
+export function getGermanyLocationId(): string {
+	if (!SHOPIFY_GERMANY_LOCATION_ID) {
+		throw new Error(
+			"SHOPIFY_GERMANY_LOCATION_ID environment variable is not set. " +
+				"Set it to your Shopify Germany location GID (e.g. gid://shopify/Location/12345678).",
+		);
 	}
-	const data = await shopifyClient.request<{
-		locations: { edges: Array<{ node: { id: string } }> };
-	}>(GET_LOCATIONS_QUERY);
-	const first = data.locations.edges[0];
-	if (!first) {
-		throw new Error("No Shopify locations found");
-	}
-	cachedDefaultLocationId = first.node.id;
-	return cachedDefaultLocationId;
+	return SHOPIFY_GERMANY_LOCATION_ID;
 }
 
 export async function getInventoryItemIdBySku(
@@ -457,58 +471,126 @@ export async function getInventoryItemIdBySku(
 		{ query },
 	);
 	const edge = data.productVariants.edges[0];
-	return edge?.node.inventoryItem?.id ?? null;
+	if (edge?.node.inventoryItem?.id) {
+		return edge.node.inventoryItem.id;
+	}
+
+	// childSku may be a Shopify variant ID (fallback when variant has no SKU)
+	if (/^\d+$/.test(sku)) {
+		const variantGid = `gid://shopify/ProductVariant/${sku}`;
+		const variantData = await shopifyClient.request<{
+			productVariant: {
+				inventoryItem: { id: string } | null;
+			} | null;
+		}>(GET_VARIANT_BY_ID_QUERY, { id: variantGid });
+		return variantData.productVariant?.inventoryItem?.id ?? null;
+	}
+
+	return null;
 }
 
+async function getAvailableQuantity(
+	inventoryItemId: string,
+	locationId: string,
+): Promise<number | null> {
+	const data = await shopifyClient.request<{
+		inventoryItem: {
+			inventoryLevel: {
+				quantities: Array<{ name: string; quantity: number }>;
+			} | null;
+		} | null;
+	}>(GET_INVENTORY_LEVEL_QUERY, { inventoryItemId, locationId });
+
+	const level = data.inventoryItem?.inventoryLevel;
+	if (!level) return null;
+
+	const available = level.quantities.find((q) => q.name === "available");
+	return available?.quantity ?? null;
+}
+
+/**
+ * Adjusts inventory for a SKU at the Germany location only.
+ * Uses compare-and-swap (compareQuantity) to prevent race conditions
+ * and rejects any adjustment that would result in negative stock.
+ */
 export async function adjustInventoryBySku(
 	sku: string,
 	delta: number,
 ): Promise<{ ok: boolean; error?: string }> {
 	try {
-		const [locationId, inventoryItemId] = await Promise.all([
-			getDefaultLocationId(),
-			getInventoryItemIdBySku(sku),
-		]);
+		const locationId = getGermanyLocationId();
+		const inventoryItemId = await getInventoryItemIdBySku(sku);
+
 		if (!inventoryItemId) {
 			return { ok: false, error: `Inventory item not found for SKU ${sku}` };
 		}
-		type AdjustInput = {
-			input: {
-				reason?: string;
-				changes: Array<{
-					inventoryItemId: string;
-					locationId: string;
-					delta: number;
-				}>;
-			};
-		};
-		const variables: AdjustInput = {
-			input: {
-				// Reason is optional; set a semantic value if supported by current API version
-				reason: "sale",
-				changes: [
-					{
-						inventoryItemId,
-						locationId,
-						delta,
-					},
-				],
-			},
-		};
-		const result = await shopifyClient.request<{
-			inventoryAdjustQuantities: {
-				userErrors: Array<{ field: string[] | null; message: string }>;
-			};
-		}>(
-			INVENTORY_ADJUST_MUTATION,
-			variables as unknown as Record<string, unknown>,
-		);
 
-		const errors = result.inventoryAdjustQuantities?.userErrors || [];
-		if (errors.length > 0) {
+		for (let attempt = 0; attempt < MAX_CAS_RETRIES; attempt++) {
+			const currentQty = await getAvailableQuantity(
+				inventoryItemId,
+				locationId,
+			);
+			if (currentQty === null) {
+				return {
+					ok: false,
+					error: `No inventory level at Germany location for SKU ${sku}`,
+				};
+			}
+
+			const newQty = currentQty + delta;
+			if (newQty < 0) {
+				return {
+					ok: false,
+					error: `Insufficient stock for SKU ${sku}: available=${currentQty}, requested=${Math.abs(delta)}`,
+				};
+			}
+
+			const result = await shopifyClient.request<{
+				inventorySetQuantities: {
+					userErrors: Array<{
+						field: string[] | null;
+						message: string;
+						code: string | null;
+					}>;
+				};
+			}>(INVENTORY_SET_MUTATION, {
+				input: {
+					name: "available",
+					reason: "correction",
+					quantities: [
+						{
+							inventoryItemId,
+							locationId,
+							quantity: newQty,
+							compareQuantity: currentQty,
+						},
+					],
+				},
+			} as unknown as Record<string, unknown>);
+
+			const errors = result.inventorySetQuantities?.userErrors || [];
+			if (errors.length === 0) {
+				return { ok: true };
+			}
+
+			const isCasConflict = errors.some(
+				(e) =>
+					e.code === "QUANTITY_COMPARE_MISMATCH" ||
+					e.message?.toLowerCase().includes("quantity has changed") ||
+					e.message?.toLowerCase().includes("compare"),
+			);
+
+			if (isCasConflict && attempt < MAX_CAS_RETRIES - 1) {
+				continue;
+			}
+
 			return { ok: false, error: errors.map((e) => e.message).join("; ") };
 		}
-		return { ok: true };
+
+		return {
+			ok: false,
+			error: `Inventory for SKU ${sku} changed concurrently after ${MAX_CAS_RETRIES} retries`,
+		};
 	} catch (error) {
 		return { ok: false, error: (error as Error).message };
 	}

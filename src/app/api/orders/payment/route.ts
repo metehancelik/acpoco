@@ -6,6 +6,7 @@ import type { PopulatedShipStationOrderItem } from "@/lib/shipstation/types";
 import { adjustInventoryBySku } from "@/lib/shopify";
 import { LogModel } from "@/models/Logs";
 import Order from "@/models/Order";
+import { ProductVariantModel } from "@/models/ProductVariant";
 import Wallet from "@/models/Wallet";
 import WalletLog from "@/models/WalletLog";
 
@@ -75,6 +76,12 @@ export async function POST(request: Request) {
 					const quantity: number = item?.quantity || 0;
 					if (!childSku || !quantity) return null;
 					const res = await adjustInventoryBySku(childSku, -quantity);
+					if (res.ok) {
+						await ProductVariantModel.updateOne(
+							{ childSku, stock: { $gte: quantity } },
+							{ $inc: { stock: -quantity } },
+						);
+					}
 					return { sku: childSku, quantity, ...res };
 				}),
 			);

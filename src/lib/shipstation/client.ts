@@ -249,6 +249,12 @@ async function processOrderAutoMatchAndPayment(
 								const quantity = item.quantity || 0;
 								if (!childSku || !quantity || !item.matchId) return null;
 								const res = await adjustInventoryBySku(childSku, -quantity);
+								if (res.ok) {
+									await ProductVariantModel.updateOne(
+										{ childSku, stock: { $gte: quantity } },
+										{ $inc: { stock: -quantity } },
+									);
+								}
 								return { sku: childSku, quantity, ...res };
 							}),
 						);
@@ -518,6 +524,12 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 									const quantity = item.quantity || 0;
 									if (!childSku || !quantity || !matchedVariant) return null;
 									const res = await adjustInventoryBySku(childSku, -quantity);
+									if (res.ok) {
+										await ProductVariantModel.updateOne(
+											{ childSku, stock: { $gte: quantity } },
+											{ $inc: { stock: -quantity } },
+										);
+									}
 									return { sku: childSku, quantity, ...res };
 								}),
 							);
