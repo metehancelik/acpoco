@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import { processAllAmazonCustomizations } from "@/lib/customization";
+import { logError } from "@/lib/log-error";
 
 export async function POST() {
 	try {
@@ -20,7 +21,7 @@ export async function POST() {
 			result,
 		});
 	} catch (error) {
-		console.error("Error processing Amazon customizations:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{

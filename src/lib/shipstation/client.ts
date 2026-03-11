@@ -22,6 +22,8 @@ type ShipStationAuth = {
 	apiSecret: string;
 };
 
+import { logError } from "@/lib/log-error";
+
 function getShipStationAuth(): ShipStationAuth {
 	const apiKey = process.env.SHIPSTATION_API_KEY;
 	const apiSecret = process.env.SHIPSTATION_API_SECRET;
@@ -98,7 +100,7 @@ export async function fetchShipStationOrders(userId?: string): Promise<{
 
 		return { orders, products };
 	} catch (error) {
-		console.error("Error fetching ShipStation orders:", error);
+		logError(error);
 		throw error;
 	}
 }
@@ -654,7 +656,7 @@ export async function syncOrderToDatabase(shipStationOrder: ShipStationOrder) {
 			throw error;
 		}
 	} catch (error) {
-		console.error("Error syncing order to database:", error);
+		logError(error);
 		throw error;
 	}
 }
@@ -678,7 +680,7 @@ export async function getStores(): Promise<IStore[]> {
 				store.storeName !== "Manual Orders",
 		);
 	} catch (error) {
-		console.error("Error fetching ShipStation stores:", error);
+		logError(error);
 		throw error;
 	}
 }
@@ -701,7 +703,7 @@ export async function fetchNewOrders(url: string): Promise<void> {
 			await syncOrderToDatabase(order);
 		}
 	} catch (error) {
-		console.error("Error fetching new orders:", error);
+		logError(error);
 		throw error;
 	}
 }
@@ -797,7 +799,7 @@ export async function refreshStore(storeId: number): Promise<void> {
 			},
 		);
 	} catch (error) {
-		console.error(`Error refreshing store ${storeId}:`, error);
+		logError(error);
 		throw error;
 	}
 }

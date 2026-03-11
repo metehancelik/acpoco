@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Product from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
 
@@ -18,7 +19,7 @@ export async function GET(
 
 		return NextResponse.json({ product }, { status: 200 });
 	} catch (error) {
-		console.error("Error fetching product:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },
@@ -108,7 +109,7 @@ export async function PUT(
 			message: "Product updated successfully",
 		});
 	} catch (error) {
-		console.error("Error updating product:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update product" },
@@ -147,7 +148,7 @@ export async function DELETE(
 			{ status: 200 },
 		);
 	} catch (error) {
-		console.error("Error deleting product:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to delete product" },

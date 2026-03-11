@@ -1,65 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
+import "@/models/Category";
+
 import Product from "@/models/Product";
 
 const ITEMS_PER_PAGE = 24;
 
-/**
- * @swagger
- * /api/catalog:
- *   get:
- *     summary: Ürün kataloğunu getirir
- *     description: Database'deki tüm ürünleri pagination ile getirir
- *     tags:
- *       - Catalog
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           default: 1
- *         description: Sayfa numarası
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *         description: Kategori ID'sine göre filtreleme (opsiyonel)
- *     responses:
- *       200:
- *         description: Ürünler başarıyla getirildi
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     products:
- *                       type: array
- *                       items:
- *                         type: object
- *                     pagination:
- *                       type: object
- *                       properties:
- *                         currentPage:
- *                           type: integer
- *                         totalPages:
- *                           type: integer
- *                         totalItems:
- *                           type: integer
- *                         itemsPerPage:
- *                           type: integer
- *                         hasNextPage:
- *                           type: boolean
- *                         hasPreviousPage:
- *                           type: boolean
- *       500:
- *         description: Sunucu hatası
- */
 export async function GET(request: NextRequest) {
 	try {
 		await dbConnect();
@@ -117,8 +65,7 @@ export async function GET(request: NextRequest) {
 			},
 		});
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Ürünler getirilirken hata oluştu:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{

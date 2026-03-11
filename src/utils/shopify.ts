@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import {
 	GET_COLLECTIONS_QUERY,
 	GET_PRODUCT_BY_ID_QUERY,
@@ -241,13 +242,15 @@ export async function testShopifyConnection(): Promise<boolean> {
       }
     `;
 
-		const result = await shopifyClient.request(testQuery);
-		console.info("Shopify connection test successful:", result);
+		await shopifyClient.request(testQuery);
 
 		return true;
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Shopify connection test failed:", error);
+		logError(
+			new Error("Shopify connection test failed:", {
+				cause: error,
+			}),
+		);
 
 		return false;
 	}
@@ -258,22 +261,18 @@ export async function fetchProductById(
 	id: string,
 ): Promise<{ product: ShopifyProduct }> {
 	try {
-		console.info("Fetching product by ID:", id);
-
 		const data = await shopifyClient.request<{ product: ShopifyProduct }>(
 			GET_PRODUCT_BY_ID_QUERY,
 			{ id },
 		);
 
-		console.info(
-			"Product fetch successful:",
-			data.product ? "Found" : "Not found",
-		);
-
 		return data;
 	} catch (error) {
-		console.error("Error fetching product by ID from Shopify:", error);
-		console.error("Error details:", JSON.stringify(error, null, 2));
+		logError(
+			new Error("Failed to fetch product by ID from Shopify:", {
+				cause: error,
+			}),
+		);
 		throw new Error("Failed to fetch product");
 	}
 }
@@ -283,7 +282,6 @@ export async function fetchProductByHandle(
 	handle: string,
 ): Promise<{ product: ShopifyProduct | null }> {
 	try {
-		console.info("Fetching product by handle:", handle);
 		const query = `handle:${handle}`;
 
 		const data = await shopifyClient.request<{
@@ -291,17 +289,14 @@ export async function fetchProductByHandle(
 		}>(GET_PRODUCTS_BY_HANDLE_QUERY, { query, first: 1 });
 
 		const product = data.products.edges[0]?.node || null;
-		console.info(
-			"Product fetch by handle successful:",
-			product ? "Found" : "Not found",
-		);
 
 		return { product };
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Error fetching product by handle from Shopify:", error);
-		// eslint-disable-next-line no-console
-		console.error("Error details:", JSON.stringify(error, null, 2));
+		logError(
+			new Error("Failed to fetch product by handle from Shopify:", {
+				cause: error,
+			}),
+		);
 		throw new Error("Failed to fetch product");
 	}
 }
@@ -355,7 +350,11 @@ export async function fetchProductsByCollection(
 
 		return data;
 	} catch (error) {
-		console.error("Error fetching products by collection from Shopify:", error);
+		logError(
+			new Error("Failed to fetch products by collection from Shopify:", {
+				cause: error,
+			}),
+		);
 		throw new Error("Failed to fetch products by collection");
 	}
 }

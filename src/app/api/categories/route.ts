@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { CategoryModel } from "@/models/Category";
 
 const categories = [
@@ -26,33 +27,6 @@ const categories = [
 	},
 ];
 
-/**
- * @swagger
- * /api/categories:
- *   get:
- *     summary: Tüm kategorileri getirir
- *     description: Database'deki tüm kategorileri getirir
- *     tags:
- *       - Categories
- *     responses:
- *       200:
- *         description: Kategoriler başarıyla getirildi
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   image:
- *                     type: string
- *       500:
- *         description: Sunucu hatası
- */
 export async function GET() {
 	try {
 		await dbConnect();
@@ -60,8 +34,7 @@ export async function GET() {
 
 		return NextResponse.json(categories);
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Error fetching categories:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to fetch categories" },
@@ -76,7 +49,7 @@ export async function POST() {
 
 		return NextResponse.json({ message: "Categories created successfully" });
 	} catch (error) {
-		console.error("Error creating categories", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Error creating categories" },

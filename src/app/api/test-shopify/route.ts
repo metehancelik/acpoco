@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { logError } from "@/lib/log-error";
 import { fetchProducts, testShopifyConnection } from "@/utils/shopify";
 
 export async function GET() {
@@ -34,7 +35,7 @@ export async function GET() {
 			},
 		});
 	} catch (error) {
-		console.error("Shopify test error:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{

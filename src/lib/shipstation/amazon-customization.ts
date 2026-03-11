@@ -6,6 +6,8 @@ export type AmazonCustomizationData = {
 	rawJson: string;
 };
 
+import { logError } from "@/lib/log-error";
+
 export type AmazonCustomizationOption = {
 	label: string;
 	option: string;
@@ -71,7 +73,7 @@ export async function fetchAmazonCustomizationData(
 			fileNames.find((name) => name.endsWith(".json")) || fileNames[0];
 
 		if (!jsonFile) {
-			console.error("No JSON file found in the zip");
+			logError(new Error("No JSON file found in the zip"));
 
 			return null;
 		}
@@ -80,7 +82,7 @@ export async function fetchAmazonCustomizationData(
 		const jsonContent = await zipContent.file(jsonFile)?.async("string");
 
 		if (!jsonContent) {
-			console.error("Could not read JSON content from zip");
+			logError(new Error("Could not read JSON content from zip"));
 
 			return null;
 		}
@@ -93,7 +95,7 @@ export async function fetchAmazonCustomizationData(
 			rawJson: jsonContent,
 		};
 	} catch (error) {
-		console.error("Error fetching Amazon customization data:", error);
+		logError(error);
 
 		return null;
 	}

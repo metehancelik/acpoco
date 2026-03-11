@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import WalletLog from "@/models/WalletLog";
 
 export async function GET(
@@ -31,7 +32,7 @@ export async function GET(
 
 		return NextResponse.json({ logs, totalPages });
 	} catch (error) {
-		console.error("Error getting deposits", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to get deposits" },

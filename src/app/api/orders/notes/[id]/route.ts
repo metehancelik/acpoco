@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Order from "@/models/Order";
 
 export async function PATCH(
@@ -36,7 +37,7 @@ export async function PATCH(
 
 		return NextResponse.json(order);
 	} catch (error) {
-		console.error("Error updating order notes:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update order notes" },

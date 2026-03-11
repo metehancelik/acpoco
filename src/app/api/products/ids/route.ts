@@ -3,13 +3,9 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import Product from "@/models/Product";
 
-/**
- * GET /api/products/ids
- * Returns all product IDs matching the current filter (category + query).
- * Used for "Select All" functionality on the products listing page.
- */
 export async function GET(request: NextRequest) {
 	const session = await getServerSession(authOptions);
 	if (!session) {
@@ -39,7 +35,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json({ ids, total: ids.length });
 	} catch (error) {
-		console.error("Error fetching product IDs:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

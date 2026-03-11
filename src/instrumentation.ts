@@ -1,12 +1,14 @@
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
+import { logEvent } from "@/lib/log-event";
 
 export async function register() {
 	if (process.env.NEXT_RUNTIME === "nodejs") {
 		try {
 			await dbConnect();
-			console.warn("Connected to MongoDB");
+			logEvent("mongodb.connected");
 		} catch (error) {
-			console.error("Error connecting to MongoDB:", error);
+			logError(new Error("mongodb.connection_error", { cause: error }));
 		}
 	}
 }

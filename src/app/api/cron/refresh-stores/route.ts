@@ -16,6 +16,8 @@ function isAuthorized(req: NextRequest): boolean {
 	return false;
 }
 
+import { logError } from "@/lib/log-error";
+
 export async function GET(req: NextRequest) {
 	if (!isAuthorized(req)) {
 		return NextResponse.json(
@@ -74,7 +76,7 @@ export async function GET(req: NextRequest) {
 			summary,
 		});
 	} catch (error) {
-		console.error("Cron ShipStation store refresh fatal error:", error);
+		logError(error);
 		await new LogModel({
 			message: "Cron ShipStation store refresh fatal error",
 			level: "error",

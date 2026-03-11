@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import User from "@/models/User";
 import Wallet from "@/models/Wallet";
 import WalletLog from "@/models/WalletLog";
@@ -72,7 +73,7 @@ export async function PUT(
 			{ status: 200 },
 		);
 	} catch (error) {
-		console.error("Error changing balance:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

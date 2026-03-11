@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import { User } from "@/models/index";
 
 export async function GET(request: Request) {
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
 			{ status: 201 },
 		);
 	} catch (error) {
-		console.error("Error creating user:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to create user" },
@@ -91,7 +92,7 @@ export async function PUT(request: Request) {
 			{ status: 200 },
 		);
 	} catch (error) {
-		console.error("Error updating user:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update user" },

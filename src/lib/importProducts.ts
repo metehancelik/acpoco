@@ -36,6 +36,8 @@ interface CSVProduct {
 	"Attribute 7 Value": string;
 }
 
+import { logError } from "@/lib/log-error";
+
 interface JSONProduct {
 	"Parent SKU": string;
 	"Child SKU": string;
@@ -222,7 +224,7 @@ export async function importProductsFromCSV(filePath: string) {
 	} catch (error: unknown) {
 		const errorMessage =
 			error instanceof Error ? error.message : "An unknown error occurred";
-		console.error("Error importing products:", errorMessage);
+		logError(errorMessage);
 
 		return { success: false, error: errorMessage };
 	}
@@ -382,7 +384,7 @@ export async function importProductsFromJSON(filePath: string) {
 	} catch (error: unknown) {
 		const errorMessage =
 			error instanceof Error ? error.message : "An unknown error occurred";
-		console.error("Error importing products:", errorMessage);
+		logError(errorMessage);
 
 		return { success: false, error: errorMessage };
 	}

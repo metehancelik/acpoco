@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Order from "@/models/Order";
 import Store from "@/models/Store";
 
@@ -138,7 +139,7 @@ export async function GET(request: Request) {
 
 		return NextResponse.json({ orders, totalOrders, totalPages, page, limit });
 	} catch (error) {
-		console.error("Error fetching orders:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to fetch orders" },

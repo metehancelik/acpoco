@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Wallet from "@/models/Wallet";
 
 export async function GET(
@@ -23,7 +24,7 @@ export async function GET(
 
 		return NextResponse.json(wallet);
 	} catch (error) {
-		console.error("Error getting wallet:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to get wallet" },

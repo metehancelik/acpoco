@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Order from "@/models/Order";
 import Store from "@/models/Store";
 import Wallet from "@/models/Wallet";
@@ -86,8 +87,10 @@ async function deductShippingFees(
 	for (const [userId, { totalFees, orderIds }] of userEntries) {
 		const userWallet = await Wallet.findOne({ userId });
 		if (!userWallet) {
-			console.warn(
-				`Wallet not found for user ${userId}, skipping fee deduction`,
+			logError(
+				new Error(
+					`Wallet not found for user ${userId}, skipping fee deduction`,
+				),
 			);
 			continue;
 		}

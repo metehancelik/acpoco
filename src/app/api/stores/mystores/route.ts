@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Store from "@/models/Store";
 
 export async function GET() {
@@ -23,7 +24,7 @@ export async function GET() {
 			return NextResponse.json({ stores });
 		}
 	} catch (error) {
-		console.error("Error fetching stores:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to fetch stores" },

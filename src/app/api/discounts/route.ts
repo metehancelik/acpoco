@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { DiscountModel } from "@/models/Discount";
 
 export async function POST(req: Request) {
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
 
 		return NextResponse.json(discount, { status: 201 });
 	} catch (error) {
-		console.error("Error creating discount:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -72,7 +73,7 @@ export async function GET(req: Request) {
 		const discounts = await DiscountModel.find(query).sort({ createdAt: -1 });
 		return NextResponse.json(discounts);
 	} catch (error) {
-		console.error("Error fetching discounts:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

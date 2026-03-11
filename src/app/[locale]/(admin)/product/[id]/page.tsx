@@ -1,5 +1,7 @@
 import ShopifyProductClient from "@/components/product-details/ShopifyProductClient";
 import dbConnect from "@/lib/db";
+import "@/models/Category";
+
 import Product, { type IProduct } from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
 import type { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";

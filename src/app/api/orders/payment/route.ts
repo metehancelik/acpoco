@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import type { PopulatedShipStationOrderItem } from "@/lib/shipstation/types";
 import { adjustInventoryBySku } from "@/lib/shopify";
 import { LogModel } from "@/models/Logs";
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ message: "Order paid" }, { status: 200 });
 	} catch (error) {
-		console.error("Error paying order:", error);
+		logError(error);
 
 		return NextResponse.json({ error: "Order not found" }, { status: 404 });
 	}

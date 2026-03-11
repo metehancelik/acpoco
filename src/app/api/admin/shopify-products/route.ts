@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { GET_PRODUCTS_QUERY, shopifyClient } from "@/lib/shopify";
 import { CategoryModel } from "@/models/Category";
 import Product, { type IProduct } from "@/models/Product";
@@ -303,12 +304,11 @@ export async function GET() {
 					}
 				}
 			} catch (productError) {
-				// eslint-disable-next-line no-console
-				console.error(
-					`Ürün işlenirken hata oluştu (${shopifyProduct.title}):`,
-					productError,
+				logError(
+					new Error(`Ürün işlenirken hata oluştu (${shopifyProduct.title}):`, {
+						cause: productError,
+					}),
 				);
-				// Bir üründe hata olsa bile devam et
 			}
 		}
 
@@ -325,8 +325,7 @@ export async function GET() {
 			},
 		});
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Shopify ürünleri çekilirken hata oluştu:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{

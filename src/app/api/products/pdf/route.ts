@@ -3,7 +3,10 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { generateProductCataloguePDF } from "@/lib/product-catalogue-pdf";
+import "@/models/Category";
+
 import { DiscountModel } from "@/models/Discount";
 import Product from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
@@ -104,7 +107,7 @@ export async function POST(request: Request) {
 			exportDate: new Date(),
 		});
 
-		return new NextResponse(pdfBuffer, {
+		return new NextResponse(new Uint8Array(pdfBuffer), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/pdf",
@@ -113,7 +116,7 @@ export async function POST(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("Product PDF generation error:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "PDF generation failed" },
 			{ status: 500 },

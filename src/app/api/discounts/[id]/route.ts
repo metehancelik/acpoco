@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { DiscountModel } from "@/models/Discount";
 
 export async function DELETE(
@@ -32,7 +33,7 @@ export async function DELETE(
 
 		return NextResponse.json({ message: "Discount deactivated successfully" });
 	} catch (error) {
-		console.error("Error deactivating discount:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

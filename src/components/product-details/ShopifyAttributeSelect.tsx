@@ -16,7 +16,6 @@ import type { ShopifyProduct, ShopifyVariant } from "@/utils/shopify";
 interface ShopifyAttributeSelectProps {
 	product: ShopifyProduct;
 	selectedVariant: ShopifyVariant | null;
-	// eslint-disable-next-line no-unused-vars
 	onVariantChange: (_variant: ShopifyVariant | null) => void;
 }
 

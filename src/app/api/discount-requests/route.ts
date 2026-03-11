@@ -3,9 +3,12 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import "@/models/Category";
+
 import { DiscountRequestModel } from "@/models/DiscountRequest";
 import "@/models/ProductVariant";
 
+import { logError } from "@/lib/log-error";
 import User from "@/models/User";
 
 export async function POST(req: Request) {
@@ -51,7 +54,7 @@ export async function POST(req: Request) {
 
 		return NextResponse.json(discountRequest, { status: 201 });
 	} catch (error) {
-		console.error("Error creating discount request:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -99,7 +102,7 @@ export async function GET(req: Request) {
 			return NextResponse.json(requests);
 		}
 	} catch (error) {
-		console.error("Error fetching discount requests:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

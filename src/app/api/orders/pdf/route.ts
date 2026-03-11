@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import { generateOrdersPDF } from "@/lib/pdf-generator";
 import Order from "@/models/Order";
 import Store from "@/models/Store";
@@ -120,7 +121,7 @@ export async function GET(request: Request) {
 		const pdfBuffer = await generateOrdersPDF(orders);
 
 		// Return PDF as response
-		return new Response(pdfBuffer, {
+		return new Response(new Uint8Array(pdfBuffer), {
 			headers: {
 				"Content-Type": "application/pdf",
 				"Content-Disposition": 'attachment; filename="order_items.pdf"',
@@ -128,7 +129,7 @@ export async function GET(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("Error generating PDF:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to generate PDF" },
@@ -183,7 +184,7 @@ export async function POST(request: Request) {
 		const pdfBuffer = await generateOrdersPDF(orders);
 
 		// Return PDF as response
-		return new Response(pdfBuffer, {
+		return new Response(new Uint8Array(pdfBuffer), {
 			headers: {
 				"Content-Type": "application/pdf",
 				"Content-Disposition": 'attachment; filename="selected_orders.pdf"',
@@ -191,7 +192,7 @@ export async function POST(request: Request) {
 			},
 		});
 	} catch (error) {
-		console.error("Error generating PDF:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to generate PDF" },

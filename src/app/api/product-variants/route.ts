@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import { ProductVariantModel } from "@/models/ProductVariant";
 
 export async function GET(req: Request) {
@@ -20,7 +21,7 @@ export async function GET(req: Request) {
 
 		return NextResponse.json({ variants });
 	} catch (error) {
-		console.error("Error fetching product variants:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

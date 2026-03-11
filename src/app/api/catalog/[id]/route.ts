@@ -1,41 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
+import "@/models/Category";
+
 import Product from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
 
-/**
- * @swagger
- * /api/catalog/{id}:
- *   get:
- *     summary: Tek bir ürünün detaylarını getirir
- *     description: Database'den ID'ye göre ürün ve variant bilgilerini Shopify formatında getirir
- *     tags:
- *       - Catalog
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Ürün ID'si (MongoDB ObjectId)
- *     responses:
- *       200:
- *         description: Ürün detayları başarıyla getirildi
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *       404:
- *         description: Ürün bulunamadı
- *       500:
- *         description: Sunucu hatası
- */
 export async function GET(
 	_request: NextRequest,
 	{ params }: { params: { id: string } },
@@ -156,8 +127,7 @@ export async function GET(
 			data: shopifyFormattedProduct,
 		});
 	} catch (error) {
-		// eslint-disable-next-line no-console
-		console.error("Ürün detayları getirilirken hata oluştu:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { logError } from "@/lib/log-error";
 import { Wallet } from "@/models";
 import User from "@/models/User";
 
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 			{ status: 201 },
 		);
 	} catch (error) {
-		console.error("Registration error:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ message: "An error occurred during registration" },

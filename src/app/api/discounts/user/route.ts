@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { DiscountModel } from "@/models/Discount";
 import User from "@/models/User";
 
@@ -33,7 +34,7 @@ export async function GET(_req: Request) {
 
 		return NextResponse.json({ discounts });
 	} catch (error) {
-		console.error("Error fetching user discounts:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

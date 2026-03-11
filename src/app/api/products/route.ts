@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import dbConnect from "@/lib/db";
+import "@/models/Category";
+
 import type { IProduct } from "@/models/Product";
 import Product from "@/models/Product";
 import { ProductVariantModel } from "@/models/ProductVariant";
@@ -19,6 +21,8 @@ type DbVariant = {
 	stock: number;
 	attributes: { name: string; value: string }[];
 };
+
+import { logError } from "@/lib/log-error";
 
 function dbVariantToShopifyVariant(
 	variant: DbVariant,
@@ -137,7 +141,7 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json(data);
 	} catch (error) {
-		console.error("Error fetching products:", error);
+		logError(error);
 		return NextResponse.json(
 			{
 				products: [],

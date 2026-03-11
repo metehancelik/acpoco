@@ -4,6 +4,7 @@ import path from "node:path";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 
+import { logError } from "@/lib/log-error";
 import type {
 	OrderWithPopulatedItems,
 	PopulatedShipStationOrderItem,
@@ -17,7 +18,7 @@ async function loadFontAsBase64(fontPath: string): Promise<string> {
 
 		return fontBuffer.toString("base64");
 	} catch (error) {
-		console.error(`Error loading font ${fontPath}:`, error);
+		logError(error);
 		// Fallback to a basic font or throw error
 		throw new Error(`Could not load font: ${fontPath}`);
 	}
@@ -158,7 +159,7 @@ export async function generateOrdersPDF(
 						return `data:image/jpeg;base64,${buffer.toString("base64")}`;
 					}
 				} catch (error) {
-					console.error("Error loading image:", error);
+					logError(error);
 				}
 			}
 
@@ -243,7 +244,7 @@ export async function generateOrdersPDF(
 						"FAST",
 					);
 				} catch (err) {
-					console.error("Error adding image to PDF:", err);
+					logError(err);
 					// Fallback to placeholder
 					pdf.setFontSize(8);
 					pdf.text("No Image", imageX + imageSize / 2, imageY + imageSize / 2, {
@@ -263,7 +264,7 @@ export async function generateOrdersPDF(
 						"FAST",
 					);
 				} catch (err) {
-					console.error("Error adding match image to PDF:", err);
+					logError(err);
 					// Fallback to placeholder
 					pdf.setFontSize(8);
 					pdf.text("No Image", imageX + imageSize / 2, imageY + imageSize / 2, {
@@ -574,7 +575,7 @@ export async function generateOrdersPDF(
 
 		return Buffer.from(pdfOutput);
 	} catch (error) {
-		console.error("PDF generation error:", error);
+		logError(error);
 		throw new Error(
 			`Failed to generate PDF: ${error instanceof Error ? error.message : "Unknown error"}`,
 		);

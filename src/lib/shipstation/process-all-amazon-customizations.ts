@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import Order from "@/models/Order";
 
 import {
@@ -127,7 +128,7 @@ export async function processAllAmazonCustomizations() {
 					// Rate limiting - her istek arasında kısa bir bekleme
 					await new Promise((resolve) => setTimeout(resolve, 100));
 				} catch (error) {
-					console.error(`    Error processing item ${item.sku}:`, error);
+					logError(error);
 					errorCount++;
 				}
 			}
@@ -139,7 +140,7 @@ export async function processAllAmazonCustomizations() {
 			errorCount,
 		};
 	} catch (error) {
-		console.error("Error processing Amazon customizations:", error);
+		logError(error);
 		throw error;
 	}
 }

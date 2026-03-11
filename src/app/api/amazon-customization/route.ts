@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { logError } from "@/lib/log-error";
 import { fetchAmazonCustomizationData } from "@/lib/shipstation/amazon-customization";
 
 export async function POST(request: NextRequest) {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 			rawJson: customizationData.rawJson,
 		});
 	} catch (error) {
-		console.error("Error in Amazon customization API:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

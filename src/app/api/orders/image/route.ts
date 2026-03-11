@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 
+import { logError } from "@/lib/log-error";
 import { deleteByPublicUrl, putObject } from "@/lib/objectStorage";
 import type { ShipStationOrderItem } from "@/lib/shipstation/types";
 import { Order } from "@/models";
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
 
 		return Response.json({ success: true, imageUrl });
 	} catch (error) {
-		console.error("Error uploading order image:", error);
+		logError(error);
 		const message = error instanceof Error ? error.message : String(error);
 		return Response.json({ error: message }, { status: 500 });
 	}
@@ -122,7 +123,7 @@ export async function DELETE(request: NextRequest) {
 
 		return Response.json({ success: true });
 	} catch (error) {
-		console.error("Error deleting image:", error);
+		logError(error);
 
 		return Response.json({ error: "Failed to delete image" }, { status: 500 });
 	}

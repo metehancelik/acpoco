@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import DepositRequest from "@/models/DepositRequest";
 
 export async function POST(request: Request) {
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
 			{ status: 201 },
 		);
 	} catch (error) {
-		console.error("Error create deposit", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to create deposit" },
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
 
 		return NextResponse.json(deposits);
 	} catch (error) {
-		console.error("Error getting deposits", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to get deposits" },

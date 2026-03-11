@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import { User } from "@/models";
 import BillingAddress from "@/models/BillingAddress";
 
@@ -72,7 +73,7 @@ export async function PUT(request: Request, params: { id: string }) {
 
 		return NextResponse.json(billingAddress);
 	} catch (error: unknown) {
-		console.error("Error updating deposit:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update deposit" },

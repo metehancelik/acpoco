@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import "@/models/Category";
 
+import { logError } from "@/lib/log-error";
 import Product from "@/models/Product";
 import User from "@/models/User";
 
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
 			{ status: 200 },
 		);
 	} catch (error) {
-		console.error("Error adding favorite:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

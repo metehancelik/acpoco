@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth/next";
 
 import ProductsTable from "@/components/dashboard/ProductsTable";
 import { authOptions } from "@/lib/auth";
+import "@/models/Category";
+
 import Product, { type IProduct } from "@/models/Product";
 
 async function getProducts(): Promise<IProduct[]> {

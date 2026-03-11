@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { logError } from "@/lib/log-error";
 import { ProductVariantModel } from "@/models/ProductVariant";
 
 export async function GET(
@@ -34,7 +35,7 @@ export async function GET(
 
 		return NextResponse.json(variant);
 	} catch (error) {
-		console.error("Error fetching variant:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Internal server error" },

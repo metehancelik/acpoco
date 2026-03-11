@@ -7,7 +7,6 @@ import { AlertNotification } from "@/components/shared/AlertNotification";
 type AlertType = "success" | "error";
 
 interface NotificationContextType {
-	// eslint-disable-next-line no-unused-vars
 	showNotification: (message: string, type: AlertType) => void;
 }
 

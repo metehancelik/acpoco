@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import { DiscountModel } from "@/models/Discount";
 import Order from "@/models/Order";
 import { ProductVariantModel } from "@/models/ProductVariant";
@@ -23,7 +24,7 @@ export async function GET(
 
 		return NextResponse.json(order);
 	} catch (error) {
-		console.error("Error fetching order:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to fetch order" },
@@ -121,7 +122,7 @@ export async function POST(
 
 		return NextResponse.json({ message: "Urun eslestirildi" });
 	} catch (error) {
-		console.error("Error updating order:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update order" },
@@ -155,7 +156,7 @@ export async function PUT(
 
 		return NextResponse.json(order);
 	} catch (error) {
-		console.error("Error updating order:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update order" },
@@ -178,7 +179,7 @@ export async function DELETE(
 
 		return NextResponse.json({ message: "Order deleted successfully" });
 	} catch (error) {
-		console.error("Error deleting order:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to delete order" },
@@ -226,7 +227,7 @@ export async function PATCH(
 
 		return NextResponse.json(order);
 	} catch (error) {
-		console.error("Error updating order:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update order" },

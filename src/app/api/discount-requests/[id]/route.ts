@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { logError } from "@/lib/log-error";
 import { DiscountModel } from "@/models/Discount";
 import { DiscountRequestModel } from "@/models/DiscountRequest";
 
@@ -38,7 +39,7 @@ export async function GET(
 
 		return NextResponse.json(request);
 	} catch (error) {
-		console.error("Error fetching discount request:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },
@@ -151,7 +152,7 @@ export async function PUT(
 			return NextResponse.json({ error: "Invalid status" }, { status: 400 });
 		}
 	} catch (error) {
-		console.error("Error updating discount request:", error);
+		logError(error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
 			{ status: 500 },

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
 import { authOptions } from "@/lib/auth";
+import { logError } from "@/lib/log-error";
 import Warehouse from "@/models/Warehouse";
 
 export async function GET() {
@@ -15,7 +16,7 @@ export async function GET() {
 
 		return NextResponse.json(warehouses);
 	} catch (error) {
-		console.error("Error fetching warehouses:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to fetch warehouses" },
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json(newWarehouse);
 	} catch (error) {
-		console.error("Error creating warehouse:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to create warehouse" },
@@ -67,7 +68,7 @@ export async function PATCH(request: Request) {
 
 		return NextResponse.json(updatedWarehouse);
 	} catch (error) {
-		console.error("Error updating warehouse:", error);
+		logError(error);
 
 		return NextResponse.json(
 			{ error: "Failed to update warehouse" },
