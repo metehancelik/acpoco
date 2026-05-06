@@ -585,7 +585,9 @@ const SellerOrdersTable: React.FC<Props> = ({
 																—
 															</div>
 														)}
-														<span className="absolute -bottom-1 -right-1 bg-slate-800 text-white text-[9px] font-bold px-1 rounded">
+														<span
+															className={`absolute -bottom-1 -right-1 text-white text-[9px] font-bold px-1 rounded ${item.quantity > 1 ? "bg-red-500" : "bg-slate-800"}`}
+														>
 															x{item.quantity}
 														</span>
 													</div>
